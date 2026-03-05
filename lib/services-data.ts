@@ -1,0 +1,728 @@
+export interface Service {
+  slug: string
+  name: string
+  tagline: string
+  category: string
+  heroImg: string
+  galleryImgs: string[]
+  price: string
+  duration: string
+  rating: number
+  reviews: number
+  bookings: string
+  description: string
+  whatWeClean: string[]
+  howItWorks: { step: number; title: string; desc: string }[]
+  whatsIncluded: string[]
+  notIncluded: string[]
+  faqs: { q: string; a: string }[]
+  relatedSlugs: string[]
+}
+
+export const SERVICES: Service[] = [
+  {
+    slug: 'home-deep-cleaning',
+    name: 'Home Deep Cleaning',
+    tagline: 'Thorough top-to-bottom cleaning for every corner of your home',
+    category: 'Deep Cleaning',
+    heroImg: '/fan%20cleaning%20PC.jpg',
+    galleryImgs: [
+      '/Wodrobe%20cleaning%20PC.jpg',
+      '/Switch%20board%20cleaning%20PC.jpg',
+      '/chandelier%20cleaning%20PC.jpg',
+    ],
+    price: '₹1,499',
+    duration: '4–6 hours',
+    rating: 4.8,
+    reviews: 12400,
+    bookings: '1L+',
+    description:
+      'Our Home Deep Cleaning service is a comprehensive, room-by-room cleaning that goes far beyond routine maintenance. Trained professionals use hospital-grade cleaning agents and professional equipment to remove stubborn grime, dust and allergens from every surface, including hard-to-reach areas. Ideal after renovation, before moving in, or just when you want your home to feel brand new.',
+    whatWeClean: [
+      'All floors — swept, mopped, scrubbed',
+      'Walls, ceilings & fans dusted',
+      'Kitchen platform, sink & tiles degreased',
+      'Bathrooms scrubbed & sanitised',
+      'Windows & window sills cleaned',
+      'Wardrobes & cabinets cleaned inside-out',
+      'Sofa & furniture surface wiped',
+      'Switchboards, sockets & AC vents cleaned',
+    ],
+    howItWorks: [
+      { step: 1, title: 'Book Online', desc: 'Choose your city and preferred date. Takes under 60 seconds.' },
+      { step: 2, title: 'Confirmed & Assigned', desc: 'You get an instant confirmation and technician details.' },
+      { step: 3, title: 'Team Arrives', desc: 'Background-verified professionals arrive with all supplies.' },
+      { step: 4, title: 'Cleaning Done', desc: 'Walk through your sparkling home and rate the service.' },
+    ],
+    whatsIncluded: [
+      'All cleaning equipment provided',
+      'Eco-friendly, safe cleaning agents',
+      'Trained & verified professionals',
+      'Service warranty — reclean if not satisfied',
+    ],
+    notIncluded: [
+      'Exterior balcony or terrace (add-on available)',
+      'Deep stain removal from walls',
+      'Pest control',
+    ],
+    faqs: [
+      { q: 'How many people will come?', a: 'Typically 2–3 professionals depending on home size.' },
+      { q: 'Do I need to provide any supplies?', a: 'No, the team brings everything they need.' },
+      { q: 'Should I be present during the service?', a: 'You can stay or leave. We just need access to the home.' },
+      { q: 'Is there a warranty?', a: 'Yes — if you\'re not satisfied, we re-clean within 48 hours for free.' },
+    ],
+    relatedSlugs: ['bathroom-cleaning', 'kitchen-cleaning', 'sofa-shampooing'],
+  },
+  {
+    slug: 'bathroom-cleaning',
+    name: 'Bathroom Cleaning',
+    tagline: 'Deep sanitisation for sparkling, germ-free bathrooms',
+    category: 'Deep Cleaning',
+    heroImg: '/bathroom%20fixures%20Cleaning%20PC.jpg',
+    galleryImgs: [
+      '/toilet%20cleaning%20PC.jpg',
+      '/toilet%20washing%20basin%20PC.jpg',
+      '/bathroom%20fixures%20Cleaning%20PC.jpg',
+    ],
+    price: '₹599',
+    duration: '1–2 hours',
+    rating: 4.7,
+    reviews: 8900,
+    bookings: '80K+',
+    description:
+      'Our Bathroom Deep Cleaning service eliminates soap scum, hard-water stains, mould and bacteria from every surface. Using specialised cleaners and scrubbing tools, our team restores your bathroom tiles, fixtures and fittings to a near-new shine while fully sanitising the space.',
+    whatWeClean: [
+      'Toilet bowl, seat & exterior scrubbed',
+      'Tiles & grout cleaned with acid wash',
+      'Basin, taps & mirror polished',
+      'Floor scrubbed & disinfected',
+      'Exhaust fan & vents cleared',
+      'Overhead shower & jets cleaned',
+      'Soap / shampoo dispensers wiped',
+    ],
+    howItWorks: [
+      { step: 1, title: 'Book Online', desc: 'Select the number of bathrooms and a convenient slot.' },
+      { step: 2, title: 'Professional Assigned', desc: 'Receive confirmed professional details.' },
+      { step: 3, title: 'Deep Clean', desc: 'Specialist arrives with acid cleaners and tools.' },
+      { step: 4, title: 'Sparkling Result', desc: 'Inspect and rate your freshly sanitised bathroom.' },
+    ],
+    whatsIncluded: [
+      'Acid & tile cleaning agents', 'Grout brush & scrubbing tools',
+      'Disinfectant spray for all surfaces', 'Exhaust & ventilation cleaning',
+    ],
+    notIncluded: ['Waterproofing repair', 'Tile replacement', 'Plumbing work'],
+    faqs: [
+      { q: 'How long does one bathroom take?', a: 'About 45–60 minutes per bathroom.' },
+      { q: 'Will the smell go away?', a: 'Yes, we use odour-neutralising agents after cleaning.' },
+      { q: 'Can you remove yellow stains?', a: 'Yes, our acid-based cleaners handle most hard-water and uric stains.' },
+    ],
+    relatedSlugs: ['home-deep-cleaning', 'kitchen-cleaning', 'disinfection-services'],
+  },
+  {
+    slug: 'sofa-shampooing',
+    name: 'Sofa Shampooing',
+    tagline: 'Restore freshness & colour to your fabric sofa',
+    category: 'Deep Cleaning',
+    heroImg: '/Sofa%20Shampooing%20PC.jpg',
+    galleryImgs: [
+      '/Sofa%20Shampooing%20PC.jpg',
+      '/mattress%20cleaning%20PC.jpg',
+      '/dining%20chair%20cleaning%20PC.jpg',
+    ],
+    price: '₹799',
+    duration: '2–3 hours',
+    rating: 4.8,
+    reviews: 7200,
+    bookings: '60K+',
+    description:
+      'Our professional Sofa Shampooing service uses hot-water extraction and enzyme-based shampoo to remove deep-seated dirt, allergens, pet hair, food stains and odours from upholstered furniture. Suitable for all fabric types including microfibre, velvet, and cotton blends.',
+    whatWeClean: [
+      'Seat cushions deep-shampooed',
+      'Back & armrest panels cleaned',
+      'Stain pre-treatment applied',
+      'Hot-water extraction rinse',
+      'Odour neutraliser applied',
+      'Final brush & dry-toweling',
+    ],
+    howItWorks: [
+      { step: 1, title: 'Book Service', desc: 'Choose sofa type and number of seats.' },
+      { step: 2, title: 'Pre-Inspection', desc: 'Team inspects fabric type and stains on arrival.' },
+      { step: 3, title: 'Shampoo & Extract', desc: 'Hot-water extraction removes all dirt and residue.' },
+      { step: 4, title: 'Dry & Inspect', desc: 'Sofa dries in 2–4 hours. Check the result.' },
+    ],
+    whatsIncluded: [
+      'Enzyme-based shampoo', 'Hot-water extraction machine',
+      'Stain pre-treatment', 'Deodoriser spray',
+    ],
+    notIncluded: ['Leather sofa treatment (separate service)', 'Structural repair', 'Cushion re-filling'],
+    faqs: [
+      { q: 'How long until the sofa is dry?', a: 'Usually 2–4 hours depending on room ventilation.' },
+      { q: 'Is it safe for kids and pets?', a: 'Yes, we use non-toxic, pet-safe cleaning agents.' },
+      { q: 'Can you remove old stains?', a: 'We can significantly reduce or remove most stains. Very old or set stains may only lighten.' },
+    ],
+    relatedSlugs: ['carpet-shampooing', 'mattress-cleaning', 'curtain-cleaning'],
+  },
+  {
+    slug: 'kitchen-cleaning',
+    name: 'Kitchen Cleaning',
+    tagline: 'Degrease, scrub & sanitise your entire kitchen',
+    category: 'Deep Cleaning',
+    heroImg: '/Kitchen%20Sink%20cleaning%20PC.jpg',
+    galleryImgs: [
+      '/Kitchen%20Sink%20cleaning%20PC.jpg',
+      '/Gas%20Stove%20Cleaning%20PC.jpg',
+      '/chimney%20cleaning%20PC.jpg',
+    ],
+    price: '₹899',
+    duration: '2–4 hours',
+    rating: 4.7,
+    reviews: 9500,
+    bookings: '90K+',
+    description:
+      'Our Kitchen Deep Cleaning tackles stubborn grease, food residue and bacteria from every surface. From the inside of your microwave to the top of your kitchen cabinets, we leave your entire cooking space hygienically clean and safe to cook in.',
+    whatWeClean: [
+      'Platform & counter tops degreased',
+      'Gas stove & burners dismantled & cleaned',
+      'Inside & outside of microwave cleaned',
+      'Backsplash tiles scrubbed',
+      'Cabinet fronts wiped down',
+      'Sink, taps & drain cleaned',
+      'Floor mopped with degreaser',
+      'Dustbins cleaned & sanitised',
+    ],
+    howItWorks: [
+      { step: 1, title: 'Book & Schedule', desc: 'Select your kitchen size and time slot.' },
+      { step: 2, title: 'Team Arrives', desc: 'Professionals arrive with degreasers and steam tools.' },
+      { step: 3, title: 'Deep Clean', desc: 'Systematic top-down cleaning of every surface.' },
+      { step: 4, title: 'Ready to Cook', desc: 'Inspect your kitchen and start cooking fresh!' },
+    ],
+    whatsIncluded: [
+      'Industrial degreaser', 'Steam cleaning for tiles',
+      'Cabinet exterior cleaning', 'Appliance exterior cleaning',
+    ],
+    notIncluded: ['Inside oven cleaning (add-on)', 'Chimney cleaning (separate service)', 'Pest control'],
+    faqs: [
+      { q: 'Are the chemicals safe for food surfaces?', a: 'Absolutely — we use food-safe, non-toxic cleaners on all food-contact surfaces.' },
+      { q: 'Do I need to empty cabinets?', a: 'Only if you want inside-cabinet cleaning, which is an optional add-on.' },
+      { q: 'How often should I book this?', a: 'Ideally every 3–6 months for a healthy kitchen environment.' },
+    ],
+    relatedSlugs: ['home-deep-cleaning', 'chimney-cleaning', 'disinfection-services'],
+  },
+  {
+    slug: 'carpet-shampooing',
+    name: 'Carpet Shampooing',
+    tagline: 'Deep clean your carpets and rugs on-site',
+    category: 'Deep Cleaning',
+    heroImg: '/Carpet%20cleaning%20PC.jpg',
+    galleryImgs: [
+      '/Carpet%20cleaning%20PC.jpg',
+      '/floor%20polishing%20PC.jpg',
+      '/Curtain%20cleaning%20PC.jpg',
+    ],
+    price: '₹499 / sq. yd.',
+    duration: '2–3 hours',
+    rating: 4.6,
+    reviews: 5600,
+    bookings: '40K+',
+    description:
+      'We deep-clean all types of carpets and rugs using hot-water extraction, removing dust mites, allergens, stains and odours embedded deep in the fibres. The service is done in-situ — no need to roll up and transport your carpet.',
+    whatWeClean: [
+      'Full surface vacuuming',
+      'Stain pre-treatment with enzyme cleaner',
+      'Hot-water extraction rinse',
+      'Odour neutraliser applied',
+      'Final grooming of carpet fibres',
+    ],
+    howItWorks: [
+      { step: 1, title: 'Book & Measure', desc: 'Input carpet dimensions during booking.' },
+      { step: 2, title: 'Pre-Vacuum', desc: 'Dry vacuuming removes loose debris first.' },
+      { step: 3, title: 'Extraction Wash', desc: 'Hot water + shampoo injection and simultaneous extraction.' },
+      { step: 4, title: 'Deodorise & Dry', desc: 'Deodoriser applied; carpet dry in 3–5 hours.' },
+    ],
+    whatsIncluded: [
+      'Industry-grade extractor machine', 'Enzyme-based carpet shampoo',
+      'Stain pre-treatment', 'Deodoriser',
+    ],
+    notIncluded: ['Carpet repair or re-stitching', 'Moving heavy furniture'],
+    faqs: [
+      { q: 'Will the carpet shrink after washing?', a: 'No — our extraction method uses the right water temperature to prevent any shrinkage.' },
+      { q: 'How do I prepare before the team arrives?', a: 'Just move small items off the carpet. The team handles the rest.' },
+    ],
+    relatedSlugs: ['sofa-shampooing', 'mattress-cleaning', 'curtain-cleaning'],
+  },
+  {
+    slug: 'mattress-cleaning',
+    name: 'Mattress Cleaning',
+    tagline: 'Eliminate dust mites and allergens from your mattress',
+    category: 'Deep Cleaning',
+    heroImg: '/mattress%20cleaning%20PC.jpg',
+    galleryImgs: [
+      '/mattress%20cleaning%20PC.jpg',
+      '/Sofa%20Shampooing%20PC.jpg',
+      '/dining%20chair%20cleaning%20PC.jpg',
+    ],
+    price: '₹699',
+    duration: '1–2 hours',
+    rating: 4.7,
+    reviews: 6100,
+    bookings: '50K+',
+    description:
+      'A third of your life is spent in bed. Our Mattress Cleaning service uses UV sanitisation, dry vacuum and steam treatment to eliminate dust mites, bacteria, mould spores and allergens — for healthier, deeper sleep.',
+    whatWeClean: [
+      'Top, bottom and sides vacuumed',
+      'UV sanitisation to kill dust mites',
+      'Steam treatment for bacteria & mould',
+      'Stain removal (sweat, spills)',
+      'Odour neutraliser spray applied',
+    ],
+    howItWorks: [
+      { step: 1, title: 'Book Slot', desc: 'Choose the number of mattresses.' },
+      { step: 2, title: 'Pre-Vacuum', desc: 'Powerful HEPA vacuum removes surface dust.' },
+      { step: 3, title: 'UV & Steam', desc: 'UV light + steam kills 99.9% of germs.' },
+      { step: 4, title: 'Odour-Free', desc: 'Fresh deodoriser applied, ready to use the same day.' },
+    ],
+    whatsIncluded: [
+      'HEPA vacuum', 'UV sanitiser wand',
+      'Steam machine', 'Bio-safe deodoriser',
+    ],
+    notIncluded: ['Mattress repair or stitching', 'Bedframe cleaning (add-on)'],
+    faqs: [
+      { q: 'How often should I clean my mattress?', a: 'Every 6 months is ideal, or every 3 months if you have allergies.' },
+      { q: 'Can I sleep on it the same night?', a: 'Yes! The mattress is completely dry and ready to use within a few hours.' },
+    ],
+    relatedSlugs: ['sofa-shampooing', 'carpet-shampooing', 'home-deep-cleaning'],
+  },
+  {
+    slug: 'pest-control',
+    name: 'General Pest Control',
+    tagline: 'Eliminate cockroaches, ants, lizards & common household pests',
+    category: 'Pest Control',
+    heroImg: '/Living%20area%20Pest%20PC.jpg',
+    galleryImgs: [
+      '/Living%20area%20Pest%20PC.jpg',
+      '/pest%20control%20kitchen%20PC.jpg',
+      '/Pest%20control%20in%20Office%20PC.jpg',
+    ],
+    price: '₹999',
+    duration: '1–2 hours',
+    rating: 4.6,
+    reviews: 14000,
+    bookings: '1.2L+',
+    description:
+      'Our General Pest Control service targets cockroaches, ants, silverfish, lizards and other common household pests using WHO-approved chemicals that are safe for humans and pets when used correctly. Comes with a 30-day re-service guarantee.',
+    whatWeClean: [
+      'Kitchen — cabinets, under appliances',
+      'Bathrooms & drains',
+      'All skirting, cracks & crevices',
+      'Bedrooms & wardrobes',
+      'Balcony & utility areas',
+    ],
+    howItWorks: [
+      { step: 1, title: 'Book Service', desc: 'Choose 1BHK, 2BHK etc. and a date.' },
+      { step: 2, title: 'Preparation', desc: 'Team will advise on minimal prep (empty under-sink area etc.)' },
+      { step: 3, title: 'Treatment', desc: 'Gel bait + spray applied systematically in all zones.' },
+      { step: 4, title: 'Clear & Wait', desc: 'Leave premises for 2 hours; results visible in 48 hrs.' },
+    ],
+    whatsIncluded: [
+      'WHO-approved pesticides', 'Gel bait for cockroaches',
+      'Spray treatment for ants & silverfish', '30-day re-service warranty',
+    ],
+    notIncluded: ['Termite treatment (separate)', 'Bed bug treatment (separate)', 'Rodent control'],
+    faqs: [
+      { q: 'Is it safe for children and pets?', a: 'Yes, once the area is ventilated for 2 hours after treatment.' },
+      { q: 'When will I see results?', a: 'You should notice a significant reduction in 48–72 hours.' },
+      { q: 'Do I need to be home?', a: 'You need to be present to provide access but can leave once the team starts.' },
+    ],
+    relatedSlugs: ['termite-treatment', 'bed-bugs-treatment', 'disinfection-services'],
+  },
+  {
+    slug: 'termite-treatment',
+    name: 'Termite Treatment',
+    tagline: 'Protect your home with long-lasting anti-termite treatment',
+    category: 'Pest Control',
+    heroImg: '/pest%20control%20kitchen%20PC.jpg',
+    galleryImgs: [
+      '/pest%20control%20kitchen%20PC.jpg',
+      '/Pest%20control%20in%20Office%20PC.jpg',
+      '/Living%20area%20Pest%20PC.jpg',
+    ],
+    price: '₹2,499',
+    duration: '3–5 hours',
+    rating: 4.7,
+    reviews: 3200,
+    bookings: '25K+',
+    description:
+      'Our Termite Treatment creates a chemical barrier around your home to repel and kill termites before they can cause structural damage. We use drilling-injection methods for the most effective, long-lasting protection.',
+    whatWeClean: [
+      'Floor and wall junction drilling',
+      'Chemical injection into earth',
+      'Exposed wood surface treatment',
+      'Door frames & window sills treated',
+      'Utility pipe entry points sealed',
+    ],
+    howItWorks: [
+      { step: 1, title: 'Inspection', desc: 'Expert assesses severity and infestation zones.' },
+      { step: 2, title: 'Drilling', desc: 'Small holes drilled at floor-wall junctions.' },
+      { step: 3, title: 'Chemical Injection', desc: 'Termiticide injected to form a protective barrier.' },
+      { step: 4, title: 'Sealing & Report', desc: 'Drill holes sealed; treatment certificate issued.' },
+    ],
+    whatsIncluded: [
+      'Full property inspection', 'Termiticide chemical',
+      'Drilling & sealing', 'Treatment certificate',
+    ],
+    notIncluded: ['Structural repairs from existing damage', 'Furniture treatment (add-on)'],
+    faqs: [
+      { q: 'How long does the treatment last?', a: 'Standard treatment lasts 3–5 years. AMC plans available.' },
+      { q: 'Will it damage my flooring?', a: 'We drill discreet small holes at skirting level that are sealed after treatment.' },
+    ],
+    relatedSlugs: ['pest-control', 'bed-bugs-treatment', 'disinfection-services'],
+  },
+  {
+    slug: 'bed-bugs-treatment',
+    name: 'Bed Bugs Treatment',
+    tagline: 'Completely eradicate bed bugs with heat & chemical treatment',
+    category: 'Pest Control',
+    heroImg: '/mattress%20cleaning%20PC.jpg',
+    galleryImgs: [
+      '/mattress%20cleaning%20PC.jpg',
+      '/Living%20area%20Pest%20PC.jpg',
+      '/Pest%20control%20in%20Office%20PC.jpg',
+    ],
+    price: '₹1,999',
+    duration: '3–4 hours',
+    rating: 4.6,
+    reviews: 4800,
+    bookings: '35K+',
+    description:
+      'Bed bugs are notoriously difficult to eliminate without professional help. Our dual-action treatment — heat combined with contact pesticide — targets bugs at every life stage including eggs, ensuring complete eradication.',
+    whatWeClean: [
+      'Mattress & bed frame treated',
+      'Headboard & side tables treated',
+      'Sofa & upholstered furniture',
+      'Wardrobe interiors sprayed',
+      'Carpets & rugs treated',
+      'Wall junctions & skirting',
+    ],
+    howItWorks: [
+      { step: 1, title: 'Inspection', desc: 'Thorough inspection to identify all affected areas.' },
+      { step: 2, title: 'Heat Treatment', desc: 'High-temperature steam kills bugs and eggs on contact.' },
+      { step: 3, title: 'Chemical Spray', desc: 'Residual pesticide applied in cracks and crevices.' },
+      { step: 4, title: 'Follow-up', desc: 'Follow-up visit included at 14 days.' },
+    ],
+    whatsIncluded: [
+      'Steam heat treatment', 'Residual insecticide spray',
+      '14-day follow-up visit', '30-day re-service guarantee',
+    ],
+    notIncluded: ['Structural repairs', 'Luggage or vehicle treatment'],
+    faqs: [
+      { q: 'How do I prepare for the treatment?', a: 'Wash all bed linen at 60°C and bag it before the team arrives.' },
+      { q: 'When can I sleep on the mattress again?', a: 'After 4 hours once the room is ventilated.' },
+    ],
+    relatedSlugs: ['pest-control', 'mattress-cleaning', 'disinfection-services'],
+  },
+  {
+    slug: 'professional-painting',
+    name: 'Professional Painting',
+    tagline: 'Interior & exterior painting with premium paints and finishes',
+    category: 'Painting',
+    heroImg: '/Office%20Exterior%20PC.jpg',
+    galleryImgs: [
+      '/Office%20Exterior%20PC.jpg',
+      '/Office%20Left%20PC.jpg',
+      '/Office%20Stairs%20PC.jpg',
+    ],
+    price: '₹7 / sq. ft.',
+    duration: 'Depends on area',
+    rating: 4.8,
+    reviews: 5400,
+    bookings: '40K+',
+    description:
+      'Transform your home with our professional painting service using premium brands like Asian Paints, Berger or Nerolac. Our trained painters ensure flawless surface preparation, smooth application and clean finishing.',
+    whatWeClean: [
+      'Surface preparation & crack filling',
+      'Putty application & sanding',
+      'Primer coat applied',
+      '2 coats of top-quality wall paint',
+      'Wood & metal trim painting',
+      'Clean-up after completion',
+    ],
+    howItWorks: [
+      { step: 1, title: 'Home Visit / Quote', desc: 'Free site visit and detailed quotation.' },
+      { step: 2, title: 'Material Selection', desc: 'Choose colour, brand and finish (mat/silk/gloss).' },
+      { step: 3, title: 'Painting', desc: 'Professional painters complete the work systematically.' },
+      { step: 4, title: 'Inspection', desc: 'Final walkthrough and touch-ups on the last day.' },
+    ],
+    whatsIncluded: [
+      'Surface prep & putty', 'Primer & 2 top-coats',
+      'All labour & tools', 'Site clean-up',
+    ],
+    notIncluded: ['Texture or designer paints (quoted separately)', 'Exterior scaffolding cost'],
+    faqs: [
+      { q: 'Do you provide the paint?', a: 'Yes — we source the paint. You choose the brand and shade.' },
+      { q: 'How long for a 2BHK?', a: 'Typically 4–6 days depending on condition and design complexity.' },
+      { q: 'Is there a warranty?', a: 'Yes — 1-year warranty against peeling or flaking if we supply the paint.' },
+    ],
+    relatedSlugs: ['home-deep-cleaning', 'marble-floor-polishing', 'exterior-cleaning'],
+  },
+  {
+    slug: 'marble-floor-polishing',
+    name: 'Marble & Floor Polishing',
+    tagline: 'Restore the natural shine and luster of your marble floors',
+    category: 'Marble & Floor Polishing',
+    heroImg: '/marble%20polishing%20PC.jpg',
+    galleryImgs: [
+      '/marble%20polishing%20PC.jpg',
+      '/floor%20polishing%20PC.jpg',
+      '/glass%20cleaning%20PC.jpg',
+    ],
+    price: '₹3 / sq. ft.',
+    duration: 'Depends on area',
+    rating: 4.8,
+    reviews: 3900,
+    bookings: '30K+',
+    description:
+      'Restore the mirror-like finish of your marble, granite or vitrified tile floors with our multi-step diamond grinding and crystallisation polishing. Removes scratches, stains and dullness to bring back the original glory.',
+    whatWeClean: [
+      'Initial dry grinding to remove scratches',
+      'Progressive grit polishing (stages 50 → 3000)',
+      'Crystallisation / re-crystallisation',
+      'Final buffing for mirror finish',
+      'Sealing to protect against stains',
+    ],
+    howItWorks: [
+      { step: 1, title: 'Site Assessment', desc: 'Evaluate marble condition and choose polishing grade.' },
+      { step: 2, title: 'Grinding Phase', desc: 'Multi-stage diamond grinding removes surface damage.' },
+      { step: 3, title: 'Polishing', desc: 'Progressive polishing pads restore gloss.' },
+      { step: 4, title: 'Crystallisation', desc: 'Chemical crystalliser locked in for lasting shine.' },
+    ],
+    whatsIncluded: [
+      'Diamond grinding pads (all stages)', 'Crystallisation chemical',
+      'Final sealing coat', 'Dust & slurry clean-up',
+    ],
+    notIncluded: ['Deep stain removal extra charge', 'Crack repair'],
+    faqs: [
+      { q: 'How long before we can walk on the floor?', a: 'The floor is ready to walk on within 2 hours of completion.' },
+      { q: 'How often should marble be polished?', a: 'Once every 2–3 years for well-maintained marble.' },
+    ],
+    relatedSlugs: ['home-deep-cleaning', 'professional-painting', 'exterior-cleaning'],
+  },
+  {
+    slug: 'disinfection-services',
+    name: 'Disinfection Services',
+    tagline: 'Hospital-grade sanitisation for homes and offices',
+    category: 'Disinfection',
+    heroImg: '/Switch%20board%20cleaning%20PC.jpg',
+    galleryImgs: [
+      '/Switch%20board%20cleaning%20PC.jpg',
+      '/fan%20cleaning%20PC.jpg',
+      '/chandelier%20cleaning%20PC.jpg',
+    ],
+    price: '₹1,299',
+    duration: '1–2 hours',
+    rating: 4.7,
+    reviews: 6800,
+    bookings: '55K+',
+    description:
+      'Our Disinfection Service uses hospital-grade disinfectants and ULV fogging technology to neutralise viruses, bacteria and fungi on all surfaces. Ideal for post-illness recovery, pre-event sanitisation or regular health protection.',
+    whatWeClean: [
+      'All flat surfaces & furniture',
+      'High-touch areas — switches, handles, remotes',
+      'Air vents and AC filters',
+      'Bathrooms & kitchen sanitised',
+      'ULV cold fogging entire premises',
+    ],
+    howItWorks: [
+      { step: 1, title: 'Book Service', desc: 'Select area size and preferred date.' },
+      { step: 2, title: 'Surface Spray', desc: 'Manual spray of disinfectant on all surfaces.' },
+      { step: 3, title: 'ULV Fogging', desc: 'Cold fog reaches every corner and air space.' },
+      { step: 4, title: 'Ventilate', desc: 'Leave premises for 1 hour; return to sanitised space.' },
+    ],
+    whatsIncluded: [
+      'WHO-approved disinfectant', 'ULV cold fogger',
+      'Manual spray of high-touch points', 'Disinfection certificate',
+    ],
+    notIncluded: ['Structural cleaning', 'Pest control'],
+    faqs: [
+      { q: 'Is it safe after the treatment?', a: 'Yes — once ventilated for 1 hour, the space is completely safe.' },
+      { q: 'Does fogging kill viruses?', a: 'Our disinfectants are effective against enveloped viruses, bacteria and fungi.' },
+    ],
+    relatedSlugs: ['pest-control', 'home-deep-cleaning', 'bathroom-cleaning'],
+  },
+  {
+    slug: 'office-deep-cleaning',
+    name: 'Office Deep Cleaning',
+    tagline: 'Keep your workplace pristine, healthy, and professional',
+    category: 'Corporate Services',
+    heroImg: '/Office%20cleaning%20PC.jpg',
+    galleryImgs: [
+      '/Office%20cleaning%20PC.jpg',
+      '/Office%20Interior%20glass%20PC.jpg',
+      '/Office%20Floor%20PC.jpg',
+    ],
+    price: '₹2,999',
+    duration: '4–8 hours',
+    rating: 4.8,
+    reviews: 4100,
+    bookings: '30K+',
+    description:
+      'Professional deep cleaning for offices, co-working spaces and commercial premises. Our corporate cleaning team works after hours to minimise disruption and deliver a spotless, healthy working environment.',
+    whatWeClean: [
+      'Workstations, monitors & keyboards wiped',
+      'Floors vacuumed, mopped & buffed',
+      'Pantry & cafeteria deep cleaned',
+      'Restrooms scrubbed & sanitised',
+      'Reception & conference rooms full clean',
+      'AC vents & glass partitions cleaned',
+    ],
+    howItWorks: [
+      { step: 1, title: 'Site Survey', desc: 'Team surveys office layout and creates a cleaning plan.' },
+      { step: 2, title: 'After-Hours Start', desc: 'Cleaning typically starts post 7 PM to avoid disruption.' },
+      { step: 3, title: 'Systematic Clean', desc: 'Each zone cleaned with dedicated equipment.' },
+      { step: 4, title: 'Handover', desc: 'Morning inspection with facility manager before opening.' },
+    ],
+    whatsIncluded: [
+      'All cleaning materials & equipment', 'Workstation & floor cleaning',
+      'Pantry & restroom deep clean', 'After-hours service',
+    ],
+    notIncluded: ['Carpet shampooing (add-on)', 'Window exterior cleaning (for high-rise)'],
+    faqs: [
+      { q: 'Can you do weekend or after-hours service?', a: 'Yes — we specialise in after-hours and weekend corporate cleaning.' },
+      { q: 'Do you offer AMC?', a: 'Yes — Annual Maintenance Contracts with monthly or weekly service options.' },
+    ],
+    relatedSlugs: ['disinfection-services', 'carpet-shampooing', 'professional-painting'],
+  },
+  {
+    slug: 'window-cleaning',
+    name: 'Window Cleaning',
+    tagline: 'Crystal-clear windows inside and out',
+    category: 'Deep Cleaning',
+    heroImg: '/window%20interior%20cleaning%20PC.jpg',
+    galleryImgs: [
+      '/window%20interior%20cleaning%20PC.jpg',
+      '/Exterior%20glass%20PC.jpg',
+      '/glass%20cleaning%20PC.jpg',
+    ],
+    price: '₹25 / sq. ft.',
+    duration: '1–3 hours',
+    rating: 4.6,
+    reviews: 3300,
+    bookings: '28K+',
+    description:
+      'Our window cleaning service leaves every pane streak-free and spotless using squeegee technique and professional-grade glass cleaner. Suitable for apartment windows, glass doors, and glass partitions.',
+    whatWeClean: [
+      'Window glass inside & outside',
+      'Window frames & sills wiped',
+      'Glass doors & sliding panels',
+      'Mosquito mesh cleaned',
+      'Balcony glass railings',
+    ],
+    howItWorks: [
+      { step: 1, title: 'Book & Measure', desc: 'Input number and size of windows.' },
+      { step: 2, title: 'Pre-Wash', desc: 'Dust and grime pre-washed from glass surface.' },
+      { step: 3, title: 'Squeegee Clean', desc: 'Professional squeegee used for streak-free finish.' },
+      { step: 4, title: 'Frame & Sill', desc: 'Frames and sills wiped dry.' },
+    ],
+    whatsIncluded: [
+      'Glass cleaning solution', 'Squeegee & microfibre',
+      'Frame & sill wipe down', 'Interior & exterior (ground floor)',
+    ],
+    notIncluded: ['High-rise exterior window cleaning (requires rope access)'],
+    faqs: [
+      { q: 'Do you clean high-rise exteriors?', a: 'We offer rope-access window cleaning for high-rise buildings — get a custom quote.' },
+      { q: 'How long do results last?', a: 'About 4–6 weeks in normal conditions.' },
+    ],
+    relatedSlugs: ['home-deep-cleaning', 'exterior-cleaning', 'curtain-cleaning'],
+  },
+  {
+    slug: 'exterior-cleaning',
+    name: 'Exterior Cleaning',
+    tagline: 'Power-wash your building facade, driveway & compound',
+    category: 'Deep Cleaning',
+    heroImg: '/Office%20Exterior%20PC.jpg',
+    galleryImgs: [
+      '/Office%20Exterior%20PC.jpg',
+      '/Exterior%20glass%20PC.jpg',
+      '/Office%20Left%20PC.jpg',
+    ],
+    price: '₹5 / sq. ft.',
+    duration: '4–8 hours',
+    rating: 4.6,
+    reviews: 2100,
+    bookings: '15K+',
+    description:
+      'Restore the curb appeal of your property with our high-pressure power washing service for exterior walls, driveways, parking areas, compound walls and building facades.',
+    whatWeClean: [
+      'Building facade power-washed',
+      'Driveway & parking area cleaned',
+      'Compound walls scrubbed',
+      'Balcony floors & railings washed',
+      'Moss & algae removal',
+    ],
+    howItWorks: [
+      { step: 1, title: 'Site Assessment', desc: 'Evaluate surface type and dirt level.' },
+      { step: 2, title: 'Pre-Treatment', desc: 'Detergent pre-soak for stubborn algae & stains.' },
+      { step: 3, title: 'Power Wash', desc: 'High-pressure washer cleans all surfaces.' },
+      { step: 4, title: 'Rinse & Dry', desc: 'Final rinse and inspection walk-through.' },
+    ],
+    whatsIncluded: [
+      'High-pressure washer', 'Industrial detergent',
+      'Algae/moss treatment', 'All labour',
+    ],
+    notIncluded: ['Interior cleaning', 'Painting after cleaning'],
+    faqs: [
+      { q: 'Can it damage my paint?', a: 'We use appropriate pressure levels safe for painted surfaces.' },
+      { q: 'Do you need water connection on site?', a: 'Yes — access to a water source and electricity socket is required.' },
+    ],
+    relatedSlugs: ['professional-painting', 'window-cleaning', 'home-deep-cleaning'],
+  },
+  {
+    slug: 'curtain-cleaning',
+    name: 'Curtain Cleaning',
+    tagline: 'On-site dry cleaning and steam cleaning for your curtains',
+    category: 'Deep Cleaning',
+    heroImg: '/Curtain%20cleaning%20PC.jpg',
+    galleryImgs: [
+      '/Curtain%20cleaning%20PC.jpg',
+      '/Wodrobe%20cleaning%20PC.jpg',
+      '/chandelier%20cleaning%20PC.jpg',
+    ],
+    price: '₹99 / panel',
+    duration: '1–3 hours',
+    rating: 4.5,
+    reviews: 2800,
+    bookings: '20K+',
+    description:
+      'Our on-site curtain cleaning service steams and vacuums your curtains without taking them down. Removes dust, allergens, odours and light stains — safe for all fabric types.',
+    whatWeClean: [
+      'Full curtain panel steam-cleaned',
+      'Heading tape & rings dusted',
+      'Odour neutraliser applied',
+      'Light stain treatment',
+      'Final brush and smooth',
+    ],
+    howItWorks: [
+      { step: 1, title: 'Book', desc: 'Count number of curtain panels and book.' },
+      { step: 2, title: 'Steam Prep', desc: 'Steam generator heats up; curtains stay on the rod.' },
+      { step: 3, title: 'Steam & Vacuum', desc: 'Upward steaming removes dust and odours.' },
+      { step: 4, title: 'Done', desc: 'Curtains dry and fresh within the hour.' },
+    ],
+    whatsIncluded: [
+      'On-site steam cleaner', 'HEPA vacuum',
+      'Odour spray', 'Stain pre-treatment',
+    ],
+    notIncluded: ['Heavy stain removal (separate charge)', 'Blind cleaning (separate service)'],
+    faqs: [
+      { q: 'Do I need to remove my curtains?', a: 'No — we clean them while they are hanging.' },
+      { q: 'Is it safe for delicate fabrics?', a: 'Yes — our team adjusts steam heat based on fabric type.' },
+    ],
+    relatedSlugs: ['sofa-shampooing', 'carpet-shampooing', 'mattress-cleaning'],
+  },
+]
+
+export function getServiceBySlug(slug: string): Service | undefined {
+  return SERVICES.find(s => s.slug === slug)
+}
+
+export function getRelatedServices(slugs: string[]): Service[] {
+  return SERVICES.filter(s => slugs.includes(s.slug))
+}
