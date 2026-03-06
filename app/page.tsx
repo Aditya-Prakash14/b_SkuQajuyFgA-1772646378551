@@ -723,7 +723,7 @@ export default function Home() {
                 </li>
                 <li className="flex items-start gap-3">
                   <MapPin className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                  <span>286 15th A Cross, 7th Main Rd, Sector 6, HSR Layout, Bengaluru, Karnataka 560102</span>
+                  <span>Bharadwaj Park, Balson Chauraha, Prayagraj, Uttar Pradesh</span>
                 </li>
               </ul>
             </div>

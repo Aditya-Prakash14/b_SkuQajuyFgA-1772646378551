@@ -91,9 +91,7 @@ export default function CartDrawer() {
                 <ArrowLeft className="w-5 h-5" />
               </button>
             )}
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-white font-black text-sm">V3</span>
-            </div>
+            <img src="/prime%20Home%20cleaning.svg" alt="Prime Home Care Logo" className="h-9 w-auto" />
             <h2 className="font-black text-gray-800 text-base">
               {step === 'cart' ? `My Cart (${totalItems})` : step === 'checkout' ? 'Book Service' : 'Booking Confirmed'}
             </h2>
