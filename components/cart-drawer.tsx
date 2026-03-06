@@ -305,7 +305,7 @@ export default function CartDrawer() {
                 </div>
               </div>
               <a
-                href="tel:+919880778585"
+                href="tel:+917349603429"
                 className="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors"
               >
                 <Phone className="w-4 h-4" /> Call Us for Updates
