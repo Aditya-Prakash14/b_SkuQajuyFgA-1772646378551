@@ -301,12 +301,6 @@ export default function Home() {
 
             {/* Left content */}
             <div>
-              <div className="inline-flex items-center gap-3 bg-primary/10 text-primary rounded-full px-4 py-1.5 text-sm font-semibold mb-6">
-                <span className="flex items-center gap-1"><Star className="w-4 h-4 fill-yellow-400 text-yellow-400" /> 4.8 Rating</span>
-                <span className="text-primary/40">|</span>
-                <span className="flex items-center gap-1"><Users className="w-4 h-4" /> 1M+ Customers</span>
-              </div>
-
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-4 leading-tight">
                 Professional Services<br />
                 <span className="text-primary">at Your Doorstep</span>
@@ -343,20 +337,7 @@ export default function Home() {
               </div>
 
               {/* Stats */}
-              <div className="flex gap-8 mt-10">
-                <div>
-                  <p className="text-3xl font-black text-primary flex items-center gap-1"><Star className="w-6 h-6 fill-yellow-400 text-yellow-400" /> 4.8</p>
-                  <p className="text-sm text-gray-500 mt-1">Service Rating</p>
-                </div>
-                <div>
-                  <p className="text-3xl font-black text-primary">1M+</p>
-                  <p className="text-sm text-gray-500 mt-1">Customers Globally</p>
-                </div>
-                <div>
-                  <p className="text-3xl font-black text-primary">50+</p>
-                  <p className="text-sm text-gray-500 mt-1">Cities Served</p>
-                </div>
-              </div>
+
             </div>
 
             {/* Right visual */}
@@ -369,12 +350,6 @@ export default function Home() {
                 />
               </div>
               {/* Floating badges */}
-              <div className="absolute -top-4 -right-4 bg-white rounded-2xl shadow-xl px-5 py-3 border border-gray-100">
-                <p className="text-xs text-gray-500">Avg rating</p>
-                <div className="flex items-center gap-1 text-yellow-400 font-bold text-lg">
-                  <Star className="w-5 h-5 fill-yellow-400" /> 4.8
-                </div>
-              </div>
               <div className="absolute -bottom-4 -left-4 bg-white rounded-2xl shadow-xl px-5 py-3 border border-gray-100">
                 <p className="text-xs text-gray-500">Happy customers</p>
                 <p className="text-primary font-black text-2xl">1M+</p>
@@ -464,25 +439,6 @@ export default function Home() {
                 </div>
                 <h3 className="font-bold text-gray-900 mb-2 group-hover:text-primary transition-colors">{item.title}</h3>
                 <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Stats Banner ──────────────────────────────────── */}
-      <section className="bg-primary py-12 px-4 sm:px-6 lg:px-8 text-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            {[
-              { value: '1M+', label: 'Happy Customers'  },
-              { value: '4.8', label: 'Average Rating'   },
-              { value: '50+', label: 'Cities Covered'   },
-              { value: '10+', label: 'Years Experience' },
-            ].map((stat, i) => (
-              <div key={i} className="group">
-                <p className="text-4xl md:text-5xl font-black group-hover:scale-110 transition-transform inline-block">{stat.value}</p>
-                <p className="text-white/70 mt-1 text-sm font-medium">{stat.label}</p>
               </div>
             ))}
           </div>
