@@ -5,7 +5,7 @@ import {
   Phone, Menu, X, Star, MapPin, ChevronDown, ShoppingCart,
   Facebook, Twitter, Instagram, Linkedin, Youtube, ArrowRight,
   CheckCircle, Shield, Clock, ThumbsUp,
-  Sparkles, Paintbrush, Building2, Droplets, Gem, Bug, Users, Mail, ShoppingBag,
+  Sparkles, Paintbrush, Building2, Droplets, Gem, Bug, Users, Mail, ShoppingBag, Settings,
 } from 'lucide-react'
 import { useCart } from '@/lib/cart-context'
 
@@ -17,10 +17,11 @@ const CITIES = [
 ]
 
 const SERVICE_CATEGORIES = [
-  { name: 'House Deep Cleaning',      Icon: Sparkles   },
+  { name: 'Residential Cleaning',     Icon: Sparkles   },
   { name: 'Commercial Cleaning',      Icon: Building2  },
   { name: 'Pest Control',             Icon: Bug        },
   { name: 'Marble Polishing',         Icon: Gem        },
+  { name: 'Custom Cleaning Service',  Icon: Settings   },
 ]
 
 const POPULAR_SERVICES = [
@@ -174,7 +175,7 @@ export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [selectedCity, setSelectedCity] = useState('Select City')
   const [cityDropdownOpen, setCityDropdownOpen] = useState(false)
-  const [activeCategory, setActiveCategory] = useState('House Deep Cleaning')
+  const [activeCategory, setActiveCategory] = useState('Residential Cleaning')
   const { totalItems, setCartOpen } = useCart()
 
   return (
@@ -495,49 +496,60 @@ export default function Home() {
             <h2 className="text-3xl md:text-4xl font-black text-gray-900">Our Work</h2>
             <p className="text-gray-500 mt-2">Real results from our professional cleaning team</p>
           </div>
-          <div className="columns-2 sm:columns-3 lg:columns-4 gap-3 space-y-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { src: '/Sofa%20Shampooing%20PC.jpg',               alt: 'Sofa Shampooing' },
-              { src: '/Office%20cleaning%20PC.jpg',               alt: 'Office Cleaning' },
-              { src: '/marble%20polishing%20PC.jpg',              alt: 'Marble Polishing' },
-              { src: '/Carpet%20cleaning%20PC.jpg',               alt: 'Carpet Cleaning' },
-              { src: '/chimney%20cleaning%20PC.jpg',              alt: 'Chimney Cleaning' },
-              { src: '/bathroom%20fixures%20Cleaning%20PC.jpg',   alt: 'Bathroom Cleaning' },
-              { src: '/fridge%20cleaning%20PC.jpg',               alt: 'Fridge Cleaning' },
-              { src: '/Kitchen%20Sink%20cleaning%20PC.jpg',       alt: 'Kitchen Sink Cleaning' },
-              { src: '/Gas%20Stove%20Cleaning%20PC.jpg',          alt: 'Gas Stove Cleaning' },
-              { src: '/window%20interior%20cleaning%20PC.jpg',    alt: 'Window Cleaning' },
-              { src: '/Exterior%20glass%20PC.jpg',                alt: 'Exterior Glass Cleaning' },
-              { src: '/glass%20cleaning%20PC.jpg',                alt: 'Glass Cleaning' },
-              { src: '/Office%20Interior%20glass%20PC.jpg',       alt: 'Office Interior Glass' },
-              { src: '/Office%20chair%20PC.jpg',                  alt: 'Office Chair Cleaning' },
-              { src: '/Office%20Floor%20PC.jpg',                  alt: 'Office Floor Cleaning' },
-              { src: '/Office%20ceiling%20PC.jpg',                alt: 'Office Ceiling Cleaning' },
-              { src: '/Office%20Exterior%20PC.jpg',               alt: 'Office Exterior' },
-              { src: '/Office%20Left%20PC.jpg',                   alt: 'Office Cleaning' },
-              { src: '/Office%20Stairs%20PC.jpg',                 alt: 'Office Stairs Cleaning' },
-              { src: '/office%20table%20PC.jpg',                  alt: 'Office Table Cleaning' },
-              { src: '/Living%20area%20Pest%20PC.jpg',            alt: 'Pest Control Living Area' },
-              { src: '/Pest%20control%20in%20Office%20PC.jpg',    alt: 'Pest Control Office' },
-              { src: '/pest%20control%20kitchen%20PC.jpg',        alt: 'Pest Control Kitchen' },
-              { src: '/mattress%20cleaning%20PC.jpg',             alt: 'Mattress Cleaning' },
-              { src: '/dining%20table%20cleaning%20PC.jpg',       alt: 'Dining Table Cleaning' },
-              { src: '/dining%20chair%20cleaning%20PC.jpg',       alt: 'Dining Chair Cleaning' },
-              { src: '/fan%20cleaning%20PC.jpg',                  alt: 'Fan Cleaning' },
-              { src: '/chandelier%20cleaning%20PC.jpg',           alt: 'Chandelier Cleaning' },
-              { src: '/Switch%20board%20cleaning%20PC.jpg',       alt: 'Switchboard Cleaning' },
-              { src: '/Wodrobe%20cleaning%20PC.jpg',              alt: 'Wardrobe Cleaning' },
-              { src: '/floor%20polishing%20PC.jpg',               alt: 'Floor Polishing' },
-              { src: '/Curtain%20cleaning%20PC.jpg',              alt: 'Curtain Cleaning' },
-              { src: '/toilet%20cleaning%20PC.jpg',               alt: 'Toilet Cleaning' },
-              { src: '/toilet%20washing%20basin%20PC.jpg',        alt: 'Washing Basin Cleaning' },
-            ].map((img, i) => (
-              <div key={i} className="break-inside-avoid rounded-xl overflow-hidden border border-gray-100 hover:shadow-lg transition-all group">
+              {
+                label: 'Residential Clean',
+                src: '/Sofa%20Shampooing%20PC.jpg',
+                alt: 'Residential Cleaning',
+                images: [
+                  '/Sofa%20Shampooing%20PC.jpg',
+                  '/mattress%20cleaning%20PC.jpg',
+                  '/Curtain%20cleaning%20PC.jpg',
+                  '/fan%20cleaning%20PC.jpg',
+                ],
+              },
+              {
+                label: 'Commercial Clean',
+                src: '/Office%20cleaning%20PC.jpg',
+                alt: 'Commercial Cleaning',
+                images: [
+                  '/Office%20cleaning%20PC.jpg',
+                  '/Office%20Floor%20PC.jpg',
+                  '/Office%20chair%20PC.jpg',
+                  '/office%20table%20PC.jpg',
+                ],
+              },
+              {
+                label: 'Pest Control',
+                src: '/Living%20area%20Pest%20PC.jpg',
+                alt: 'Pest Control',
+                images: [
+                  '/Living%20area%20Pest%20PC.jpg',
+                  '/Pest%20control%20in%20Office%20PC.jpg',
+                  '/pest%20control%20kitchen%20PC.jpg',
+                ],
+              },
+              {
+                label: 'Marble Polish',
+                src: '/marble%20polishing%20PC.jpg',
+                alt: 'Marble Polishing',
+                images: [
+                  '/marble%20polishing%20PC.jpg',
+                  '/floor%20polishing%20PC.jpg',
+                ],
+              },
+            ].map((cat, i) => (
+              <div key={i} className="group relative rounded-2xl overflow-hidden border border-gray-100 hover:shadow-xl transition-all cursor-pointer aspect-[3/4]">
                 <img
-                  src={img.src}
-                  alt={img.alt}
-                  className="w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  src={cat.src}
+                  alt={cat.alt}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-4">
+                  <p className="text-white font-bold text-sm md:text-base">{cat.label}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -545,16 +557,30 @@ export default function Home() {
       </section>
 
       {/* ── Testimonials ──────────────────────────────────── */}
-      <section id="testimonials" className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
+      <section id="testimonials" className="py-16 bg-gray-50 overflow-hidden">
+        <style>{`
+          @keyframes scroll-left {
+            0%   { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+          .testimonials-track {
+            animation: scroll-left 35s linear infinite;
+          }
+          .testimonials-track:hover {
+            animation-play-state: paused;
+          }
+        `}</style>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-black text-gray-900">Top Testimonials</h2>
             <p className="text-gray-500 mt-2">What our customers say about us</p>
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {TESTIMONIALS.map((t, i) => (
-              <div key={i} className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-xl hover:border-primary/20 transition-all group">
+        <div className="overflow-hidden w-full">
+          <div className="testimonials-track flex gap-6" style={{ width: 'max-content' }}>
+            {[...TESTIMONIALS, ...TESTIMONIALS].map((t, i) => (
+              <div key={i} className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-xl hover:border-primary/20 transition-all group" style={{ width: '320px', flexShrink: 0 }}>
                 <div className="flex gap-1 mb-4">
                   {Array(t.rating).fill(0).map((_, j) => (
                     <Star key={j} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
@@ -628,7 +654,7 @@ export default function Home() {
           <h2 className="text-2xl font-black text-gray-900 mb-2">Our Clients</h2>
           <p className="text-gray-500 text-sm mb-8">We are proud to partner with industry leaders and trusted brands</p>
           <div className="flex flex-wrap justify-center gap-4">
-            {['Infosys', 'Wipro', 'Prestige', 'Sobha', 'Mantri', 'Embassy', 'Brigade', 'Puravankara'].map(client => (
+            {['Viatris', 'Mylan', 'Laurus Bio', 'Prime Eagle'].map(client => (
               <div key={client} className="bg-white rounded-xl border border-gray-100 px-6 py-4 text-sm font-bold text-gray-400 hover:text-primary hover:border-primary/30 hover:shadow-md transition-all">
                 {client}
               </div>
