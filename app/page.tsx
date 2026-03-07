@@ -633,10 +633,15 @@ export default function Home() {
         <div className="max-w-7xl mx-auto text-center">
           <h2 className="text-2xl font-black text-gray-900 mb-2">Our Clients</h2>
           <p className="text-gray-500 text-sm mb-8">We are proud to partner with industry leaders and trusted brands</p>
-          <div className="flex flex-wrap justify-center gap-4">
-            {['Viatris', 'Mylan', 'Laurus Bio', 'Prime Eagle'].map(client => (
-              <div key={client} className="bg-white rounded-xl border border-gray-100 px-6 py-4 text-sm font-bold text-gray-400 hover:text-primary hover:border-primary/30 hover:shadow-md transition-all">
-                {client}
+          <div className="flex flex-wrap justify-center items-center gap-8">
+            {[
+              { src: '/viatris.webp',         alt: 'Viatris' },
+              { src: '/mylan.webp',            alt: 'Mylan' },
+              { src: '/LaurusBio_Black.png',   alt: 'Laurus Bio' },
+              { src: '/primeeagle.jpeg',        alt: 'Prime Eagle' },
+            ].map(client => (
+              <div key={client.alt} className="bg-white rounded-xl border border-gray-100 px-6 py-4 hover:border-primary/30 hover:shadow-md transition-all flex items-center justify-center" style={{ minWidth: '140px', height: '80px' }}>
+                <img src={client.src} alt={client.alt} className="max-h-12 max-w-[120px] object-contain grayscale hover:grayscale-0 transition-all" />
               </div>
             ))}
           </div>
