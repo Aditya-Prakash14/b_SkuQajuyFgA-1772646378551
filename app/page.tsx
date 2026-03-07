@@ -710,7 +710,7 @@ export default function Home() {
               </ul>
             </div>
 
-            {/* Additional Links */}
+            
             <div>
               <h4 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">Additional Links</h4>
               <ul className="space-y-2.5 text-sm">
