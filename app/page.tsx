@@ -746,6 +746,31 @@ export default function Home() {
         </div>
       </footer>
 
+      {/* ── Floating Buttons ──────────────────────────────── */}
+      <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50">
+        {/* WhatsApp */}
+        <a
+          href="https://wa.me/917349603429"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Chat on WhatsApp"
+          className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+          style={{ backgroundColor: '#25D366' }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-7 h-7 fill-white">
+            <path d="M16 0C7.163 0 0 7.163 0 16c0 2.822.737 5.469 2.027 7.773L0 32l8.437-2.013A15.938 15.938 0 0 0 16 32c8.837 0 16-7.163 16-16S24.837 0 16 0zm0 29.333a13.27 13.27 0 0 1-6.773-1.853l-.486-.289-5.007 1.195 1.219-4.879-.317-.502A13.267 13.267 0 0 1 2.667 16C2.667 8.636 8.636 2.667 16 2.667S29.333 8.636 29.333 16 23.364 29.333 16 29.333zm7.307-9.907c-.4-.2-2.368-1.168-2.735-1.301-.367-.133-.634-.2-.9.2-.267.4-1.034 1.301-1.267 1.568-.233.267-.467.3-.867.1-.4-.2-1.688-.622-3.215-1.983-1.188-1.06-1.99-2.37-2.223-2.77-.233-.4-.025-.616.175-.815.18-.18.4-.467.6-.7.2-.233.267-.4.4-.667.133-.267.067-.5-.033-.7-.1-.2-.9-2.168-1.234-2.968-.325-.78-.655-.674-.9-.686l-.767-.013c-.267 0-.7.1-1.067.5-.367.4-1.4 1.368-1.4 3.335s1.433 3.868 1.633 4.135c.2.267 2.82 4.305 6.832 6.035.955.413 1.7.659 2.282.843.958.305 1.831.262 2.52.159.769-.115 2.368-.968 2.702-1.903.333-.935.333-1.735.233-1.903-.1-.167-.367-.267-.767-.467z"/>
+          </svg>
+        </a>
+        {/* Call */}
+        <a
+          href="tel:+917349603429"
+          aria-label="Call us"
+          className="w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+        >
+          <Phone className="w-6 h-6 text-white" />
+        </a>
+      </div>
+
     </div>
   )
 }
