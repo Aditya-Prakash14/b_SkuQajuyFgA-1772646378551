@@ -6,6 +6,7 @@ import {
   Facebook, Twitter, Instagram, Linkedin, Youtube, ArrowRight,
   CheckCircle, Shield, Clock, ThumbsUp,
   Sparkles, Paintbrush, Building2, Droplets, Gem, Bug, Users, Mail, ShoppingBag, Settings,
+  ChevronLeft, ChevronRight,
 } from 'lucide-react'
 import { useCart } from '@/lib/cart-context'
 
@@ -166,6 +167,72 @@ function ServiceCard({ name, img, city, slug, price, priceStr }: { name: string;
         </button>
       </div>
     </div>
+  )
+}
+
+// ─── Testimonials Slider ───────────────────────────────────────────────────────
+
+function TestimonialsSlider() {
+  const [current, setCurrent] = useState(0)
+  const total = TESTIMONIALS.length
+  const prev = () => setCurrent(c => (c - 1 + total) % total)
+  const next = () => setCurrent(c => (c + 1) % total)
+  const t = TESTIMONIALS[current]
+
+  return (
+    <section id="testimonials" className="py-16 bg-gray-50">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-black text-gray-900">Top Testimonials</h2>
+          <p className="text-gray-500 mt-2">What our customers say about us</p>
+        </div>
+
+        <div className="relative bg-white rounded-2xl p-8 border border-gray-100 shadow-lg">
+          {/* Stars */}
+          <div className="flex gap-1 mb-4 justify-center">
+            {Array(t.rating).fill(0).map((_, j) => (
+              <Star key={j} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+            ))}
+          </div>
+
+          {/* Text */}
+          <p className="text-gray-600 text-base leading-relaxed mb-6 italic text-center">
+            &ldquo;{t.text}&rdquo;
+          </p>
+
+          {/* Author */}
+          <div className="flex items-center justify-center gap-3">
+            <div className="w-11 h-11 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold">
+              {t.name[0]}
+            </div>
+            <div>
+              <p className="font-bold text-gray-900 text-sm">{t.name}</p>
+              <p className="text-xs text-gray-400">Verified Customer</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Controls */}
+        <div className="flex items-center justify-center gap-6 mt-6">
+          <button onClick={prev} className="w-10 h-10 rounded-full border border-gray-200 bg-white flex items-center justify-center hover:border-primary hover:text-primary transition-all shadow-sm">
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+
+          {/* Dots */}
+          <div className="flex gap-2">
+            {TESTIMONIALS.map((_, i) => (
+              <button key={i} onClick={() => setCurrent(i)}
+                className={`w-2.5 h-2.5 rounded-full transition-all ${i === current ? 'bg-primary scale-125' : 'bg-gray-300'}`}
+              />
+            ))}
+          </div>
+
+          <button onClick={next} className="w-10 h-10 rounded-full border border-gray-200 bg-white flex items-center justify-center hover:border-primary hover:text-primary transition-all shadow-sm">
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+    </section>
   )
 }
 
@@ -513,50 +580,7 @@ export default function Home() {
       </section>
 
       {/* ── Testimonials ──────────────────────────────────── */}
-      <section id="testimonials" className="py-16 bg-gray-50 overflow-hidden">
-        <style>{`
-          @keyframes scroll-left {
-            0%   { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-          }
-          .testimonials-track {
-            animation: scroll-left 35s linear infinite;
-          }
-          .testimonials-track:hover {
-            animation-play-state: paused;
-          }
-        `}</style>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-black text-gray-900">Top Testimonials</h2>
-            <p className="text-gray-500 mt-2">What our customers say about us</p>
-          </div>
-        </div>
-
-        <div className="overflow-hidden w-full">
-          <div className="testimonials-track flex gap-6" style={{ width: 'max-content' }}>
-            {[...TESTIMONIALS, ...TESTIMONIALS].map((t, i) => (
-              <div key={i} className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-xl hover:border-primary/20 transition-all group" style={{ width: '320px', flexShrink: 0 }}>
-                <div className="flex gap-1 mb-4">
-                  {Array(t.rating).fill(0).map((_, j) => (
-                    <Star key={j} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  ))}
-                </div>
-                <p className="text-gray-600 text-sm leading-relaxed mb-5 italic">&ldquo;{t.text}&rdquo;</p>
-                <div className="flex items-center gap-3 border-t border-gray-100 pt-4">
-                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-sm group-hover:bg-primary group-hover:text-white transition-all">
-                    {t.name[0]}
-                  </div>
-                  <div>
-                    <p className="font-bold text-gray-900 text-sm group-hover:text-primary transition-colors">{t.name}</p>
-                    <p className="text-xs text-gray-400">Verified Customer</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <TestimonialsSlider />
 
       {/* ── Blog / Tips Section ───────────────────────────── */}
       <section id="blog" className="py-16 px-4 sm:px-6 lg:px-8">
