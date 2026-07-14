@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import type { Database } from '@prime/shared'
+import { supabaseAuthEnv } from '@/lib/env'
 
 /**
  * Refreshes the Supabase session cookie and enforces coarse route auth:
@@ -10,17 +11,17 @@ import type { Database } from '@prime/shared'
  * Fine-grained authorization (is this user an ACTIVE admin?) is enforced in
  * app/dashboard/layout.tsx, not here, to avoid a DB round-trip per request.
  *
- * If Supabase env is absent, this is a local dev preview: allow everything so
- * the shell is viewable. Production always has env, so auth is always enforced.
+ * With no Supabase env this is a local dev preview and everything is allowed
+ * through. supabaseAuthEnv() throws rather than returning null in production,
+ * so that path can never be reached by a deployed build.
  */
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  if (!url || !anonKey) return supabaseResponse
+  const env = supabaseAuthEnv()
+  if (!env) return supabaseResponse
 
-  const supabase = createServerClient<Database>(url, anonKey, {
+  const supabase = createServerClient<Database>(env.url, env.anonKey, {
     cookies: {
       getAll() {
         return request.cookies.getAll()
