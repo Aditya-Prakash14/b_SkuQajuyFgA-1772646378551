@@ -1,0 +1,19 @@
+{
+  "name": "@prime/supabase-seed",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "seed": "tsx seed-services.ts",
+    "bootstrap": "tsx bootstrap-admin.ts"
+  },
+  "dependencies": {
+    "@prime/shared": "workspace:*",
+    "@supabase/supabase-js": "^2.48.1",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "5.7.3"
+  }
+}
