@@ -1,10 +1,50 @@
-# v0 runtime files
+# ── Secrets & environment ────────────────────────────────────────────────────
+# NEVER commit real values. Only *.env.example templates are tracked.
+.env
+.env.*
+!.env.example
+!*.env.example
+
+# Credentials / keys of any kind
+*.pem
+*.key
+*.p12
+*.pfx
+service-account*.json
+secrets.json
+
+# ── Dependencies ─────────────────────────────────────────────────────────────
+node_modules/
+.pnpm-store/
+
+# ── Build output ─────────────────────────────────────────────────────────────
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+next-env.d.ts
+.vercel/
+.turbo/
+
+# ── Supabase ─────────────────────────────────────────────────────────────────
+supabase/.branches
+supabase/.temp
+
+# ── Logs & temp ──────────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-error.log*
+next-panic-*.log
+
+# ── Editor / OS ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# ── v0 runtime files ─────────────────────────────────────────────────────────
 __v0_runtime_loader.js
 __v0_devtools.tsx
 __v0_jsx-dev-runtime.ts
-
-# Common ignores
-node_modules/
-.next/
-.env*.local
-.DS_Store
