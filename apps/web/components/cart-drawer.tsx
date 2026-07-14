@@ -31,19 +31,28 @@ export default function CartDrawer() {
   const [errors, setErrors] = useState<Partial<BookingForm>>({})
   const [submitting, setSubmitting] = useState(false)
   const [apiError, setApiError] = useState<string | null>(null)
+  const [authError, setAuthError] = useState<string | null>(null)
   const [orderNumber, setOrderNumber] = useState('')
 
-  // Returning from Google OAuth → reopen the cart straight at checkout.
+  // Returning from Google OAuth. Success → reopen the cart straight at checkout.
+  // Failure → reopen it on the sign-in step showing why, rather than dropping
+  // the user on the home page with a raw ?error=... in the address bar.
   useEffect(() => {
     if (typeof window === 'undefined') return
     const params = new URLSearchParams(window.location.search)
-    if (params.get('signed_in') === '1') {
-      setCartOpen(true)
-      setStep('checkout')
-      params.delete('signed_in')
-      const qs = params.toString()
-      window.history.replaceState({}, '', window.location.pathname + (qs ? `?${qs}` : ''))
-    }
+
+    const signedIn = params.get('signed_in') === '1'
+    const failed = params.get('auth_error')
+    if (!signedIn && !failed) return
+
+    setCartOpen(true)
+    if (signedIn) setStep('checkout')
+    if (failed) setAuthError(failed)
+
+    params.delete('signed_in')
+    params.delete('auth_error')
+    const qs = params.toString()
+    window.history.replaceState({}, '', window.location.pathname + (qs ? `?${qs}` : ''))
   }, [setCartOpen])
 
   // Prefill from the Google profile and the detected city.
@@ -215,11 +224,21 @@ export default function CartDrawer() {
                     </p>
                   </div>
 
+                  {authError && (
+                    <div className="w-full rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-left text-sm text-red-600">
+                      <p className="font-semibold">Sign-in failed</p>
+                      <p className="mt-0.5 text-xs leading-relaxed">{authError}</p>
+                    </div>
+                  )}
+
                   <button
-                    onClick={() => signInWithGoogle(typeof window !== 'undefined' ? window.location.pathname : '/')}
+                    onClick={() => {
+                      setAuthError(null)
+                      signInWithGoogle(typeof window !== 'undefined' ? window.location.pathname : '/')
+                    }}
                     className="w-full flex items-center justify-center gap-3 border-2 border-gray-200 bg-white text-gray-700 font-bold py-3.5 rounded-xl hover:border-primary/40 hover:shadow-md transition-all"
                   >
-                    <GoogleMark className="w-5 h-5" /> Continue with Google
+                    <GoogleMark className="w-5 h-5" /> {authError ? 'Try again with Google' : 'Continue with Google'}
                   </button>
 
                   <div className="bg-gray-50 rounded-xl p-3 w-full text-left border border-gray-100">
