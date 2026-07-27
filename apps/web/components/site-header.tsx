@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import {
   Phone, Menu, X, MapPin, ChevronDown, ShoppingCart, ShoppingBag,
-  LocateFixed, Loader2, LogOut, User as UserIcon,
+  LocateFixed, Loader2, LogOut, User as UserIcon, CalendarClock,
 } from 'lucide-react'
 import { useCart } from '@/lib/cart-context'
 import { useCity } from '@/lib/city-context'
@@ -50,8 +50,12 @@ export function SiteHeader() {
 
       <header className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
-          <Link href="/" className="flex items-center shrink-0">
-            <img src="/prime%20Home%20cleaning.svg" alt="MyPrimeCompany" className="h-14 w-auto" />
+          <Link href="/" className="flex items-center gap-2.5 shrink-0" aria-label="MyPrimeCompany home">
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-white font-black text-lg shadow-sm shadow-primary/30">M</span>
+            <span className="flex flex-col leading-none">
+              <span className="font-black text-lg text-gray-900 tracking-tight">MyPrimeCompany</span>
+              <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold mt-0.5">Home &amp; Office Care</span>
+            </span>
           </Link>
 
           <nav className="hidden lg:flex items-center gap-6 flex-1 justify-center">
@@ -123,6 +127,13 @@ export function SiteHeader() {
                   <div className="absolute top-full right-0 mt-1 bg-white border border-gray-100 rounded-xl shadow-2xl z-50 p-2 w-56">
                     <p className="px-3 py-1.5 text-xs text-gray-500 truncate">{user.email}</p>
                     <div className="my-1 border-t border-gray-100" />
+                    <Link
+                      href="/account"
+                      onClick={() => setUserOpen(false)}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                    >
+                      <CalendarClock className="w-4 h-4" /> My bookings
+                    </Link>
                     <button
                       onClick={() => { signOut(); setUserOpen(false) }}
                       className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
@@ -191,9 +202,14 @@ export function SiteHeader() {
             {detectError && <p className="text-[11px] text-red-500">{detectError}</p>}
 
             {user ? (
-              <button onClick={() => signOut()} className="flex items-center gap-2 text-sm text-red-600 py-1">
-                <LogOut className="w-4 h-4" /> Sign out ({displayName})
-              </button>
+              <>
+                <Link href="/account" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-primary py-1">
+                  <CalendarClock className="w-4 h-4" /> My bookings
+                </Link>
+                <button onClick={() => signOut()} className="flex items-center gap-2 text-sm text-red-600 py-1">
+                  <LogOut className="w-4 h-4" /> Sign out ({displayName})
+                </button>
+              </>
             ) : (
               <button
                 onClick={() => signInWithGoogle('/')}

@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation'
 import {
   CheckCircle, XCircle, Star, ChevronRight, Clock, Users, Shield, ArrowLeft,
 } from 'lucide-react'
-import { getServiceBySlug, getRelatedServices, getAllServiceSlugs } from '@/lib/services-data'
+import { getServiceBySlug, getRelatedServices, getAllServiceSlugs, getServiceReviews } from '@/lib/services-data'
 import { PageShell } from '@/components/page-shell'
 import ServiceBookingCard from '@/components/service-booking-card'
 
@@ -30,7 +30,10 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
   const service = await getServiceBySlug(slug)
   if (!service) notFound()
 
-  const related = await getRelatedServices(service.relatedIds)
+  const [related, reviews] = await Promise.all([
+    getRelatedServices(service.relatedIds),
+    getServiceReviews(service.id),
+  ])
   const numericPrice = parseInt(service.price.replace(/[^0-9]/g, '')) || 0
 
   const stars = (n: number) =>
@@ -159,6 +162,29 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
                       <div key={i} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
                         <p className="font-semibold text-gray-800 mb-1">{faq.q}</p>
                         <p className="text-gray-600 text-sm">{faq.a}</p>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              )}
+
+              {reviews.length > 0 && (
+                <Card title="Customer Reviews">
+                  <div className="space-y-4">
+                    {reviews.map((r, i) => (
+                      <div key={i} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                        <div className="flex items-center justify-between">
+                          <div className="flex">{stars(Math.round(r.rating))}</div>
+                          {r.created_at && (
+                            <span className="text-xs text-gray-400">
+                              {new Date(r.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            </span>
+                          )}
+                        </div>
+                        {r.comment && <p className="text-gray-600 text-sm mt-1.5">“{r.comment}”</p>}
+                        <p className="mt-1 flex items-center gap-1 text-[11px] text-green-600">
+                          <CheckCircle className="w-3 h-3" /> Verified customer
+                        </p>
                       </div>
                     ))}
                   </div>

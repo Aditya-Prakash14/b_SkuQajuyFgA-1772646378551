@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Printer } from 'lucide-react'
 import { toast } from 'sonner'
-import { formatINR, type InvoiceStatus } from '@prime/shared'
+import { formatINR, gstHalves, type InvoiceStatus } from '@prime/shared'
 import { updateInvoiceStatus, markInvoicePaid } from '@/app/dashboard/invoices/actions'
 import { InvoiceStatusBadge, INVOICE_STATUSES, invoiceStatusLabel } from '@/components/status-badge'
 import { Button } from '@/components/ui/button'
@@ -156,13 +156,26 @@ export function InvoiceView({ invoice }: { invoice: InvoiceData }) {
           </table>
 
           <div className="mt-4 ml-auto max-w-xs space-y-1.5 text-sm">
-            <Row label="Subtotal" value={formatINR(invoice.subtotal)} />
-            {invoice.discount > 0 && <Row label="Discount" value={`− ${formatINR(invoice.discount)}`} />}
-            {invoice.tax > 0 && <Row label="Tax" value={formatINR(invoice.tax)} />}
+            {invoice.tax > 0 ? (
+              <>
+                <Row label="Taxable value" value={formatINR(invoice.subtotal)} />
+                {invoice.discount > 0 && <Row label="Discount" value={`− ${formatINR(invoice.discount)}`} />}
+                <Row label="CGST @ 9%" value={formatINR(gstHalves(invoice.tax).cgst)} />
+                <Row label="SGST @ 9%" value={formatINR(gstHalves(invoice.tax).sgst)} />
+              </>
+            ) : (
+              <>
+                <Row label="Subtotal" value={formatINR(invoice.subtotal)} />
+                {invoice.discount > 0 && <Row label="Discount" value={`− ${formatINR(invoice.discount)}`} />}
+              </>
+            )}
             <div className="flex justify-between border-t pt-2 text-base font-black">
               <span>Total</span>
               <span>{formatINR(invoice.total)}</span>
             </div>
+            {invoice.tax > 0 && (
+              <p className="pt-1 text-right text-[11px] text-muted-foreground">Prices are inclusive of GST.</p>
+            )}
           </div>
 
           {status === 'paid' && (
@@ -172,7 +185,7 @@ export function InvoiceView({ invoice }: { invoice: InvoiceData }) {
           )}
 
           <p className="mt-8 border-t pt-4 text-center text-xs text-muted-foreground">
-            MyPrimeCompany · +91 73496 03429 · info@primehomecare.in — Thank you for your business!
+            MyPrimeCompany · +91 73496 03429 · support@myprimecompany.in — Thank you for your business!
           </p>
         </CardContent>
       </Card>

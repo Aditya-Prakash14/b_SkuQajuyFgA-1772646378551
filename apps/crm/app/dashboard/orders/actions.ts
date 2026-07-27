@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import type { OrderStatus, PaymentStatus } from '@prime/shared'
+import { gstInclusive, type OrderStatus, type PaymentStatus } from '@prime/shared'
 
 export interface ManualOrderInput {
   customer: { name: string; phone: string; email: string; city: string }
@@ -54,17 +54,20 @@ export async function createManualOrder(input: ManualOrderInput): Promise<Result
   if (svcErr) return { error: svcErr.message }
   const map = new Map((svc ?? []).map((s) => [s.id, s]))
 
-  let subtotal = 0
+  let gross = 0
   const lines = []
   for (const it of items) {
     const s = map.get(it.service_id)
     if (!s) continue
     const qty = Math.max(Math.trunc(it.qty) || 1, 1)
     const lineTotal = Number(s.price) * qty
-    subtotal += lineTotal
+    gross += lineTotal
     lines.push({ service_id: s.id, service_name: s.name, unit_price: Number(s.price), qty, line_total: lineTotal })
   }
   if (!lines.length) return { error: 'None of the selected services are valid' }
+
+  // Prices include 18% GST — store the derived taxable value + tax (see tax.ts).
+  const { total, taxable, tax } = gstInclusive(gross)
 
   const { data: order, error: orderErr } = await supabase
     .from('orders')
@@ -74,8 +77,9 @@ export async function createManualOrder(input: ManualOrderInput): Promise<Result
       scheduled_date: scheduled_date || null,
       city: customer.city,
       address: address.trim(),
-      subtotal,
-      total: subtotal,
+      subtotal: taxable,
+      tax,
+      total,
       source: 'crm',
       notes: notes || null,
     })

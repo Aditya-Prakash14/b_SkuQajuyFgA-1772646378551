@@ -131,3 +131,22 @@ export async function getAllServiceSlugs(): Promise<string[]> {
   const { data } = await supabase.from('services').select('slug').eq('is_active', true)
   return ((data as any[]) ?? []).map((s) => s.slug)
 }
+
+export interface PublicReview {
+  rating: number
+  comment: string | null
+  created_at: string | null
+}
+
+/** Public (world-readable) reviews for a service, newest first, comments only. */
+export async function getServiceReviews(serviceId: string): Promise<PublicReview[]> {
+  const supabase = createPublicClient()
+  const { data } = await supabase
+    .from('reviews')
+    .select('rating,comment,created_at')
+    .eq('service_id', serviceId)
+    .not('comment', 'is', null)
+    .order('created_at', { ascending: false })
+    .limit(20)
+  return (data as any[]) ?? []
+}

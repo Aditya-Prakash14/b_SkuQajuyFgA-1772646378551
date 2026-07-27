@@ -49,7 +49,7 @@ export default function PrivacyPage() {
         {
           heading: '6. Your rights',
           paras: [
-            'You may request a copy of the personal data we hold about you, or ask us to correct or delete it, by emailing info@primehomecare.in. We will respond within 30 days.',
+            'You may request a copy of the personal data we hold about you, or ask us to correct or delete it, by emailing support@myprimecompany.in. We will respond within 30 days.',
           ],
         },
       ]}

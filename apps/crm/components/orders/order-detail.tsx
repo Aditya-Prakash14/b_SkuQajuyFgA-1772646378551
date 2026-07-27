@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Mail, MapPin, Phone, Truck, User } from 'lucide-react'
 import { toast } from 'sonner'
-import { formatINR, type OrderStatus, type PaymentStatus } from '@prime/shared'
+import { formatINR, gstHalves, type OrderStatus, type PaymentStatus } from '@prime/shared'
 import { updateOrderStatus, updatePaymentStatus, assignVendor } from '@/app/dashboard/orders/actions'
 import {
   ORDER_STATUSES, PAYMENT_STATUSES, orderStatusLabel, paymentStatusLabel,
@@ -147,13 +147,26 @@ export function OrderDetail({
                 </TBody>
               </Table>
               <div className="mt-4 space-y-1.5 border-t pt-4 text-sm">
-                <Row label="Subtotal" value={formatINR(order.subtotal)} />
-                {order.discount > 0 && <Row label="Discount" value={`− ${formatINR(order.discount)}`} />}
-                {order.tax > 0 && <Row label="Tax" value={formatINR(order.tax)} />}
+                {order.tax > 0 ? (
+                  <>
+                    <Row label="Taxable value" value={formatINR(order.subtotal)} />
+                    {order.discount > 0 && <Row label="Discount" value={`− ${formatINR(order.discount)}`} />}
+                    <Row label="CGST @ 9%" value={formatINR(gstHalves(order.tax).cgst)} />
+                    <Row label="SGST @ 9%" value={formatINR(gstHalves(order.tax).sgst)} />
+                  </>
+                ) : (
+                  <>
+                    <Row label="Subtotal" value={formatINR(order.subtotal)} />
+                    {order.discount > 0 && <Row label="Discount" value={`− ${formatINR(order.discount)}`} />}
+                  </>
+                )}
                 <div className="flex justify-between pt-1 text-base font-bold">
                   <span>Total</span>
                   <span>{formatINR(order.total)}</span>
                 </div>
+                {order.tax > 0 && (
+                  <p className="text-right text-[11px] text-muted-foreground">Incl. GST</p>
+                )}
               </div>
             </CardContent>
           </Card>

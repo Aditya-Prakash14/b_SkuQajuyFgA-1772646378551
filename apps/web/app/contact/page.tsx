@@ -25,8 +25,8 @@ const CHANNELS = [
   {
     Icon: Mail,
     title: 'Email',
-    value: 'info@primehomecare.in',
-    href: 'mailto:info@primehomecare.in',
+    value: 'support@myprimecompany.in',
+    href: 'mailto:support@myprimecompany.in',
     note: 'For corporate contracts and AMC enquiries',
   },
 ]

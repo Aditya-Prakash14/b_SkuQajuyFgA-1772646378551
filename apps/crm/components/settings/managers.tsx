@@ -170,7 +170,7 @@ export function AdminsManager({
           </div>
           <div>
             <Label className="mb-1 block text-xs">Email</Label>
-            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@primehomecare.in" />
+            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@myprimecompany.in" />
           </div>
           <div>
             <Label className="mb-1 block text-xs">Role</Label>
