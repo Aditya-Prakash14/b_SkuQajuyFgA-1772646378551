@@ -3,13 +3,15 @@
 import { useEffect, useState } from 'react'
 import {
   X, Minus, Plus, Trash2, ShoppingBag, Phone, MapPin,
-  Calendar, User, CheckCircle, ArrowLeft, Tag, ShieldCheck, Loader2,
+  Calendar, Clock, User, CheckCircle, ArrowLeft, Tag, ShieldCheck, Loader2,
 } from 'lucide-react'
 import { useCart } from '@/lib/cart-context'
 import { useAuth } from '@/lib/auth-context'
 import { useCity } from '@/lib/city-context'
 import { createClient } from '@/lib/supabase/client'
 import { GoogleMark } from '@/components/site-header'
+import { TIME_SLOTS } from '@/lib/slots'
+import type { Address } from '@prime/shared'
 
 type Step = 'cart' | 'checkout' | 'success'
 
@@ -18,6 +20,7 @@ interface BookingForm {
   phone: string
   city: string
   date: string
+  slot: string
   address: string
 }
 
@@ -27,7 +30,8 @@ export default function CartDrawer() {
   const { city: detectedCity, cities } = useCity()
 
   const [step, setStep] = useState<Step>('cart')
-  const [form, setForm] = useState<BookingForm>({ name: '', phone: '', city: '', date: '', address: '' })
+  const [form, setForm] = useState<BookingForm>({ name: '', phone: '', city: '', date: '', slot: '', address: '' })
+  const [savedAddresses, setSavedAddresses] = useState<Address[]>([])
   const [errors, setErrors] = useState<Partial<BookingForm>>({})
   const [submitting, setSubmitting] = useState(false)
   const [apiError, setApiError] = useState<string | null>(null)
@@ -62,6 +66,21 @@ export default function CartDrawer() {
   useEffect(() => {
     if (detectedCity) setForm((f) => ({ ...f, city: f.city || detectedCity }))
   }, [detectedCity])
+
+  // Load saved addresses to speed up checkout; prefill the default one.
+  useEffect(() => {
+    if (!user) { setSavedAddresses([]); return }
+    createClient()
+      .from('addresses')
+      .select('*')
+      .order('is_default', { ascending: false })
+      .then(({ data }) => {
+        const list = (data as Address[]) ?? []
+        setSavedAddresses(list)
+        const def = list.find((a) => a.is_default) ?? list[0]
+        if (def) setForm((f) => ({ ...f, address: f.address || def.full_address, city: f.city || def.city }))
+      })
+  }, [user])
 
   const close = () => {
     setCartOpen(false)
@@ -105,6 +124,7 @@ export default function CartDrawer() {
         p_city: form.city,
         p_address: form.address,
         p_scheduled_date: form.date,
+        p_slot: form.slot || undefined,
         p_items: cart.map((c) => ({ service_id: c.id, qty: c.qty })),
       })
       if (error) throw error
@@ -140,7 +160,7 @@ export default function CartDrawer() {
                 <ArrowLeft className="w-5 h-5" />
               </button>
             )}
-            <img src="/prime%20Home%20cleaning.svg" alt="MyPrimeCompany" className="h-9 w-auto" />
+            <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-white font-black text-sm">M</span>
             <h2 className="font-black text-gray-800 text-base">
               {step === 'cart' ? `My Cart (${totalItems})` : step === 'checkout' ? 'Book Service' : 'Booking Confirmed'}
             </h2>
@@ -308,6 +328,32 @@ export default function CartDrawer() {
                     <input type="date" min={minDateStr} value={form.date} onChange={(e) => field('date', e.target.value)} className={inputCls(errors.date)} />
                   </Field>
 
+                  <Field label="Preferred Time Slot" icon={Clock}>
+                    <select value={form.slot} onChange={(e) => field('slot', e.target.value)} className={inputCls(undefined)}>
+                      <option value="">Any time — we&apos;ll confirm on call</option>
+                      {TIME_SLOTS.map((s) => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </Field>
+
+                  {savedAddresses.length > 0 && (
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 mb-1.5">Saved addresses</label>
+                      <select
+                        defaultValue=""
+                        onChange={(e) => {
+                          const a = savedAddresses.find((x) => x.id === e.target.value)
+                          if (a) setForm((f) => ({ ...f, address: a.full_address, city: a.city }))
+                        }}
+                        className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700"
+                      >
+                        <option value="">Use a saved address…</option>
+                        {savedAddresses.map((a) => (
+                          <option key={a.id} value={a.id}>{a.label ? `${a.label} — ` : ''}{a.full_address}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
                   <Field label="Full Address" icon={MapPin} error={errors.address}>
                     <textarea rows={3} placeholder="Flat / House No., Street, Area" value={form.address}
                       onChange={(e) => field('address', e.target.value)} className={`${inputCls(errors.address)} resize-none`} />
@@ -342,6 +388,7 @@ export default function CartDrawer() {
                 <Row label="Name" value={form.name} />
                 <Row label="City" value={form.city} />
                 <Row label="Date" value={form.date} />
+                {form.slot && <Row label="Time" value={form.slot} />}
               </div>
 
               <a href="tel:+917349603429" className="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors">
