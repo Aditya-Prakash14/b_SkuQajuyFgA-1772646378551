@@ -50,8 +50,12 @@ export function SiteHeader() {
 
       <header className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
-          <Link href="/" className="flex items-center shrink-0">
-            <img src="/prime%20Home%20cleaning.svg" alt="MyPrimeCompany" className="h-14 w-auto" />
+          <Link href="/" className="flex items-center gap-2.5 shrink-0" aria-label="MyPrimeCompany home">
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-white font-black text-lg shadow-sm shadow-primary/30">M</span>
+            <span className="flex flex-col leading-none">
+              <span className="font-black text-lg text-gray-900 tracking-tight">MyPrimeCompany</span>
+              <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold mt-0.5">Home &amp; Office Care</span>
+            </span>
           </Link>
 
           <nav className="hidden lg:flex items-center gap-6 flex-1 justify-center">

@@ -103,7 +103,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <div className="space-y-1.5">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" autoComplete="email" placeholder="you@primehomecare.in" value={email} onChange={(e) => setEmail(e.target.value)} disabled={loading} required />
+              <Input id="email" type="email" autoComplete="email" placeholder="you@myprimecompany.in" value={email} onChange={(e) => setEmail(e.target.value)} disabled={loading} required />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="password">Password</Label>

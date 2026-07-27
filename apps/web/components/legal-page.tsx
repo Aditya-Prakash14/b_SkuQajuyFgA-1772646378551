@@ -37,8 +37,8 @@ export function LegalPage({
 
           <div className="mt-12 rounded-2xl bg-gray-50 border border-gray-100 p-6 text-sm text-gray-600">
             Questions about this policy? Email{' '}
-            <a href="mailto:info@primehomecare.in" className="text-primary font-semibold hover:underline">
-              info@primehomecare.in
+            <a href="mailto:support@myprimecompany.in" className="text-primary font-semibold hover:underline">
+              support@myprimecompany.in
             </a>{' '}
             or call{' '}
             <a href="tel:+917349603429" className="text-primary font-semibold hover:underline">

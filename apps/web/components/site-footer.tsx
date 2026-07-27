@@ -26,7 +26,13 @@ export function SiteFooter() {
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
           <div>
-            <img src="/prime%20Home%20cleaning.svg" alt="MyPrimeCompany" className="h-14 w-auto brightness-0 invert mb-4" />
+            <Link href="/" className="flex items-center gap-2.5 mb-4" aria-label="MyPrimeCompany home">
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-white font-black text-lg">M</span>
+              <span className="flex flex-col leading-none">
+                <span className="font-black text-lg text-white tracking-tight">MyPrimeCompany</span>
+                <span className="text-[10px] uppercase tracking-widest text-gray-500 font-semibold mt-0.5">Home &amp; Office Care</span>
+              </span>
+            </Link>
             <p className="text-sm text-gray-400 leading-relaxed mb-5">
               We are an organisation that cares about our people and our clients — to be the most
               admired cleaning and facility services partner in India.
@@ -44,7 +50,7 @@ export function SiteFooter() {
               <a href="tel:+917349603429" aria-label="Call" className="w-9 h-9 bg-gray-800 hover:bg-primary rounded-lg flex items-center justify-center transition-colors">
                 <Phone className="w-4 h-4" />
               </a>
-              <a href="mailto:info@primehomecare.in" aria-label="Email" className="w-9 h-9 bg-gray-800 hover:bg-primary rounded-lg flex items-center justify-center transition-colors">
+              <a href="mailto:support@myprimecompany.in" aria-label="Email" className="w-9 h-9 bg-gray-800 hover:bg-primary rounded-lg flex items-center justify-center transition-colors">
                 <Mail className="w-4 h-4" />
               </a>
             </div>
@@ -81,7 +87,7 @@ export function SiteFooter() {
               </li>
               <li className="flex items-start gap-3">
                 <Mail className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                <a href="mailto:info@primehomecare.in" className="hover:text-primary transition-colors">info@primehomecare.in</a>
+                <a href="mailto:support@myprimecompany.in" className="hover:text-primary transition-colors">support@myprimecompany.in</a>
               </li>
               <li className="flex items-start gap-3">
                 <MapPin className="w-4 h-4 text-primary shrink-0 mt-0.5" />

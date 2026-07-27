@@ -283,6 +283,7 @@ export default function CartDrawer() {
                       <span>Total</span>
                       <span>₹{totalPrice.toLocaleString()}</span>
                     </div>
+                    <p className="text-[11px] text-gray-400 text-right mt-0.5">Inclusive of 18% GST</p>
                   </div>
 
                   <Field label="Full Name" icon={User} error={errors.name}>

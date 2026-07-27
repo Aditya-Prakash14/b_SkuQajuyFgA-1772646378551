@@ -17,7 +17,7 @@ const FAQS: { q: string; a: string }[] = [
   { q: 'What is your service warranty?', a: 'If you are not satisfied, tell us within 48 hours and we will return and re-clean the affected areas at no extra cost.' },
   { q: 'Can I cancel or reschedule?', a: 'Yes — free of charge up to 12 hours before your slot. Later cancellations may attract a fee. See our Refund Policy for details.' },
   { q: 'Which cities do you serve?', a: 'We currently operate in 12 cities including Bangalore, Mumbai, Delhi, Hyderabad, Pune, Chennai, Kolkata, Ahmedabad, Jaipur, Bhubaneswar, Gurgaon and Noida. Use "detect my location" to find your nearest city.' },
-  { q: 'Do you take corporate or AMC contracts?', a: 'Yes. We handle office deep cleaning, facade cleaning and annual maintenance contracts. Email info@primehomecare.in for a proposal.' },
+  { q: 'Do you take corporate or AMC contracts?', a: 'Yes. We handle office deep cleaning, facade cleaning and annual maintenance contracts. Email support@myprimecompany.in for a proposal.' },
 ]
 
 export default function FaqPage() {
