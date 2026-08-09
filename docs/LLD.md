@@ -26,15 +26,25 @@ module internals, request flows, and contracts — as actually built.
 prime-home-care/
 ├─ apps/
 │  ├─ web/          Next 16 marketing site (anon Supabase)         :3000
-│  └─ crm/          Next 16 admin console (auth + service-role)    :3001
+│  ├─ crm/          Next 16 admin console (auth + service-role)    :3001
+│  └─ partner/      Expo / React Native partner onboarding app     (Metro)
 ├─ packages/
 │  └─ shared/       DB types (generated), enums, jsonb shapes, formatINR, theme.css
 ├─ supabase/
-│  ├─ migrations/   0001_schema · 0002_rls · 0003_security_hardening
+│  ├─ migrations/   0001_schema · 0002_rls · 0003_security_hardening ·
+│  │                0004_web_auth_and_partner_applications · 0005_catalog_taxonomy ·
+│  │                0006_booking_identity_and_gst · 0007_customer_self_service ·
+│  │                0008_vendor_app_onboarding · 0009_vendor_docs_storage
 │  ├─ seed/         reference-data.sql · seed-services.ts · bootstrap-admin.ts
 │  └─ apply-all.sql one-shot bundle
 └─ pnpm-workspace.yaml
 ```
+
+`apps/partner` is **excluded** from the pnpm workspace and installed with npm.
+Expo's Metro resolver walks real directories and breaks on pnpm's symlinked
+store without `node-linker=hoisted`, which would re-link every dependency the
+two Next apps use. Consequence: it cannot import `@prime/shared`, so the schema
+slice it needs is hand-maintained in `apps/partner/src/lib/types.ts`.
 
 ### 2.2 Runtime data flow
 
@@ -288,8 +298,9 @@ one Supabase backend. Private Storage buckets `vendor-docs` / `invoices` are a d
 - **Money**: `numeric(10,2)` in DB; `number` in app; formatted via `formatINR`. Server re-prices bookings.
 - **Numbering**: DB triggers (no client involvement), collision-free via sequences.
 - **Freshness**: website catalog on 5-min ISR; on-demand revalidation is a follow-up.
-- **Type checking**: `ignoreBuildErrors` is on (matches `apps/web`) — generated types are strict
-  about nullability/jsonb; runtime is unaffected. Reconciling to remove the flag is a follow-up.
+- **Type checking**: clean. Neither `next.config.mjs` sets `ignoreBuildErrors`, and
+  `pnpm typecheck` (`tsc --noEmit` in both apps) passes; `apps/partner` typechecks separately
+  via `npm --prefix apps/partner run typecheck`.
 
 ---
 
@@ -302,6 +313,18 @@ order/invoice numbering triggers; mark-paid → order sync; both apps serve; adv
 
 ## 12. Known follow-ups
 
-Storage-backed uploads (vendor docs, service images) · on-demand ISR (CRM→site instant) ·
-Realtime order board · remove `ignoreBuildErrors` by reconciling generated-type nullability ·
-enable Auth leaked-password protection.
+**Open**
+
+- **CRM document review UI** — `vendor_documents` and the `vendor-docs` bucket have admin RLS,
+  but `apps/crm` has no screen to verify/reject a partner's documents. Until it exists,
+  approving a partner is a manual dashboard/SQL step, and nothing ever writes
+  `vendors.rejection_reason` that the partner app reads back.
+- Storage-backed uploads for **service images** (vendor docs: done, migration 0009).
+- On-demand ISR (CRM→site instant) · Realtime order board.
+- Push notifications to the partner app on approval/rejection.
+- Enable Auth leaked-password protection (dashboard toggle).
+
+**Closed**
+
+- ~~Storage-backed uploads (vendor docs)~~ — migration 0009, consumed by `apps/partner`.
+- ~~Remove `ignoreBuildErrors`~~ — neither app sets it; `pnpm typecheck` is clean.
