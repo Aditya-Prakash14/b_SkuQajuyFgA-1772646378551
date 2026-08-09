@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import {
   Phone, Menu, X, MapPin, ChevronDown, ShoppingCart, ShoppingBag,
@@ -9,6 +9,25 @@ import {
 import { useCart } from '@/lib/cart-context'
 import { useCity } from '@/lib/city-context'
 import { useAuth } from '@/lib/auth-context'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { cn } from '@/lib/utils'
 
 const NAV = [
   { href: '/services', label: 'Services' },
@@ -25,198 +44,199 @@ export function SiteHeader() {
   const { user, displayName, signInWithGoogle, signOut } = useAuth()
 
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [cityOpen, setCityOpen] = useState(false)
-  const [userOpen, setUserOpen] = useState(false)
-  const cityRef = useRef<HTMLDivElement>(null)
-  const userRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    function onClick(e: MouseEvent) {
-      if (cityRef.current && !cityRef.current.contains(e.target as Node)) setCityOpen(false)
-      if (userRef.current && !userRef.current.contains(e.target as Node)) setUserOpen(false)
-    }
-    document.addEventListener('mousedown', onClick)
-    return () => document.removeEventListener('mousedown', onClick)
-  }, [])
 
   return (
     <>
       {/* Announcement */}
-      <div className="bg-primary text-white text-xs sm:text-sm py-2 text-center px-4">
-        <Phone className="w-3.5 h-3.5 inline-block mr-1" /> Call us anytime:{' '}
+      <div className="bg-primary px-4 py-2 text-center text-xs text-primary-foreground sm:text-sm">
+        <Phone className="mr-1 inline-block h-3.5 w-3.5" /> Call us anytime:{' '}
         <a href="tel:+917349603429" className="font-semibold hover:underline">+91 73496 03429</a>
         &nbsp;|&nbsp; Professional cleaning services across India
       </div>
 
-      <header className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-2.5 shrink-0" aria-label="MyPrimeCompany home">
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-white font-black text-lg shadow-sm shadow-primary/30">M</span>
+      <header className="sticky top-0 z-50 border-b bg-background shadow-sm">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+          <Link href="/" className="flex shrink-0 items-center gap-2.5" aria-label="MyPrimeCompany home">
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary text-lg font-black text-primary-foreground shadow-sm shadow-primary/30">M</span>
             <span className="flex flex-col leading-none">
-              <span className="font-black text-lg text-gray-900 tracking-tight">MyPrimeCompany</span>
-              <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold mt-0.5">Home &amp; Office Care</span>
+              <span className="text-lg font-black tracking-tight text-foreground">MyPrimeCompany</span>
+              <span className="mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Home &amp; Office Care</span>
             </span>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-6 flex-1 justify-center">
+          <nav className="hidden flex-1 items-center justify-center gap-6 lg:flex">
             {NAV.map((n) => (
-              <Link key={n.href} href={n.href} className="text-gray-600 hover:text-primary transition-colors text-sm font-medium">
+              <Link key={n.href} href={n.href} className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
                 {n.label}
               </Link>
             ))}
           </nav>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex shrink-0 items-center gap-2">
             {/* City selector with geolocation */}
-            <div className="relative hidden sm:block" ref={cityRef}>
-              <button
-                onClick={() => setCityOpen((v) => !v)}
-                className="flex items-center gap-1 text-sm text-gray-600 hover:text-primary border border-gray-200 rounded-lg px-3 py-1.5 hover:border-primary/40 transition-colors"
-              >
-                <MapPin className="w-4 h-4" />
-                <span className="max-w-24 truncate">{city ?? 'Select City'}</span>
-                <ChevronDown className="w-3 h-3" />
-              </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="hidden gap-1 font-normal text-muted-foreground sm:flex">
+                  <MapPin className="size-4" />
+                  <span className="max-w-24 truncate">{city ?? 'Select City'}</span>
+                  <ChevronDown className="size-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-64">
+                <DropdownMenuItem
+                  disabled={detecting}
+                  onSelect={(e) => {
+                    e.preventDefault() // keep the menu open while detecting
+                    detectCity()
+                  }}
+                  className="font-semibold text-primary focus:text-primary"
+                >
+                  {detecting ? <Loader2 className="animate-spin" /> : <LocateFixed />}
+                  {detecting ? 'Detecting…' : 'Use my current location'}
+                </DropdownMenuItem>
 
-              {cityOpen && (
-                <div className="absolute top-full right-0 mt-1 bg-white border border-gray-100 rounded-xl shadow-2xl z-50 p-2 w-64">
-                  <button
-                    onClick={detectCity}
-                    disabled={detecting}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-sm font-semibold text-primary hover:bg-primary/10 rounded-lg transition-colors disabled:opacity-60"
-                  >
-                    {detecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <LocateFixed className="w-4 h-4" />}
-                    {detecting ? 'Detecting…' : 'Use my current location'}
-                  </button>
+                {detectMessage && <p className="px-2 py-1.5 text-[11px] text-emerald-600">{detectMessage}</p>}
+                {detectError && <p className="px-2 py-1.5 text-[11px] text-destructive">{detectError}</p>}
 
-                  {detectMessage && <p className="px-3 py-1.5 text-[11px] text-green-600">{detectMessage}</p>}
-                  {detectError && <p className="px-3 py-1.5 text-[11px] text-red-500">{detectError}</p>}
-
-                  <div className="my-1 border-t border-gray-100" />
-                  <div className="max-h-56 overflow-y-auto">
-                    {cities.map((c) => (
-                      <button
-                        key={c}
-                        onClick={() => { setCity(c); setCityOpen(false) }}
-                        className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors ${
-                          c === city ? 'bg-primary/10 text-primary font-semibold' : 'hover:bg-gray-50'
-                        }`}
-                      >
-                        {c}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+                <DropdownMenuSeparator />
+                <ScrollArea className="h-56">
+                  {cities.map((c) => (
+                    <DropdownMenuItem
+                      key={c}
+                      onSelect={() => setCity(c)}
+                      className={cn(c === city && 'bg-primary/10 font-semibold text-primary focus:text-primary')}
+                    >
+                      {c}
+                    </DropdownMenuItem>
+                  ))}
+                </ScrollArea>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             {/* Auth */}
             {user ? (
-              <div className="relative hidden sm:block" ref={userRef}>
-                <button
-                  onClick={() => setUserOpen((v) => !v)}
-                  className="flex items-center gap-1.5 text-sm border border-gray-200 rounded-lg px-2 py-1.5 hover:border-primary/40 transition-colors"
-                >
-                  <span className="w-6 h-6 rounded-full bg-primary/10 text-primary grid place-items-center text-xs font-bold">
-                    {displayName.charAt(0).toUpperCase() || <UserIcon className="w-3 h-3" />}
-                  </span>
-                  <span className="max-w-20 truncate text-gray-700">{displayName}</span>
-                  <ChevronDown className="w-3 h-3 text-gray-400" />
-                </button>
-                {userOpen && (
-                  <div className="absolute top-full right-0 mt-1 bg-white border border-gray-100 rounded-xl shadow-2xl z-50 p-2 w-56">
-                    <p className="px-3 py-1.5 text-xs text-gray-500 truncate">{user.email}</p>
-                    <div className="my-1 border-t border-gray-100" />
-                    <Link
-                      href="/account"
-                      onClick={() => setUserOpen(false)}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                    >
-                      <CalendarClock className="w-4 h-4" /> My bookings
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="hidden gap-1.5 px-2 font-normal sm:flex">
+                    <span className="grid size-6 place-items-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                      {displayName.charAt(0).toUpperCase() || <UserIcon className="size-3" />}
+                    </span>
+                    <span className="max-w-20 truncate">{displayName}</span>
+                    <ChevronDown className="size-3 text-muted-foreground" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel className="truncate text-xs font-normal text-muted-foreground">
+                    {user.email}
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/account">
+                      <CalendarClock /> My bookings
                     </Link>
-                    <button
-                      onClick={() => { signOut(); setUserOpen(false) }}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    >
-                      <LogOut className="w-4 h-4" /> Sign out
-                    </button>
-                  </div>
-                )}
-              </div>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem variant="destructive" onSelect={() => signOut()}>
+                    <LogOut /> Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
-              <button
+              <Button
+                variant="outline"
                 onClick={() => signInWithGoogle(typeof window !== 'undefined' ? window.location.pathname : '/')}
-                className="hidden sm:flex items-center gap-1.5 text-sm font-semibold text-gray-700 border border-gray-200 rounded-lg px-3 py-1.5 hover:border-primary/40 hover:text-primary transition-colors"
+                className="hidden gap-1.5 font-semibold sm:flex"
               >
                 <GoogleMark /> Sign in
-              </button>
+              </Button>
             )}
 
-            <button onClick={() => setCartOpen(true)} className="hidden sm:flex relative text-gray-500 hover:text-primary transition-colors items-center">
-              <ShoppingCart className="w-5 h-5" />
-              {totalItems > 0 && (
-                <span className="absolute -top-2 -right-2 bg-accent text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-                  {totalItems > 9 ? '9+' : totalItems}
-                </span>
-              )}
-            </button>
-
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setCartOpen(true)}
-              className="bg-accent text-white px-5 py-2 rounded-xl text-sm font-bold hover:bg-accent/90 transition-colors shadow-md shadow-accent/30 flex items-center gap-1.5"
+              aria-label="Open cart"
+              className="relative hidden text-muted-foreground hover:text-primary sm:inline-flex"
             >
-              {totalItems > 0 ? (<><ShoppingBag className="w-4 h-4" /> Cart ({totalItems})</>) : 'Book Now'}
-            </button>
+              <ShoppingCart className="size-5" />
+              {totalItems > 0 && (
+                <Badge className="absolute -right-0.5 -top-0.5 size-4 justify-center rounded-full bg-brand p-0 text-[10px] font-bold text-brand-foreground">
+                  {totalItems > 9 ? '9+' : totalItems}
+                </Badge>
+              )}
+            </Button>
 
-            <button className="lg:hidden text-gray-600" onClick={() => setMobileOpen((v) => !v)} aria-label="Menu">
-              {mobileOpen ? <X size={22} /> : <Menu size={22} />}
-            </button>
+            <Button
+              variant="brand"
+              onClick={() => setCartOpen(true)}
+              className="rounded-xl font-bold shadow-md shadow-brand/30"
+            >
+              {totalItems > 0 ? (<><ShoppingBag /> Cart ({totalItems})</>) : 'Book Now'}
+            </Button>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-muted-foreground lg:hidden"
+              onClick={() => setMobileOpen((v) => !v)}
+              aria-label="Menu"
+              aria-expanded={mobileOpen}
+            >
+              {mobileOpen ? <X className="size-[22px]" /> : <Menu className="size-[22px]" />}
+            </Button>
           </div>
         </div>
 
         {/* Mobile menu */}
         {mobileOpen && (
-          <div className="lg:hidden border-t border-gray-100 px-4 py-4 flex flex-col gap-3 bg-white">
+          <div className="flex flex-col gap-3 border-t bg-background px-4 py-4 lg:hidden">
             {NAV.map((n) => (
-              <Link key={n.href} href={n.href} onClick={() => setMobileOpen(false)} className="text-gray-700 hover:text-primary font-medium py-1">
+              <Link key={n.href} href={n.href} onClick={() => setMobileOpen(false)} className="py-1 font-medium text-foreground hover:text-primary">
                 {n.label}
               </Link>
             ))}
 
-            <button
+            <Button
+              variant="link"
               onClick={detectCity}
               disabled={detecting}
-              className="flex items-center gap-2 text-sm font-semibold text-primary py-1"
+              className="h-auto justify-start gap-2 p-0 py-1 text-sm font-semibold"
             >
-              {detecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <LocateFixed className="w-4 h-4" />}
+              {detecting ? <Loader2 className="animate-spin" /> : <LocateFixed />}
               {detecting ? 'Detecting…' : 'Use my current location'}
-            </button>
-            <select
-              className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-600"
-              value={city ?? ''}
-              onChange={(e) => setCity(e.target.value)}
-            >
-              <option value="" disabled>Select City</option>
-              {cities.map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
-            {detectError && <p className="text-[11px] text-red-500">{detectError}</p>}
+            </Button>
+            <Select value={city ?? undefined} onValueChange={setCity}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select City" />
+              </SelectTrigger>
+              <SelectContent>
+                {cities.map((c) => (
+                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {detectError && <p className="text-[11px] text-destructive">{detectError}</p>}
 
             {user ? (
               <>
-                <Link href="/account" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-primary py-1">
-                  <CalendarClock className="w-4 h-4" /> My bookings
+                <Link href="/account" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 py-1 text-sm font-medium text-foreground hover:text-primary">
+                  <CalendarClock className="size-4" /> My bookings
                 </Link>
-                <button onClick={() => signOut()} className="flex items-center gap-2 text-sm text-red-600 py-1">
-                  <LogOut className="w-4 h-4" /> Sign out ({displayName})
-                </button>
+                <Button
+                  variant="link"
+                  onClick={() => signOut()}
+                  className="h-auto justify-start gap-2 p-0 py-1 text-sm text-destructive"
+                >
+                  <LogOut /> Sign out ({displayName})
+                </Button>
               </>
             ) : (
-              <button
+              <Button
+                variant="link"
                 onClick={() => signInWithGoogle('/')}
-                className="flex items-center gap-2 text-sm font-semibold text-gray-700 py-1"
+                className="h-auto justify-start gap-2 p-0 py-1 text-sm font-semibold text-foreground"
               >
                 <GoogleMark /> Sign in with Google
-              </button>
+              </Button>
             )}
           </div>
         )}

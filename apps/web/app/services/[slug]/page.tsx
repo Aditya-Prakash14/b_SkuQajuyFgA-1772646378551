@@ -60,7 +60,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
           </div>
 
           <div className="relative z-10 h-full flex flex-col justify-end max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
-            <span className="inline-block bg-accent/90 text-white text-xs font-bold px-3 py-1 rounded-full mb-3 w-fit">
+            <span className="inline-block bg-brand/90 text-white text-xs font-bold px-3 py-1 rounded-full mb-3 w-fit">
               {service.category}
             </span>
             <h1 className="text-3xl sm:text-5xl font-black text-white mb-2 leading-tight max-w-2xl">{service.name}</h1>
@@ -230,7 +230,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
                       <img src={rel.heroImg} alt={rel.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     </div>
                     <div className="p-4">
-                      <span className="text-xs text-accent font-semibold uppercase tracking-wide">{rel.category}</span>
+                      <span className="text-xs text-brand font-semibold uppercase tracking-wide">{rel.category}</span>
                       <h3 className="font-bold text-gray-800 mt-1 mb-1">{rel.name}</h3>
                       <p className="text-sm text-gray-500 line-clamp-2">{rel.tagline}</p>
                       <div className="flex items-center justify-between mt-3">

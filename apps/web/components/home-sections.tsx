@@ -1,5 +1,6 @@
 'use client'
 
+import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import Link from 'next/link'
 import {
@@ -17,7 +18,7 @@ export function HeroSection() {
   const { city, detectCity, detecting, detectMessage, detectError } = useCity()
 
   return (
-    <section className="relative overflow-hidden bg-linear-to-br from-primary/5 via-white to-accent/5 py-16 md:py-24 px-4 sm:px-6 lg:px-8">
+    <section className="relative overflow-hidden bg-linear-to-br from-primary/5 via-white to-brand/5 py-16 md:py-24 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div>
@@ -41,26 +42,29 @@ export function HeroSection() {
                     'Where do you need the service?'
                   )}
                 </span>
-                <button
+                <Button
+                  variant="link"
                   onClick={detectCity}
                   disabled={detecting}
-                  className="ml-auto flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline disabled:opacity-60"
+                  className="ml-auto h-auto gap-1.5 p-0 text-sm font-semibold"
                 >
-                  {detecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <LocateFixed className="w-4 h-4" />}
+                  {detecting ? <Loader2 className="animate-spin" /> : <LocateFixed />}
                   {detecting ? 'Detecting…' : city ? 'Change' : 'Detect my location'}
-                </button>
+                </Button>
               </div>
               {detectMessage && <p className="mt-2 text-xs text-green-600">{detectMessage}</p>}
               {detectError && <p className="mt-2 text-xs text-red-500">{detectError}</p>}
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">
-              <button
+              <Button
+                variant="brand"
+                size="lg"
                 onClick={() => setCartOpen(true)}
-                className="bg-accent text-white px-8 py-3.5 rounded-xl font-bold hover:bg-accent/90 transition-all shadow-lg shadow-accent/30 hover:scale-105 text-base"
+                className="rounded-xl px-8 py-6 text-base font-bold shadow-lg shadow-brand/30 transition-all hover:scale-105"
               >
                 Book Now
-              </button>
+              </Button>
               <a
                 href="#services"
                 className="flex items-center justify-center gap-2 border-2 border-primary text-primary px-8 py-3.5 rounded-xl font-bold hover:bg-primary hover:text-white transition-all text-base"
@@ -96,7 +100,7 @@ const WHY_US = [
 
 export function WhyUs() {
   return (
-    <section id="why-us" className="py-16 px-4 sm:px-6 lg:px-8 bg-linear-to-br from-primary/5 to-accent/5">
+    <section id="why-us" className="py-16 px-4 sm:px-6 lg:px-8 bg-linear-to-br from-primary/5 to-brand/5">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-black text-gray-900">Why Choose MyPrimeCompany?</h2>
@@ -194,18 +198,30 @@ export function Testimonials() {
         </div>
 
         <div className="flex items-center justify-center gap-6 mt-6">
-          <button onClick={() => setCurrent((c) => (c - 1 + total) % total)} aria-label="Previous" className="w-10 h-10 rounded-full border border-gray-200 bg-white flex items-center justify-center hover:border-primary hover:text-primary transition-all shadow-sm">
-            <ChevronLeft className="w-5 h-5" />
-          </button>
+          <Button
+            variant="outline"
+            size="icon-lg"
+            onClick={() => setCurrent((c) => (c - 1 + total) % total)}
+            aria-label="Previous"
+            className="rounded-full shadow-sm hover:border-primary hover:text-primary"
+          >
+            <ChevronLeft className="size-5" />
+          </Button>
           <div className="flex gap-2">
             {TESTIMONIALS.map((_, i) => (
               <button key={i} onClick={() => setCurrent(i)} aria-label={`Testimonial ${i + 1}`}
-                className={`w-2.5 h-2.5 rounded-full transition-all ${i === current ? 'bg-primary scale-125' : 'bg-gray-300'}`} />
+                className={`w-2.5 h-2.5 rounded-full transition-all ${i === current ? 'bg-primary scale-125' : 'bg-muted-foreground/30'}`} />
             ))}
           </div>
-          <button onClick={() => setCurrent((c) => (c + 1) % total)} aria-label="Next" className="w-10 h-10 rounded-full border border-gray-200 bg-white flex items-center justify-center hover:border-primary hover:text-primary transition-all shadow-sm">
-            <ChevronRight className="w-5 h-5" />
-          </button>
+          <Button
+            variant="outline"
+            size="icon-lg"
+            onClick={() => setCurrent((c) => (c + 1) % total)}
+            aria-label="Next"
+            className="rounded-full shadow-sm hover:border-primary hover:text-primary"
+          >
+            <ChevronRight className="size-5" />
+          </Button>
         </div>
       </div>
     </section>
@@ -288,9 +304,14 @@ export function CtaBanner() {
         <h2 className="text-3xl md:text-4xl font-black mb-4">Ready for a Spotless Home?</h2>
         <p className="text-white/80 mb-8 text-lg">Book your service today and experience the MyPrimeCompany difference.</p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <button onClick={() => setCartOpen(true)} className="bg-accent text-white px-8 py-3.5 rounded-xl font-bold hover:bg-accent/90 transition-all shadow-lg text-base hover:scale-105">
+          <Button
+            variant="brand"
+            size="lg"
+            onClick={() => setCartOpen(true)}
+            className="rounded-xl px-8 py-6 text-base font-bold shadow-lg transition-all hover:scale-105"
+          >
             Book Now
-          </button>
+          </Button>
           <a href="tel:+917349603429" className="flex items-center justify-center gap-2 bg-white/20 text-white border-2 border-white/30 px-8 py-3.5 rounded-xl font-bold hover:bg-white/30 transition-all text-base">
             <Phone className="w-4 h-4" /> +91 73496 03429
           </a>

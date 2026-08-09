@@ -13,8 +13,16 @@ import { createService, updateService, deleteService, type ServiceInput } from '
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Checkbox } from '@/components/ui/checkbox'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { Textarea } from '@/components/ui/textarea'
-import { Select } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
@@ -338,26 +346,32 @@ export function ServiceForm({
                 control={control}
                 name="related_service_ids"
                 render={({ field }) => (
-                  <div className="max-h-56 space-y-1.5 overflow-y-auto pr-1">
-                    {allServices.map((s) => {
-                      const checked = field.value.includes(s.id)
-                      return (
-                        <label key={s.id} className="flex items-center gap-2 text-sm">
-                          <input
-                            type="checkbox"
-                            checked={checked}
-                            onChange={() =>
-                              field.onChange(
-                                checked ? field.value.filter((x) => x !== s.id) : [...field.value, s.id],
-                              )
-                            }
-                          />
-                          {s.name}
-                        </label>
-                      )
-                    })}
-                    {allServices.length === 0 && <p className="text-sm text-muted-foreground">No other services yet.</p>}
-                  </div>
+                  <ScrollArea className="h-56 pr-3">
+                    <div className="space-y-1">
+                      {allServices.map((s) => {
+                        const checked = field.value.includes(s.id)
+                        return (
+                          <Label
+                            key={s.id}
+                            className="flex cursor-pointer items-center gap-2.5 rounded-md px-2 py-1.5 text-sm font-normal hover:bg-accent"
+                          >
+                            <Checkbox
+                              checked={checked}
+                              onCheckedChange={() =>
+                                field.onChange(
+                                  checked ? field.value.filter((x) => x !== s.id) : [...field.value, s.id],
+                                )
+                              }
+                            />
+                            {s.name}
+                          </Label>
+                        )
+                      })}
+                      {allServices.length === 0 && (
+                        <p className="text-sm text-muted-foreground">No other services yet.</p>
+                      )}
+                    </div>
+                  </ScrollArea>
                 )}
               />
             </CardContent>

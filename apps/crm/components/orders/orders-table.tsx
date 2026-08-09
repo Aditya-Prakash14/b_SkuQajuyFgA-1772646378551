@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Table, THead, TBody, TR, TH, TD } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 
 export interface OrderRow {
   id: string
@@ -134,18 +135,18 @@ function FilterChip({
   count: number
 }) {
   return (
-    <button
+    <Button
       type="button"
+      size="sm"
+      variant={active ? 'default' : 'outline'}
       onClick={onClick}
-      className={cn(
-        'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm font-medium transition-colors',
-        active ? 'border-primary bg-primary text-primary-foreground' : 'border-border bg-background hover:bg-muted',
-      )}
+      aria-pressed={active}
+      className={cn('rounded-full', !active && 'text-muted-foreground')}
     >
       {label}
       <Badge variant={active ? 'secondary' : 'outline'} className="px-1.5 py-0">
         {count}
       </Badge>
-    </button>
+    </Button>
   )
 }

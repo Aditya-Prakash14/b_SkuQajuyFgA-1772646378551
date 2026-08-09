@@ -10,6 +10,10 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        // Brand orange CTA. Not "accent" — that token is shadcn's neutral
+        // hover/focus tint (see globals.css).
+        brand:
+          'bg-brand text-brand-foreground shadow-xs hover:bg-brand/90 focus-visible:ring-brand/40',
         destructive:
           'bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
         outline:
@@ -25,6 +29,7 @@ const buttonVariants = cva(
         sm: 'h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5',
         lg: 'h-10 rounded-md px-6 has-[>svg]:px-4',
         icon: 'size-9',
+        'icon-xs': 'size-7 rounded-md [&_svg:not([class*="size-"])]:size-3',
         'icon-sm': 'size-8',
         'icon-lg': 'size-10',
       },

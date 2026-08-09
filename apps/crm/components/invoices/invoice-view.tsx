@@ -9,7 +9,13 @@ import { updateInvoiceStatus, markInvoicePaid } from '@/app/dashboard/invoices/a
 import { InvoiceStatusBadge, INVOICE_STATUSES, invoiceStatusLabel } from '@/components/status-badge'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Select } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Card, CardContent } from '@/components/ui/card'
 
 interface InvoiceData {
@@ -74,23 +80,33 @@ export function InvoiceView({ invoice }: { invoice: InvoiceData }) {
         <div className="flex flex-wrap items-end gap-2">
           <div>
             <Label className="mb-1 block text-xs">Status</Label>
-            <Select value={status} onChange={(e) => changeStatus(e.target.value as InvoiceStatus)} className="w-32">
-              {INVOICE_STATUSES.map((s) => (
-                <option key={s} value={s}>{invoiceStatusLabel(s)}</option>
-              ))}
+            <Select value={status} onValueChange={(v) => changeStatus(v as InvoiceStatus)}>
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {INVOICE_STATUSES.map((s) => (
+                  <SelectItem key={s} value={s}>{invoiceStatusLabel(s)}</SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
           {status !== 'paid' && (
             <>
               <div>
                 <Label className="mb-1 block text-xs">Method</Label>
-                <Select value={method} onChange={(e) => setMethod(e.target.value)} className="w-36">
-                  {METHODS.map((m) => (
-                    <option key={m} value={m}>{m}</option>
-                  ))}
+                <Select value={method} onValueChange={setMethod}>
+                  <SelectTrigger className="w-36 capitalize">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {METHODS.map((m) => (
+                      <SelectItem key={m} value={m} className="capitalize">{m}</SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
               </div>
-              <Button variant="accent" onClick={markPaid}>Mark as paid</Button>
+              <Button variant="brand" onClick={markPaid}>Mark as paid</Button>
             </>
           )}
           <Button variant="outline" onClick={() => window.print()}>

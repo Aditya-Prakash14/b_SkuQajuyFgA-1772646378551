@@ -4,6 +4,18 @@ import { useState } from 'react'
 import { Phone, MapPin, Calendar, ShoppingBag, CheckCircle, LocateFixed, Loader2 } from 'lucide-react'
 import { useCart } from '@/lib/cart-context'
 import { useCity } from '@/lib/city-context'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { cn } from '@/lib/utils'
 
 interface Props {
   id: string
@@ -30,84 +42,91 @@ export default function ServiceBookingCard({ id, name, img, price, priceStr }: P
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-      <div className="bg-primary p-5 text-white">
-        <p className="text-sm opacity-80 mb-1">Starting from</p>
+    <Card className="gap-0 overflow-hidden py-0 shadow-lg">
+      <div className="bg-primary p-5 text-primary-foreground">
+        <p className="mb-1 text-sm opacity-80">Starting from</p>
         <p className="text-4xl font-black">{priceStr}</p>
-        <p className="text-sm opacity-70 mt-1">Inclusive of all taxes</p>
+        <p className="mt-1 text-sm opacity-70">Inclusive of all taxes</p>
       </div>
 
-      <div className="p-5 space-y-4">
-        <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Select City</label>
-            <button
+      <CardContent className="space-y-4 p-5">
+        <div className="grid gap-1.5">
+          <div className="flex items-center justify-between">
+            <Label className="text-xs uppercase tracking-wide text-muted-foreground">Select City</Label>
+            <Button
               type="button"
+              variant="link"
               onClick={detectCity}
               disabled={detecting}
-              className="flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline disabled:opacity-60"
+              className="h-auto gap-1 p-0 text-[11px] font-semibold"
             >
-              {detecting ? <Loader2 className="w-3 h-3 animate-spin" /> : <LocateFixed className="w-3 h-3" />}
+              {detecting ? <Loader2 className="size-3 animate-spin" /> : <LocateFixed className="size-3" />}
               {detecting ? 'Detecting…' : 'Detect'}
-            </button>
+            </Button>
           </div>
-          <div className="flex items-center gap-2 border border-gray-200 rounded-xl px-3 py-2.5">
-            <MapPin className="w-4 h-4 text-primary shrink-0" />
-            <select
-              value={city ?? ''}
-              onChange={(e) => setCity(e.target.value)}
-              className="flex-1 text-sm text-gray-700 outline-none bg-transparent"
-            >
-              <option value="">Choose your city</option>
+          {/* Radix Select reserves "" for "no value" — undefined shows the placeholder. */}
+          <Select value={city ?? undefined} onValueChange={setCity}>
+            <SelectTrigger className="h-11 w-full rounded-xl">
+              <span className="flex items-center gap-2">
+                <MapPin className="size-4 shrink-0 text-primary" />
+                <SelectValue placeholder="Choose your city" />
+              </span>
+            </SelectTrigger>
+            <SelectContent>
               {cities.map((c) => (
-                <option key={c} value={c}>{c}</option>
+                <SelectItem key={c} value={c}>{c}</SelectItem>
               ))}
-            </select>
-          </div>
+            </SelectContent>
+          </Select>
         </div>
 
-        <div>
-          <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">
+        <div className="grid gap-1.5">
+          <Label htmlFor="preferred-date" className="text-xs uppercase tracking-wide text-muted-foreground">
             Preferred Date
-          </label>
-          <div className="flex items-center gap-2 border border-gray-200 rounded-xl px-3 py-2.5">
-            <Calendar className="w-4 h-4 text-primary shrink-0" />
-            <input type="date" min={minDateStr} className="flex-1 text-sm text-gray-700 outline-none bg-transparent" />
+          </Label>
+          <div className="relative">
+            <Calendar className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-primary" />
+            <Input id="preferred-date" type="date" min={minDateStr} className="h-11 rounded-xl pl-9" />
           </div>
         </div>
 
-        <button
+        <Button
           onClick={handleAdd}
-          className={`w-full py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-md ${
-            added || inCart
-              ? 'bg-green-500 text-white shadow-green-500/30'
-              : 'bg-accent text-white hover:bg-accent/90 shadow-accent/30'
-          }`}
+          variant="brand"
+          size="lg"
+          className={cn(
+            'w-full rounded-xl font-bold shadow-md shadow-brand/30',
+            (added || inCart) && 'bg-emerald-600 text-white shadow-emerald-600/30 hover:bg-emerald-600/90',
+          )}
         >
           {added || inCart ? (
-            <><CheckCircle className="w-4 h-4" /> Added to Cart</>
+            <><CheckCircle /> Added to Cart</>
           ) : (
-            <><ShoppingBag className="w-4 h-4" /> Add to Cart</>
+            <><ShoppingBag /> Add to Cart</>
           )}
-        </button>
+        </Button>
 
         {inCart && (
-          <button
+          <Button
             onClick={() => setCartOpen(true)}
-            className="w-full py-2.5 rounded-xl border-2 border-accent text-accent font-bold text-sm hover:bg-accent/5 transition-colors"
+            variant="outline"
+            className="w-full rounded-xl border-2 border-brand font-bold text-brand hover:bg-brand/5 hover:text-brand"
           >
             View Cart &amp; Book
-          </button>
+          </Button>
         )}
 
-        <a
-          href="tel:+917349603429"
-          className="block w-full border-2 border-primary text-primary text-center font-bold py-3 rounded-xl hover:bg-primary/5 transition-colors text-sm"
+        <Button
+          asChild
+          variant="outline"
+          size="lg"
+          className="w-full rounded-xl border-2 border-primary font-bold text-primary hover:bg-primary/5 hover:text-primary"
         >
-          <Phone className="w-4 h-4 inline-block mr-1.5 -mt-0.5" />
-          Call to Book
-        </a>
-      </div>
-    </div>
+          <a href="tel:+917349603429">
+            <Phone /> Call to Book
+          </a>
+        </Button>
+      </CardContent>
+    </Card>
   )
 }

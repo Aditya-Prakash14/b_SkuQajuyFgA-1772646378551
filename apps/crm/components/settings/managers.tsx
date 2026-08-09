@@ -10,7 +10,13 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -174,10 +180,15 @@ export function AdminsManager({
           </div>
           <div>
             <Label className="mb-1 block text-xs">Role</Label>
-            <Select value={role} onChange={(e) => setRole(e.target.value as AdminRole)} className="w-32">
-              {ROLES.map((r) => (
-                <option key={r} value={r}>{r}</option>
-              ))}
+            <Select value={role} onValueChange={(v) => setRole(v as AdminRole)}>
+              <SelectTrigger className="w-36 capitalize">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {ROLES.map((r) => (
+                  <SelectItem key={r} value={r} className="capitalize">{r}</SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
           <Button onClick={invite}><Plus className="h-4 w-4" /> Invite</Button>

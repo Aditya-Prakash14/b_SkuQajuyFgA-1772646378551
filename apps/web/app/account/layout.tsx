@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/auth-context'
 import { PageShell } from '@/components/page-shell'
 import { AccountNav } from '@/components/account/account-nav'
 import { GoogleMark } from '@/components/site-header'
+import { Button } from '@/components/ui/button'
 
 export default function AccountLayout({ children }: { children: React.ReactNode }) {
   const { user, loading, signInWithGoogle } = useAuth()
@@ -21,17 +22,19 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
             <div className="mx-auto w-16 h-16 rounded-2xl bg-primary/10 grid place-items-center mb-5">
               <ShieldCheck className="w-8 h-8 text-primary" />
             </div>
-            <h1 className="text-2xl font-black text-gray-900">Sign in to your account</h1>
-            <p className="text-gray-500 mt-2 text-sm leading-relaxed">
+            <h1 className="text-2xl font-black text-foreground">Sign in to your account</h1>
+            <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
               View your bookings, reschedule or cancel a service, manage saved addresses and
               review completed work — all in one place.
             </p>
-            <button
+            <Button
+              variant="outline"
+              size="lg"
               onClick={() => signInWithGoogle('/account')}
-              className="mt-6 inline-flex items-center justify-center gap-3 border-2 border-gray-200 bg-white text-gray-700 font-bold py-3 px-6 rounded-xl hover:border-primary/40 hover:shadow-md transition-all"
+              className="mt-6 gap-3 font-bold"
             >
               <GoogleMark className="w-5 h-5" /> Continue with Google
-            </button>
+            </Button>
           </div>
         ) : (
           <>

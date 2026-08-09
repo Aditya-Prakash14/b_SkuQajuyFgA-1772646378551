@@ -23,7 +23,7 @@ export function ModulePlaceholder({
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-            <Construction className="h-5 w-5 text-accent" />
+            <Construction className="h-5 w-5 text-brand" />
             <CardTitle>Being built next</CardTitle>
             <Badge variant="secondary">{phase}</Badge>
           </div>
@@ -32,7 +32,7 @@ export function ModulePlaceholder({
           <ul className="grid gap-2 sm:grid-cols-2">
             {planned.map((p) => (
               <li key={p} className="flex items-start gap-2 text-sm text-muted-foreground">
-                <span className="mt-0.5 text-accent">•</span>
+                <span className="mt-0.5 text-brand">•</span>
                 {p}
               </li>
             ))}

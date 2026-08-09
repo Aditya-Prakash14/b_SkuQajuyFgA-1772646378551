@@ -9,6 +9,9 @@ import {
 import { useCart } from '@/lib/cart-context'
 import { useCity } from '@/lib/city-context'
 import type { HomeCategory, HomeService } from '@/lib/services-data'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { cn } from '@/lib/utils'
 
 const ICONS: Record<string, LucideIcon> = {
   Home, Sparkles, Building2, Bug, Gem, Paintbrush, Droplets, Settings,
@@ -40,15 +43,14 @@ export function ServiceCard({ svc, city }: { svc: HomeService; city: string }) {
 
         <div className="mt-auto pt-3 flex items-center justify-between gap-2">
           <p className="text-primary font-black">{svc.priceStr}</p>
-          <button
+          <Button
+            size="sm"
             onClick={() => addToCart({ id: svc.id, name: svc.name, img: svc.img, price: svc.price, priceStr: svc.priceStr })}
-            className={`text-xs font-semibold py-2 px-3 rounded-lg transition-colors flex items-center gap-1 ${
-              inCart ? 'bg-green-500 text-white hover:bg-green-600' : 'bg-primary text-white hover:bg-primary/90'
-            }`}
+            className={cn(inCart && 'bg-emerald-600 text-white hover:bg-emerald-600/90')}
           >
-            <ShoppingBag className="w-3 h-3" />
+            <ShoppingBag />
             {inCart ? 'Added' : 'Add'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -107,19 +109,25 @@ export function ServicesExplorer({
         {/* Search */}
         <div className="max-w-md mx-auto mb-6">
           <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search services…"
               aria-label="Search services"
-              className="w-full rounded-full border border-gray-200 bg-white pl-10 pr-10 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="h-11 rounded-full pl-10 pr-10 [&::-webkit-search-cancel-button]:hidden"
             />
             {query && (
-              <button onClick={() => setQuery('')} aria-label="Clear search" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                <X className="w-4 h-4" />
-              </button>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={() => setQuery('')}
+                aria-label="Clear search"
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full text-muted-foreground"
+              >
+                <X />
+              </Button>
             )}
           </div>
         </div>
@@ -172,18 +180,21 @@ function TabButton({
   count: number
 }) {
   return (
-    <button
+    <Button
       onClick={onClick}
-      className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold border transition-all ${
-        active
-          ? 'bg-primary text-white border-primary shadow-lg shadow-primary/30'
-          : 'bg-white text-gray-600 border-gray-200 hover:border-primary hover:text-primary'
-      }`}
+      variant={active ? 'default' : 'outline'}
+      aria-pressed={active}
+      className={cn('rounded-full font-semibold', active && 'shadow-lg shadow-primary/30')}
     >
-      <Icon className="w-4 h-4" /> {label}
-      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${active ? 'bg-white/20' : 'bg-gray-100 text-gray-500'}`}>
+      <Icon /> {label}
+      <span
+        className={cn(
+          'rounded-full px-1.5 py-0.5 text-[10px] font-bold',
+          active ? 'bg-white/20' : 'bg-muted text-muted-foreground',
+        )}
+      >
         {count}
       </span>
-    </button>
+    </Button>
   )
 }

@@ -6,7 +6,13 @@ import { Pencil, Search, Star } from 'lucide-react'
 import { toast } from 'sonner'
 import { toggleServiceActive } from '@/app/dashboard/services/actions'
 import { Input } from '@/components/ui/input'
-import { Select } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import { Table, THead, TBody, TR, TH, TD } from '@/components/ui/table'
@@ -74,18 +80,28 @@ export function ServicesTable({
           />
         </div>
         <div className="flex gap-3">
-          <Select value={cat} onChange={(e) => setCat(e.target.value)} className="w-44">
-            <option value="all">All categories</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.name}>
-                {c.name}
-              </option>
-            ))}
+          <Select value={cat} onValueChange={setCat}>
+            <SelectTrigger className="w-44">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All categories</SelectItem>
+              {categories.map((c) => (
+                <SelectItem key={c.id} value={c.name}>
+                  {c.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
           </Select>
-          <Select value={active} onChange={(e) => setActive(e.target.value)} className="w-32">
-            <option value="all">All status</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
+          <Select value={active} onValueChange={setActive}>
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All status</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+            </SelectContent>
           </Select>
         </div>
       </div>
