@@ -10,7 +10,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Select } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface SvcOpt {
@@ -111,11 +117,15 @@ export function ManualOrderForm({ services, cities }: { services: SvcOpt[]; citi
               </div>
               <div>
                 <Label className="mb-1.5 block">City</Label>
-                <Select value={city} onChange={(e) => setCity(e.target.value)}>
-                  <option value="">Select city</option>
-                  {cities.map((c) => (
-                    <option key={c} value={c}>{c}</option>
-                  ))}
+                <Select value={city || undefined} onValueChange={setCity}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select city" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {cities.map((c) => (
+                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
               </div>
               <div className="sm:col-span-2">
@@ -138,12 +148,20 @@ export function ManualOrderForm({ services, cities }: { services: SvcOpt[]; citi
             <CardContent className="space-y-3">
               {items.map((it, i) => (
                 <div key={i} className="grid gap-2 sm:grid-cols-[1fr_auto_auto_auto] sm:items-center">
-                  <Select value={it.service_id} onChange={(e) => patchItem(i, { service_id: e.target.value })}>
-                    {services.map((s) => (
-                      <option key={s.id} value={s.id}>
-                        {s.name} — {s.label || formatINR(s.price)}
-                      </option>
-                    ))}
+                  <Select
+                    value={it.service_id || undefined}
+                    onValueChange={(v) => patchItem(i, { service_id: v })}
+                  >
+                    <SelectTrigger className="min-w-0 flex-1">
+                      <SelectValue placeholder="Select service" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {services.map((s) => (
+                        <SelectItem key={s.id} value={s.id}>
+                          {s.name} — {s.label || formatINR(s.price)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
                   </Select>
                   <Input
                     type="number"

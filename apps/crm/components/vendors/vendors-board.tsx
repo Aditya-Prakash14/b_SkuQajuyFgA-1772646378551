@@ -6,7 +6,13 @@ import { Phone, MapPin } from 'lucide-react'
 import { toast } from 'sonner'
 import type { VendorStatus } from '@prime/shared'
 import { updateVendorStatus } from '@/app/dashboard/vendors/actions'
-import { Select } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 
 export interface VendorCard {
@@ -73,14 +79,18 @@ export function VendorsBoard({ vendors }: { vendors: VendorCard[] }) {
                   </div>
                   <Select
                     value={v.status}
-                    onChange={(e) => move(v.id, e.target.value as VendorStatus)}
-                    className="mt-2 h-8 text-xs"
+                    onValueChange={(val) => move(v.id, val as VendorStatus)}
                   >
-                    {ALL_STATUSES.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ))}
+                    <SelectTrigger size="sm" className="mt-2 w-full capitalize text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ALL_STATUSES.map((s) => (
+                        <SelectItem key={s} value={s} className="capitalize">
+                          {s}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
                   </Select>
                 </div>
               ))}

@@ -12,9 +12,18 @@ import {
 } from '@/components/status-badge'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Select } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, THead, TBody, TR, TH, TD } from '@/components/ui/table'
+
+/** Sentinel for "no vendor" — Radix Select cannot use "" as an item value. */
+const UNASSIGNED = '__unassigned__'
 
 interface DetailOrder {
   id: string
@@ -185,18 +194,32 @@ export function OrderDetail({
             <CardContent className="space-y-4">
               <div>
                 <Label className="mb-1.5 block">Order status</Label>
-                <Select value={status} onChange={(e) => changeStatus(e.target.value as OrderStatus)} disabled={pending}>
-                  {ORDER_STATUSES.map((s) => (
-                    <option key={s} value={s}>{orderStatusLabel(s)}</option>
-                  ))}
+                <Select
+                  value={status}
+                  onValueChange={(v) => changeStatus(v as OrderStatus)}
+                  disabled={pending}
+                >
+                  <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {ORDER_STATUSES.map((s) => (
+                      <SelectItem key={s} value={s}>{orderStatusLabel(s)}</SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
               </div>
               <div>
                 <Label className="mb-1.5 block">Payment status</Label>
-                <Select value={payment} onChange={(e) => changePayment(e.target.value as PaymentStatus)} disabled={pending}>
-                  {PAYMENT_STATUSES.map((s) => (
-                    <option key={s} value={s}>{paymentStatusLabel(s)}</option>
-                  ))}
+                <Select
+                  value={payment}
+                  onValueChange={(v) => changePayment(v as PaymentStatus)}
+                  disabled={pending}
+                >
+                  <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {PAYMENT_STATUSES.map((s) => (
+                      <SelectItem key={s} value={s}>{paymentStatusLabel(s)}</SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
               </div>
             </CardContent>
@@ -217,11 +240,20 @@ export function OrderDetail({
               )}
               <div>
                 <Label className="mb-1.5 block">Assign vendor</Label>
-                <Select value={vendorId} onChange={(e) => changeVendor(e.target.value)} disabled={pending}>
-                  <option value="">— Unassigned —</option>
-                  {eligibleVendors.map((v) => (
-                    <option key={v.id} value={v.id}>{v.name} · {v.phone}</option>
-                  ))}
+                {/* Radix Select treats "" as "no value", so unassigning needs a
+                    sentinel item that is mapped back to "" for the action. */}
+                <Select
+                  value={vendorId || UNASSIGNED}
+                  onValueChange={(v) => changeVendor(v === UNASSIGNED ? '' : v)}
+                  disabled={pending}
+                >
+                  <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={UNASSIGNED}>— Unassigned —</SelectItem>
+                    {eligibleVendors.map((v) => (
+                      <SelectItem key={v.id} value={v.id}>{v.name} · {v.phone}</SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
                 {eligibleVendors.length === 0 && (
                   <p className="mt-1.5 text-xs text-muted-foreground">

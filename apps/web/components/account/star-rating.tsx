@@ -3,6 +3,9 @@
 import { useState } from 'react'
 import { Star } from 'lucide-react'
 
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+
 /** Read-only star display (supports halves visually via fill). */
 export function Stars({ value, className = 'w-4 h-4' }: { value: number; className?: string }) {
   return (
@@ -10,7 +13,10 @@ export function Stars({ value, className = 'w-4 h-4' }: { value: number; classNa
       {[1, 2, 3, 4, 5].map((n) => (
         <Star
           key={n}
-          className={`${className} ${n <= Math.round(value) ? 'fill-amber-400 text-amber-400' : 'fill-gray-200 text-gray-200'}`}
+          className={cn(
+            className,
+            n <= Math.round(value) ? 'fill-amber-400 text-amber-400' : 'fill-muted text-muted',
+          )}
         />
       ))}
     </div>
@@ -24,19 +30,26 @@ export function StarInput({ value, onChange }: { value: number; onChange: (v: nu
   return (
     <div className="flex items-center gap-1" role="radiogroup" aria-label="Rating">
       {[1, 2, 3, 4, 5].map((n) => (
-        <button
+        <Button
           key={n}
           type="button"
+          variant="ghost"
+          size="icon-lg"
           aria-label={`${n} star${n > 1 ? 's' : ''}`}
           aria-checked={value === n}
           role="radio"
           onMouseEnter={() => setHover(n)}
           onMouseLeave={() => setHover(0)}
           onClick={() => onChange(n)}
-          className="p-0.5 transition-transform hover:scale-110"
+          className="transition-transform hover:scale-110 hover:bg-transparent"
         >
-          <Star className={`w-7 h-7 ${n <= shown ? 'fill-amber-400 text-amber-400' : 'fill-gray-200 text-gray-300'}`} />
-        </button>
+          <Star
+            className={cn(
+              'size-7',
+              n <= shown ? 'fill-amber-400 text-amber-400' : 'fill-muted text-muted-foreground/40',
+            )}
+          />
+        </Button>
       ))}
     </div>
   )

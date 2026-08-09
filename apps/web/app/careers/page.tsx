@@ -48,7 +48,7 @@ export default function CareersPage() {
                 href="https://wa.me/917349603429"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 bg-accent text-white px-6 py-3 rounded-xl font-bold hover:bg-accent/90 transition-colors"
+                className="inline-flex items-center justify-center gap-2 bg-brand text-white px-6 py-3 rounded-xl font-bold hover:bg-brand/90 transition-colors"
               >
                 <MessageCircle className="w-4 h-4" /> Apply on WhatsApp
               </a>

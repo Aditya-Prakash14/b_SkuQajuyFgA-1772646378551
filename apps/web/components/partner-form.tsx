@@ -1,9 +1,22 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle, Loader2, Send } from 'lucide-react'
+import { CheckCircle2, Loader2, Send } from 'lucide-react'
 import { createPublicClient } from '@/lib/supabase/public'
 import { useCity } from '@/lib/city-context'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 
 export function PartnerForm() {
   const { cities } = useCity()
@@ -50,100 +63,124 @@ export function PartnerForm() {
 
   if (done) {
     return (
-      <div className="bg-white border border-green-200 rounded-2xl p-8 text-center">
-        <div className="w-16 h-16 mx-auto rounded-full bg-green-100 text-green-600 grid place-items-center mb-4">
-          <CheckCircle className="w-8 h-8" />
-        </div>
-        <h3 className="text-xl font-black text-gray-900">Application received</h3>
-        <p className="text-gray-500 mt-2 text-sm leading-relaxed">
-          Thanks, <strong>{form.name}</strong>. Our onboarding team will review your application and call
-          you at <strong>{form.phone}</strong> within 2–3 working days.
-        </p>
-      </div>
+      <Card className="text-center">
+        <CardHeader>
+          <div className="mx-auto grid size-14 place-items-center rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950">
+            <CheckCircle2 className="size-7" />
+          </div>
+          <CardTitle className="text-xl">Application received</CardTitle>
+          <CardDescription className="leading-relaxed">
+            Thanks, <strong className="text-foreground">{form.name}</strong>. Our onboarding team will
+            review your application and call you at{' '}
+            <strong className="text-foreground">{form.phone}</strong> within 2–3 working days.
+          </CardDescription>
+        </CardHeader>
+      </Card>
     )
   }
 
   return (
-    <form onSubmit={submit} className="bg-white border border-gray-100 rounded-2xl p-6 sm:p-8 shadow-sm space-y-4">
-      {apiError && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">{apiError}</div>
-      )}
+    <Card>
+      <CardContent>
+        <form onSubmit={submit} className="space-y-5">
+          {apiError && (
+            <Alert variant="destructive">
+              <AlertDescription>{apiError}</AlertDescription>
+            </Alert>
+          )}
 
-      <div className="grid sm:grid-cols-2 gap-4">
-        <Field label="Full name / Company" error={errors.name}>
-          <input
-            value={form.name}
-            onChange={(e) => set('name', e.target.value)}
-            placeholder="Your name or company"
-            className={input(errors.name)}
-          />
-        </Field>
-        <Field label="Mobile number" error={errors.phone}>
-          <input
-            value={form.phone}
-            onChange={(e) => set('phone', e.target.value.replace(/\D/g, ''))}
-            maxLength={10}
-            placeholder="10-digit mobile"
-            className={input(errors.phone)}
-          />
-        </Field>
-        <Field label="Email (optional)">
-          <input
-            type="email"
-            value={form.email}
-            onChange={(e) => set('email', e.target.value)}
-            placeholder="you@example.com"
-            className={input()}
-          />
-        </Field>
-        <Field label="City" error={errors.city}>
-          <select value={form.city} onChange={(e) => set('city', e.target.value)} className={input(errors.city)}>
-            <option value="">Select city</option>
-            {cities.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
-        </Field>
-      </div>
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Field id="name" label="Full name / Company" error={errors.name}>
+              <Input
+                id="name"
+                value={form.name}
+                onChange={(e) => set('name', e.target.value)}
+                placeholder="Your name or company"
+                aria-invalid={!!errors.name}
+              />
+            </Field>
 
-      <Field label="Services you offer & experience">
-        <textarea
-          rows={4}
-          value={form.note}
-          onChange={(e) => set('note', e.target.value)}
-          placeholder="e.g. Deep cleaning and sofa shampooing, 4 years experience, team of 6, own equipment"
-          className={`${input()} resize-none`}
-        />
-      </Field>
+            <Field id="phone" label="Mobile number" error={errors.phone}>
+              <Input
+                id="phone"
+                inputMode="numeric"
+                value={form.phone}
+                onChange={(e) => set('phone', e.target.value.replace(/\D/g, ''))}
+                maxLength={10}
+                placeholder="10-digit mobile"
+                aria-invalid={!!errors.phone}
+              />
+            </Field>
 
-      <button
-        type="submit"
-        disabled={submitting}
-        className="w-full bg-accent text-white py-3.5 rounded-xl font-bold hover:bg-accent/90 transition-colors shadow-md shadow-accent/30 disabled:opacity-60 flex items-center justify-center gap-2"
-      >
-        {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-        {submitting ? 'Submitting…' : 'Submit application'}
-      </button>
+            <Field id="email" label="Email (optional)">
+              <Input
+                id="email"
+                type="email"
+                value={form.email}
+                onChange={(e) => set('email', e.target.value)}
+                placeholder="you@example.com"
+              />
+            </Field>
 
-      <p className="text-xs text-gray-400 text-center">
-        By applying you agree to a background verification check.
-      </p>
-    </form>
+            <Field id="city" label="City" error={errors.city}>
+              {/* Radix Select reserves "" for "no value", so an unset city stays
+                  undefined and the placeholder renders instead. */}
+              <Select value={form.city || undefined} onValueChange={(v) => set('city', v)}>
+                <SelectTrigger id="city" className="w-full" aria-invalid={!!errors.city}>
+                  <SelectValue placeholder="Select city" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cities.map((c) => (
+                    <SelectItem key={c} value={c}>
+                      {c}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+          </div>
+
+          <Field id="note" label="Services you offer & experience">
+            <Textarea
+              id="note"
+              rows={4}
+              value={form.note}
+              onChange={(e) => set('note', e.target.value)}
+              placeholder="e.g. Deep cleaning and sofa shampooing, 4 years experience, team of 6, own equipment"
+              className="resize-none"
+            />
+          </Field>
+
+          <Button type="submit" variant="brand" size="lg" disabled={submitting} className="w-full">
+            {submitting ? <Loader2 className="animate-spin" /> : <Send />}
+            {submitting ? 'Submitting…' : 'Submit application'}
+          </Button>
+
+          <p className="text-center text-xs text-muted-foreground">
+            By applying you agree to a background verification check.
+          </p>
+        </form>
+      </CardContent>
+    </Card>
   )
 }
 
-function input(error?: string) {
-  return `w-full border rounded-xl px-3 py-2.5 text-sm outline-none transition-colors bg-white ${
-    error ? 'border-red-400 bg-red-50' : 'border-gray-200 focus:border-primary'
-  }`
-}
-
-function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
+function Field({
+  id,
+  label,
+  error,
+  children,
+}: {
+  id: string
+  label: string
+  error?: string
+  children: React.ReactNode
+}) {
   return (
-    <div>
-      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">{label}</label>
+    <div className="grid gap-2">
+      <Label htmlFor={id}>{label}</Label>
       {children}
-      {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+      {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   )
 }

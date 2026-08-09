@@ -5,11 +5,14 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard, ClipboardList, Users, Truck, Sparkles, FileText, Settings,
-  LogOut, Menu, X, ChevronRight, ChevronsUpDown, type LucideIcon,
+  LogOut, Menu, ChevronRight, ChevronsUpDown, type LucideIcon,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { Badge, type BadgeProps } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { ThemeToggle } from '@/components/theme-toggle'
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem,
@@ -55,7 +58,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
 
 const ROLE_META: Record<Role, { label: string; variant: BadgeProps['variant'] }> = {
   super_admin: { label: 'Super Admin', variant: 'default' },
-  admin: { label: 'Admin', variant: 'accent' },
+  admin: { label: 'Admin', variant: 'brand' },
   staff: { label: 'Staff', variant: 'secondary' },
 }
 
@@ -98,14 +101,16 @@ export default function CrmShell({
     .toUpperCase()
 
   const userButton = (
-    <button className="flex items-center gap-2 rounded-lg py-1 pl-1 pr-2 text-left transition-colors hover:bg-muted">
-      <span className="grid h-8 w-8 place-items-center rounded-full bg-primary/10 text-xs font-bold text-primary">{initials}</span>
+    <Button variant="ghost" className="h-auto gap-2 py-1 pl-1 pr-2 text-left">
+      <Avatar className="h-8 w-8">
+        <AvatarFallback className="bg-primary/10 text-xs font-bold text-primary">{initials}</AvatarFallback>
+      </Avatar>
       <span className="hidden leading-tight sm:block">
         <span className="block text-sm font-semibold">{admin?.full_name ?? 'Preview Mode'}</span>
-        <span className="block text-[11px] text-muted-foreground">{ROLE_META[role].label}</span>
+        <span className="block text-[11px] font-normal text-muted-foreground">{ROLE_META[role].label}</span>
       </span>
       <ChevronsUpDown className="hidden h-3.5 w-3.5 text-muted-foreground sm:block" />
-    </button>
+    </Button>
   )
 
   const sidebar = (
@@ -161,23 +166,28 @@ export default function CrmShell({
     <div className="min-h-screen bg-muted/30">
       <aside className="fixed inset-y-0 left-0 hidden w-60 border-r border-sidebar-border md:block">{sidebar}</aside>
 
-      {open && (
-        <>
-          <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm md:hidden" onClick={() => setOpen(false)} />
-          <aside className="fixed inset-y-0 left-0 z-50 w-60 border-r border-sidebar-border shadow-xl md:hidden">
-            <button className="absolute right-3 top-3.5 text-muted-foreground" onClick={() => setOpen(false)} aria-label="Close menu">
-              <X className="h-5 w-5" />
-            </button>
-            {sidebar}
-          </aside>
-        </>
-      )}
+      {/* Mobile nav. Sheet brings the focus trap, scroll lock, Escape handling
+          and exit animation the hand-rolled overlay was missing. */}
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent side="left" className="w-60 border-sidebar-border p-0 md:hidden">
+          <SheetHeader className="sr-only">
+            <SheetTitle>Navigation</SheetTitle>
+          </SheetHeader>
+          {sidebar}
+        </SheetContent>
+      </Sheet>
 
       <div className="md:pl-60">
         <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur-md">
-          <button className="text-muted-foreground md:hidden" onClick={() => setOpen(true)} aria-label="Open menu">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-muted-foreground md:hidden"
+            onClick={() => setOpen(true)}
+            aria-label="Open menu"
+          >
             <Menu className="h-5 w-5" />
-          </button>
+          </Button>
 
           <nav className="flex items-center gap-1.5 text-sm">
             <span className="text-muted-foreground">CRM</span>

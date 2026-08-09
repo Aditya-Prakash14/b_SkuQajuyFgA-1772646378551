@@ -50,7 +50,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         <div className="mt-12 rounded-2xl bg-primary/5 border border-primary/10 p-6 text-center">
           <h2 className="font-black text-gray-900">Need this done professionally?</h2>
           <p className="text-sm text-gray-500 mt-1 mb-4">Book a verified MyPrimeCompany team in minutes.</p>
-          <Link href="/services" className="inline-block bg-accent text-white px-6 py-3 rounded-xl font-bold hover:bg-accent/90 transition-colors">
+          <Link href="/services" className="inline-block bg-brand text-white px-6 py-3 rounded-xl font-bold hover:bg-brand/90 transition-colors">
             Explore services
           </Link>
         </div>

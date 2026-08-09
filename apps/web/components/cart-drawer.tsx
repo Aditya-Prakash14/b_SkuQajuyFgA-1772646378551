@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import {
-  X, Minus, Plus, Trash2, ShoppingBag, Phone, MapPin,
+  Minus, Plus, Trash2, ShoppingBag, Phone, MapPin,
   Calendar, Clock, User, CheckCircle, ArrowLeft, Tag, ShieldCheck, Loader2,
 } from 'lucide-react'
 import { useCart } from '@/lib/cart-context'
@@ -12,8 +12,24 @@ import { createClient } from '@/lib/supabase/client'
 import { GoogleMark } from '@/components/site-header'
 import { TIME_SLOTS } from '@/lib/slots'
 import type { Address } from '@prime/shared'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Textarea } from '@/components/ui/textarea'
 
 type Step = 'cart' | 'checkout' | 'success'
+
+/** Radix Select reserves "", so the optional "any slot" choice needs a sentinel. */
+const ANY_SLOT = '__any__'
 
 interface BookingForm {
   name: string
@@ -145,30 +161,27 @@ export default function CartDrawer() {
   minDate.setDate(minDate.getDate() + 1)
   const minDateStr = minDate.toISOString().split('T')[0]
 
-  if (!cartOpen) return null
-
   return (
-    <>
-      <div className="fixed inset-0 bg-black/40 z-50 backdrop-blur-sm" onClick={close} />
-
-      <div className="fixed top-0 right-0 h-full w-full sm:w-105 bg-white z-50 shadow-2xl flex flex-col">
+    <Sheet open={cartOpen} onOpenChange={(open) => { if (!open) close() }}>
+      <SheetContent side="right" className="flex w-full flex-col gap-0 p-0 sm:max-w-105">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-white">
-          <div className="flex items-center gap-2">
-            {step === 'checkout' && (
-              <button onClick={() => setStep('cart')} className="text-gray-400 hover:text-primary mr-1 transition-colors">
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-            )}
-            <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-white font-black text-sm">M</span>
-            <h2 className="font-black text-gray-800 text-base">
-              {step === 'cart' ? `My Cart (${totalItems})` : step === 'checkout' ? 'Book Service' : 'Booking Confirmed'}
-            </h2>
-          </div>
-          <button onClick={close} className="text-gray-400 hover:text-primary transition-colors p-1">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+        <SheetHeader className="flex-row items-center gap-2 space-y-0 border-b px-5 py-4">
+          {step === 'checkout' && (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => setStep('cart')}
+              aria-label="Back to cart"
+              className="-ml-2 text-muted-foreground hover:text-primary"
+            >
+              <ArrowLeft className="size-5" />
+            </Button>
+          )}
+          <span className="grid size-8 place-items-center rounded-lg bg-primary text-sm font-black text-primary-foreground">M</span>
+          <SheetTitle className="text-base font-black">
+            {step === 'cart' ? `My Cart (${totalItems})` : step === 'checkout' ? 'Book Service' : 'Booking Confirmed'}
+          </SheetTitle>
+        </SheetHeader>
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto">
@@ -176,47 +189,65 @@ export default function CartDrawer() {
           {step === 'cart' && (
             <>
               {cart.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full gap-4 px-6 text-center">
-                  <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center">
-                    <ShoppingBag className="w-9 h-9 text-primary" />
+                <div className="flex h-full flex-col items-center justify-center gap-4 px-6 text-center">
+                  <div className="flex size-20 items-center justify-center rounded-full bg-primary/10">
+                    <ShoppingBag className="size-9 text-primary" />
                   </div>
                   <div>
-                    <p className="font-bold text-gray-800 text-lg">Your cart is empty</p>
-                    <p className="text-gray-500 text-sm mt-1">Add services to get started</p>
+                    <p className="text-lg font-bold text-foreground">Your cart is empty</p>
+                    <p className="mt-1 text-sm text-muted-foreground">Add services to get started</p>
                   </div>
-                  <button onClick={close} className="bg-primary text-white px-6 py-2.5 rounded-xl font-semibold text-sm hover:bg-primary/90 transition-colors">
+                  <Button onClick={close} className="rounded-xl font-semibold">
                     Browse Services
-                  </button>
+                  </Button>
                 </div>
               ) : (
-                <div className="p-4 space-y-3">
+                <div className="space-y-3 p-4">
                   {cart.map((item) => (
-                    <div key={item.id} className="flex gap-3 bg-gray-50 rounded-2xl p-3 border border-gray-100">
-                      <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0">
-                        <img src={item.img} alt={item.name} className="w-full h-full object-cover" />
+                    <div key={item.id} className="flex gap-3 rounded-2xl border bg-muted/40 p-3">
+                      <div className="size-16 shrink-0 overflow-hidden rounded-xl">
+                        <img src={item.img} alt={item.name} className="h-full w-full object-cover" />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-sm text-gray-800 line-clamp-2 leading-snug">{item.name}</p>
-                        <p className="text-primary font-bold text-sm mt-1">{item.priceStr}</p>
-                        <div className="flex items-center gap-2 mt-2">
-                          <button onClick={() => updateQty(item.id, item.qty - 1)} className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:border-primary hover:text-primary transition-colors">
-                            <Minus className="w-3 h-3" />
-                          </button>
-                          <span className="font-bold text-sm w-5 text-center">{item.qty}</span>
-                          <button onClick={() => updateQty(item.id, item.qty + 1)} className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center hover:border-primary hover:text-primary transition-colors">
-                            <Plus className="w-3 h-3" />
-                          </button>
+                      <div className="min-w-0 flex-1">
+                        <p className="line-clamp-2 text-sm font-semibold leading-snug text-foreground">{item.name}</p>
+                        <p className="mt-1 text-sm font-bold text-primary">{item.priceStr}</p>
+                        <div className="mt-2 flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="icon-xs"
+                            onClick={() => updateQty(item.id, item.qty - 1)}
+                            aria-label="Decrease quantity"
+                            className="rounded-lg hover:border-primary hover:text-primary"
+                          >
+                            <Minus className="size-3" />
+                          </Button>
+                          <span className="w-5 text-center text-sm font-bold">{item.qty}</span>
+                          <Button
+                            variant="outline"
+                            size="icon-xs"
+                            onClick={() => updateQty(item.id, item.qty + 1)}
+                            aria-label="Increase quantity"
+                            className="rounded-lg hover:border-primary hover:text-primary"
+                          >
+                            <Plus className="size-3" />
+                          </Button>
                         </div>
                       </div>
-                      <button onClick={() => removeFromCart(item.id)} className="text-gray-300 hover:text-red-400 transition-colors shrink-0 self-start mt-0.5">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <Button
+                        variant="ghost"
+                        size="icon-xs"
+                        onClick={() => removeFromCart(item.id)}
+                        aria-label={`Remove ${item.name}`}
+                        className="mt-0.5 shrink-0 self-start text-muted-foreground/60 hover:text-destructive"
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
                     </div>
                   ))}
 
-                  <div className="flex items-center gap-2 bg-accent/10 border border-accent/20 rounded-xl px-3 py-2.5 mt-2">
-                    <Tag className="w-4 h-4 text-accent shrink-0" />
-                    <p className="text-xs text-accent font-semibold">Free re-service warranty on every booking</p>
+                  <div className="mt-2 flex items-center gap-2 rounded-xl border border-brand/20 bg-brand/10 px-3 py-2.5">
+                    <Tag className="size-4 shrink-0 text-brand" />
+                    <p className="text-xs font-semibold text-brand">Free re-service warranty on every booking</p>
                   </div>
                 </div>
               )}
@@ -227,136 +258,184 @@ export default function CartDrawer() {
           {step === 'checkout' && (
             <>
               {authLoading ? (
-                <div className="flex items-center justify-center h-full">
-                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                <div className="flex h-full items-center justify-center">
+                  <Loader2 className="size-6 animate-spin text-primary" />
                 </div>
               ) : !user ? (
                 /* ── Google sign-in gate ── */
-                <div className="flex flex-col items-center justify-center h-full gap-5 px-6 text-center">
-                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-                    <ShieldCheck className="w-8 h-8 text-primary" />
+                <div className="flex h-full flex-col items-center justify-center gap-5 px-6 text-center">
+                  <div className="flex size-16 items-center justify-center rounded-full bg-primary/10">
+                    <ShieldCheck className="size-8 text-primary" />
                   </div>
                   <div>
-                    <p className="font-black text-gray-800 text-lg">Sign in to continue</p>
-                    <p className="text-gray-500 text-sm mt-2 leading-relaxed">
+                    <p className="text-lg font-black text-foreground">Sign in to continue</p>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                       We ask you to sign in so your booking is securely linked to you and you can track it later.
                       It takes one tap.
                     </p>
                   </div>
 
                   {authError && (
-                    <div className="w-full rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-left text-sm text-red-600">
-                      <p className="font-semibold">Sign-in failed</p>
-                      <p className="mt-0.5 text-xs leading-relaxed">{authError}</p>
-                    </div>
+                    <Alert variant="destructive" className="text-left">
+                      <AlertTitle>Sign-in failed</AlertTitle>
+                      <AlertDescription className="text-xs leading-relaxed">{authError}</AlertDescription>
+                    </Alert>
                   )}
 
-                  <button
+                  <Button
+                    variant="outline"
+                    size="lg"
                     onClick={() => {
                       setAuthError(null)
                       signInWithGoogle(typeof window !== 'undefined' ? window.location.pathname : '/')
                     }}
-                    className="w-full flex items-center justify-center gap-3 border-2 border-gray-200 bg-white text-gray-700 font-bold py-3.5 rounded-xl hover:border-primary/40 hover:shadow-md transition-all"
+                    className="w-full gap-3 rounded-xl border-2 font-bold"
                   >
-                    <GoogleMark className="w-5 h-5" /> {authError ? 'Try again with Google' : 'Continue with Google'}
-                  </button>
+                    <GoogleMark className="size-5" /> {authError ? 'Try again with Google' : 'Continue with Google'}
+                  </Button>
 
-                  <div className="bg-gray-50 rounded-xl p-3 w-full text-left border border-gray-100">
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Your order</p>
+                  <div className="w-full rounded-xl border bg-muted/40 p-3 text-left">
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Your order</p>
                     {cart.map((item) => (
-                      <div key={item.id} className="flex justify-between text-xs text-gray-600 py-0.5">
-                        <span className="truncate mr-2">{item.name} × {item.qty}</span>
-                        <span className="font-semibold whitespace-nowrap">₹{(item.price * item.qty).toLocaleString()}</span>
+                      <div key={item.id} className="flex justify-between py-0.5 text-xs text-muted-foreground">
+                        <span className="mr-2 truncate">{item.name} × {item.qty}</span>
+                        <span className="whitespace-nowrap font-semibold">₹{(item.price * item.qty).toLocaleString()}</span>
                       </div>
                     ))}
-                    <div className="border-t border-gray-200 mt-2 pt-2 flex justify-between text-sm font-bold text-primary">
+                    <div className="mt-2 flex justify-between border-t pt-2 text-sm font-bold text-primary">
                       <span>Total</span>
                       <span>₹{totalPrice.toLocaleString()}</span>
                     </div>
                   </div>
 
-                  <p className="text-[11px] text-gray-400">We never post anything to your Google account.</p>
+                  <p className="text-[11px] text-muted-foreground/70">We never post anything to your Google account.</p>
                 </div>
               ) : (
                 /* ── Booking form ── */
-                <form id="checkout-form" onSubmit={handleSubmit} className="p-4 space-y-4" noValidate>
-                  <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-3 py-2">
-                    <CheckCircle className="w-4 h-4 text-green-600 shrink-0" />
-                    <p className="text-xs text-green-700">
+                <form id="checkout-form" onSubmit={handleSubmit} className="space-y-4 p-4" noValidate>
+                  <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 dark:border-emerald-900 dark:bg-emerald-950">
+                    <CheckCircle className="size-4 shrink-0 text-emerald-600" />
+                    <p className="text-xs text-emerald-700 dark:text-emerald-400">
                       Signed in as <strong>{user.email}</strong>
                     </p>
                   </div>
 
                   {apiError && (
-                    <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">{apiError}</div>
+                    <Alert variant="destructive">
+                      <AlertDescription>{apiError}</AlertDescription>
+                    </Alert>
                   )}
 
-                  <div className="bg-primary/5 rounded-2xl p-3 border border-primary/10">
-                    <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-2">Order Summary</p>
+                  <div className="rounded-2xl border border-primary/10 bg-primary/5 p-3">
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-primary">Order Summary</p>
                     {cart.map((item) => (
-                      <div key={item.id} className="flex justify-between text-xs text-gray-600 py-0.5">
-                        <span className="truncate mr-2">{item.name} × {item.qty}</span>
-                        <span className="font-semibold whitespace-nowrap">₹{(item.price * item.qty).toLocaleString()}</span>
+                      <div key={item.id} className="flex justify-between py-0.5 text-xs text-muted-foreground">
+                        <span className="mr-2 truncate">{item.name} × {item.qty}</span>
+                        <span className="whitespace-nowrap font-semibold">₹{(item.price * item.qty).toLocaleString()}</span>
                       </div>
                     ))}
-                    <div className="border-t border-primary/10 mt-2 pt-2 flex justify-between text-sm font-bold text-primary">
+                    <div className="mt-2 flex justify-between border-t border-primary/10 pt-2 text-sm font-bold text-primary">
                       <span>Total</span>
                       <span>₹{totalPrice.toLocaleString()}</span>
                     </div>
-                    <p className="text-[11px] text-gray-400 text-right mt-0.5">Inclusive of 18% GST</p>
+                    <p className="mt-0.5 text-right text-[11px] text-muted-foreground/70">Inclusive of 18% GST</p>
                   </div>
 
-                  <Field label="Full Name" icon={User} error={errors.name}>
-                    <input type="text" placeholder="Your full name" value={form.name} onChange={(e) => field('name', e.target.value)} className={inputCls(errors.name)} />
+                  <Field id="co-name" label="Full Name" icon={User} error={errors.name}>
+                    <Input
+                      id="co-name"
+                      placeholder="Your full name"
+                      value={form.name}
+                      onChange={(e) => field('name', e.target.value)}
+                      aria-invalid={!!errors.name}
+                    />
                   </Field>
 
-                  <Field label="Mobile Number" icon={Phone} error={errors.phone}>
-                    <input type="tel" placeholder="10-digit mobile number" maxLength={10} value={form.phone}
-                      onChange={(e) => field('phone', e.target.value.replace(/\D/g, ''))} className={inputCls(errors.phone)} />
+                  <Field id="co-phone" label="Mobile Number" icon={Phone} error={errors.phone}>
+                    <Input
+                      id="co-phone"
+                      type="tel"
+                      inputMode="numeric"
+                      placeholder="10-digit mobile number"
+                      maxLength={10}
+                      value={form.phone}
+                      onChange={(e) => field('phone', e.target.value.replace(/\D/g, ''))}
+                      aria-invalid={!!errors.phone}
+                    />
                   </Field>
 
-                  <Field label="City" icon={MapPin} error={errors.city}>
-                    <select value={form.city} onChange={(e) => field('city', e.target.value)} className={inputCls(errors.city)}>
-                      <option value="">Select your city</option>
-                      {cities.map((c) => (
-                        <option key={c} value={c}>{c}</option>
-                      ))}
-                    </select>
+                  <Field id="co-city" label="City" icon={MapPin} error={errors.city}>
+                    <Select value={form.city || undefined} onValueChange={(v) => field('city', v)}>
+                      <SelectTrigger id="co-city" className="w-full" aria-invalid={!!errors.city}>
+                        <SelectValue placeholder="Select your city" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {cities.map((c) => (
+                          <SelectItem key={c} value={c}>{c}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </Field>
 
-                  <Field label="Preferred Date" icon={Calendar} error={errors.date}>
-                    <input type="date" min={minDateStr} value={form.date} onChange={(e) => field('date', e.target.value)} className={inputCls(errors.date)} />
+                  <Field id="co-date" label="Preferred Date" icon={Calendar} error={errors.date}>
+                    <Input
+                      id="co-date"
+                      type="date"
+                      min={minDateStr}
+                      value={form.date}
+                      onChange={(e) => field('date', e.target.value)}
+                      aria-invalid={!!errors.date}
+                    />
                   </Field>
 
-                  <Field label="Preferred Time Slot" icon={Clock}>
-                    <select value={form.slot} onChange={(e) => field('slot', e.target.value)} className={inputCls(undefined)}>
-                      <option value="">Any time — we&apos;ll confirm on call</option>
-                      {TIME_SLOTS.map((s) => <option key={s} value={s}>{s}</option>)}
-                    </select>
+                  <Field id="co-slot" label="Preferred Time Slot" icon={Clock}>
+                    <Select
+                      value={form.slot || ANY_SLOT}
+                      onValueChange={(v) => field('slot', v === ANY_SLOT ? '' : v)}
+                    >
+                      <SelectTrigger id="co-slot" className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={ANY_SLOT}>Any time — we&apos;ll confirm on call</SelectItem>
+                        {TIME_SLOTS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
                   </Field>
 
                   {savedAddresses.length > 0 && (
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-500 mb-1.5">Saved addresses</label>
-                      <select
-                        defaultValue=""
-                        onChange={(e) => {
-                          const a = savedAddresses.find((x) => x.id === e.target.value)
+                    <div className="grid gap-1.5">
+                      <Label className="text-xs text-muted-foreground">Saved addresses</Label>
+                      <Select
+                        onValueChange={(id) => {
+                          const a = savedAddresses.find((x) => x.id === id)
                           if (a) setForm((f) => ({ ...f, address: a.full_address, city: a.city }))
                         }}
-                        className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700"
                       >
-                        <option value="">Use a saved address…</option>
-                        {savedAddresses.map((a) => (
-                          <option key={a.id} value={a.id}>{a.label ? `${a.label} — ` : ''}{a.full_address}</option>
-                        ))}
-                      </select>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Use a saved address…" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {savedAddresses.map((a) => (
+                            <SelectItem key={a.id} value={a.id}>
+                              {a.label ? `${a.label} — ` : ''}{a.full_address}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   )}
 
-                  <Field label="Full Address" icon={MapPin} error={errors.address}>
-                    <textarea rows={3} placeholder="Flat / House No., Street, Area" value={form.address}
-                      onChange={(e) => field('address', e.target.value)} className={`${inputCls(errors.address)} resize-none`} />
+                  <Field id="co-address" label="Full Address" icon={MapPin} error={errors.address}>
+                    <Textarea
+                      id="co-address"
+                      rows={3}
+                      placeholder="Flat / House No., Street, Area"
+                      value={form.address}
+                      onChange={(e) => field('address', e.target.value)}
+                      aria-invalid={!!errors.address}
+                      className="resize-none"
+                    />
                   </Field>
                 </form>
               )}
@@ -365,23 +444,23 @@ export default function CartDrawer() {
 
           {/* STEP 3 — Success */}
           {step === 'success' && (
-            <div className="flex flex-col items-center justify-center h-full gap-5 px-6 text-center py-10">
-              <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center">
-                <CheckCircle className="w-12 h-12 text-green-500" />
+            <div className="flex h-full flex-col items-center justify-center gap-5 px-6 py-10 text-center">
+              <div className="flex size-24 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-950">
+                <CheckCircle className="size-12 text-emerald-500" />
               </div>
               <div>
-                <p className="font-black text-gray-800 text-2xl">Booking Confirmed!</p>
-                <p className="text-gray-500 text-sm mt-2 leading-relaxed">
+                <p className="text-2xl font-black text-foreground">Booking Confirmed!</p>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                   Thank you, <strong>{form.name}</strong>! We have received your booking for{' '}
                   <strong>{form.date}</strong> in <strong>{form.city}</strong>.
                 </p>
-                <p className="text-gray-400 text-xs mt-2">
+                <p className="mt-2 text-xs text-muted-foreground/70">
                   Our team will call you at <strong>{form.phone}</strong> to confirm the slot.
                 </p>
               </div>
 
-              <div className="bg-primary/5 rounded-2xl p-4 w-full text-left border border-primary/10 space-y-1.5">
-                <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-2">Booking Details</p>
+              <div className="w-full space-y-1.5 rounded-2xl border border-primary/10 bg-primary/5 p-4 text-left">
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-primary">Booking Details</p>
                 {orderNumber && (
                   <Row label="Order #" value={orderNumber} />
                 )}
@@ -391,70 +470,76 @@ export default function CartDrawer() {
                 {form.slot && <Row label="Time" value={form.slot} />}
               </div>
 
-              <a href="tel:+917349603429" className="flex items-center gap-2 bg-primary text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-primary/90 transition-colors">
-                <Phone className="w-4 h-4" /> Call Us for Updates
-              </a>
-              <button onClick={close} className="text-sm text-gray-400 hover:text-gray-600 transition-colors">Close</button>
+              <Button asChild className="rounded-xl font-bold">
+                <a href="tel:+917349603429">
+                  <Phone /> Call Us for Updates
+                </a>
+              </Button>
+              <Button variant="ghost" onClick={close} className="text-muted-foreground">
+                Close
+              </Button>
             </div>
           )}
         </div>
 
         {/* Footer CTA */}
         {cart.length > 0 && step !== 'success' && (
-          <div className="border-t border-gray-100 bg-white p-4">
+          <div className="border-t bg-background p-4">
             {step === 'cart' && (
               <>
-                <div className="flex justify-between items-center mb-3">
-                  <span className="text-sm text-gray-500">{totalItems} service{totalItems !== 1 ? 's' : ''}</span>
-                  <span className="font-black text-primary text-xl">₹{totalPrice.toLocaleString()}</span>
+                <div className="mb-3 flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">{totalItems} service{totalItems !== 1 ? 's' : ''}</span>
+                  <span className="text-xl font-black text-primary">₹{totalPrice.toLocaleString()}</span>
                 </div>
-                <button onClick={() => setStep('checkout')} className="w-full bg-accent text-white py-3.5 rounded-xl font-bold hover:bg-accent/90 transition-colors text-sm shadow-md shadow-accent/30">
+                <Button
+                  variant="brand"
+                  size="lg"
+                  onClick={() => setStep('checkout')}
+                  className="w-full rounded-xl font-bold shadow-md shadow-brand/30"
+                >
                   Proceed to Book
-                </button>
+                </Button>
               </>
             )}
             {step === 'checkout' && user && (
-              <button
+              <Button
                 type="submit"
                 form="checkout-form"
+                variant="brand"
+                size="lg"
                 disabled={submitting}
-                className="w-full bg-accent text-white py-3.5 rounded-xl font-bold hover:bg-accent/90 transition-colors text-sm shadow-md shadow-accent/30 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full rounded-xl font-bold shadow-md shadow-brand/30"
               >
                 {submitting ? (
-                  <><Loader2 className="w-4 h-4 animate-spin" /> Confirming Booking…</>
+                  <><Loader2 className="animate-spin" /> Confirming Booking…</>
                 ) : (
                   `Confirm Booking • ₹${totalPrice.toLocaleString()}`
                 )}
-              </button>
+              </Button>
             )}
           </div>
         )}
-      </div>
-    </>
+      </SheetContent>
+    </Sheet>
   )
 }
 
-function inputCls(error?: string) {
-  return `w-full border rounded-xl px-3 py-2.5 text-sm outline-none transition-colors bg-white ${
-    error ? 'border-red-400 bg-red-50' : 'border-gray-200 focus:border-primary'
-  }`
-}
-
 function Field({
-  label, icon: Icon, error, children,
+  id, label, icon: Icon, error, children,
 }: {
+  id: string
   label: string
   icon: React.ComponentType<{ className?: string }>
   error?: string
   children: React.ReactNode
 }) {
   return (
-    <div>
-      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide flex items-center gap-1.5 mb-1.5">
-        <Icon className="w-3.5 h-3.5" /> {label}
-      </label>
+    <div className="grid gap-1.5">
+      <Label htmlFor={id} className="text-xs uppercase tracking-wide text-muted-foreground">
+        <Icon className="size-3.5" /> {label}
+      </Label>
       {children}
-      {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+      {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   )
 }
@@ -462,8 +547,8 @@ function Field({
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between text-sm">
-      <span className="text-gray-500">{label}</span>
-      <span className="font-semibold text-gray-700">{value}</span>
+      <span className="text-muted-foreground">{label}</span>
+      <span className="font-semibold text-foreground">{value}</span>
     </div>
   )
 }

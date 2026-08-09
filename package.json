@@ -9,6 +9,8 @@
   "scripts": {
     "dev:web": "pnpm --filter @prime/web dev",
     "dev:crm": "pnpm --filter @prime/crm dev",
+    "//dev:partner": "apps/partner is outside the pnpm workspace (Expo + Metro vs. pnpm symlinks) — it is an npm project.",
+    "dev:partner": "npm --prefix apps/partner run start",
     "build:web": "pnpm --filter @prime/web build",
     "build:crm": "pnpm --filter @prime/crm build",
     "build": "pnpm -r --if-present build",

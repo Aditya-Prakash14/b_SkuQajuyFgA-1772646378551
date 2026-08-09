@@ -6,6 +6,20 @@ import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/lib/auth-context'
 import { useCity } from '@/lib/city-context'
 import type { Address } from '@prime/shared'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 
 export default function AddressesPage() {
   const { user } = useAuth()
@@ -43,7 +57,11 @@ export default function AddressesPage() {
 
   return (
     <div className="space-y-4">
-      {error && <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">{error}</p>}
+      {error && (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
       {addresses.length === 0 && !adding && (
         <div className="text-center py-12">
@@ -55,22 +73,38 @@ export default function AddressesPage() {
 
       <div className="grid gap-3 sm:grid-cols-2">
         {addresses.map((a) => (
-          <div key={a.id} className="rounded-2xl border border-gray-100 bg-white p-4">
-            <div className="flex items-start justify-between gap-2">
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500">
-                <Home className="w-3.5 h-3.5" /> {a.label || 'Address'}
-                {a.is_default && <span className="ml-1 rounded-full bg-primary/10 text-primary px-2 py-0.5">Default</span>}
-              </span>
-              <button onClick={() => remove(a)} className="text-gray-300 hover:text-red-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
-            </div>
-            <p className="mt-2 text-sm text-gray-700">{a.full_address}</p>
-            <p className="text-xs text-gray-400">{a.city}</p>
-            {!a.is_default && (
-              <button onClick={() => makeDefault(a)} className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
-                <Star className="w-3.5 h-3.5" /> Set as default
-              </button>
-            )}
-          </div>
+          <Card key={a.id} className="rounded-2xl py-4">
+            <CardContent className="px-4">
+              <div className="flex items-start justify-between gap-2">
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+                  <Home className="size-3.5" /> {a.label || 'Address'}
+                  {a.is_default && (
+                    <Badge className="ml-1 rounded-full bg-primary/10 text-primary">Default</Badge>
+                  )}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  onClick={() => remove(a)}
+                  aria-label="Delete address"
+                  className="text-muted-foreground/60 hover:text-destructive"
+                >
+                  <Trash2 className="size-4" />
+                </Button>
+              </div>
+              <p className="mt-2 text-sm text-foreground">{a.full_address}</p>
+              <p className="text-xs text-muted-foreground">{a.city}</p>
+              {!a.is_default && (
+                <Button
+                  variant="link"
+                  onClick={() => makeDefault(a)}
+                  className="mt-3 h-auto gap-1 p-0 text-xs font-semibold"
+                >
+                  <Star className="size-3.5" /> Set as default
+                </Button>
+              )}
+            </CardContent>
+          </Card>
         ))}
       </div>
 
@@ -83,9 +117,9 @@ export default function AddressesPage() {
           onSaved={async () => { setAdding(false); await load() }}
         />
       ) : (
-        <button onClick={() => setAdding(true)} className="inline-flex items-center gap-1.5 bg-primary text-white text-sm font-semibold rounded-xl px-4 py-2.5 hover:bg-primary/90 transition-colors">
-          <Plus className="w-4 h-4" /> Add address
-        </button>
+        <Button onClick={() => setAdding(true)} className="rounded-xl font-semibold">
+          <Plus /> Add address
+        </Button>
       )}
     </div>
   )
@@ -119,31 +153,41 @@ function AddressForm({
   }
 
   return (
-    <div className="rounded-2xl border border-gray-100 bg-white p-4 space-y-3">
-      {error && <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-600">{error}</p>}
-      <div className="grid gap-3 sm:grid-cols-2">
-        <label className="text-sm">
-          <span className="block text-xs font-semibold text-gray-500 mb-1">Label</span>
-          <input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Home / Office" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
-        </label>
-        <label className="text-sm">
-          <span className="block text-xs font-semibold text-gray-500 mb-1">City</span>
-          <select value={city} onChange={(e) => setCity(e.target.value)} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm">
-            <option value="">Select city</option>
-            {cities.map((c) => <option key={c} value={c}>{c}</option>)}
-          </select>
-        </label>
-      </div>
-      <label className="text-sm block">
-        <span className="block text-xs font-semibold text-gray-500 mb-1">Full address</span>
-        <textarea rows={2} value={full} onChange={(e) => setFull(e.target.value)} placeholder="Flat / House No., Street, Area" className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm resize-none" />
-      </label>
-      <div className="flex gap-2">
-        <button onClick={save} disabled={busy} className="flex items-center gap-1.5 bg-primary text-white text-sm font-semibold rounded-lg px-4 py-2 hover:bg-primary/90 transition-colors disabled:opacity-60">
-          {busy && <Loader2 className="w-4 h-4 animate-spin" />} Save address
-        </button>
-        <button onClick={onCancel} className="text-sm text-gray-500 px-3 py-2">Cancel</button>
-      </div>
-    </div>
+    <Card className="rounded-2xl py-4">
+      <CardContent className="space-y-3 px-4">
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription className="text-xs">{error}</AlertDescription>
+          </Alert>
+        )}
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-1.5">
+            <Label htmlFor="addr-label" className="text-xs text-muted-foreground">Label</Label>
+            <Input id="addr-label" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Home / Office" />
+          </div>
+          <div className="grid gap-1.5">
+            <Label htmlFor="addr-city" className="text-xs text-muted-foreground">City</Label>
+            <Select value={city || undefined} onValueChange={setCity}>
+              <SelectTrigger id="addr-city" className="w-full">
+                <SelectValue placeholder="Select city" />
+              </SelectTrigger>
+              <SelectContent>
+                {cities.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <div className="grid gap-1.5">
+          <Label htmlFor="addr-full" className="text-xs text-muted-foreground">Full address</Label>
+          <Textarea id="addr-full" rows={2} value={full} onChange={(e) => setFull(e.target.value)} placeholder="Flat / House No., Street, Area" className="resize-none" />
+        </div>
+        <div className="flex gap-2">
+          <Button onClick={save} disabled={busy} className="font-semibold">
+            {busy && <Loader2 className="animate-spin" />} Save address
+          </Button>
+          <Button variant="ghost" onClick={onCancel} className="text-muted-foreground">Cancel</Button>
+        </div>
+      </CardContent>
+    </Card>
   )
 }

@@ -10,8 +10,17 @@ import { createVendor, updateVendor, type VendorInput } from '@/app/dashboard/ve
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Separator } from '@/components/ui/separator'
 
 const STATUSES: VendorStatus[] = ['pending', 'approved', 'active', 'suspended', 'rejected']
 
@@ -110,19 +119,30 @@ export function VendorForm({
               </div>
               <div>
                 <Label className="mb-1.5 block">City</Label>
-                <Select value={city} onChange={(e) => setCity(e.target.value)}>
-                  <option value="">Select city</option>
-                  {cities.map((c) => (
-                    <option key={c} value={c}>{c}</option>
-                  ))}
+                {/* Radix Select reserves "" — an unset city is `undefined`, which
+                    renders the placeholder instead of an empty item. */}
+                <Select value={city || undefined} onValueChange={setCity}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select city" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {cities.map((c) => (
+                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
               </div>
               <div>
                 <Label className="mb-1.5 block">Status</Label>
-                <Select value={status} onChange={(e) => setStatus(e.target.value as VendorStatus)}>
-                  {STATUSES.map((s) => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
+                <Select value={status} onValueChange={(v) => setStatus(v as VendorStatus)}>
+                  <SelectTrigger className="w-full capitalize">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STATUSES.map((s) => (
+                      <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
               </div>
               <div>
@@ -139,10 +159,13 @@ export function VendorForm({
                 <div key={i} className="grid gap-2 sm:grid-cols-[1fr_1.5fr_auto_auto] sm:items-center">
                   <Input placeholder="Type (ID proof…)" value={d.type} onChange={(e) => patchDoc(i, { type: e.target.value })} />
                   <Input placeholder="URL" value={d.url} onChange={(e) => patchDoc(i, { url: e.target.value })} />
-                  <label className="flex items-center gap-1.5 whitespace-nowrap text-sm text-muted-foreground">
-                    <input type="checkbox" checked={d.verified} onChange={(e) => patchDoc(i, { verified: e.target.checked })} />
+                  <Label className="flex items-center gap-2 whitespace-nowrap text-sm font-normal text-muted-foreground">
+                    <Checkbox
+                      checked={d.verified}
+                      onCheckedChange={(v) => patchDoc(i, { verified: v === true })}
+                    />
                     Verified
-                  </label>
+                  </Label>
                   <Button type="button" variant="ghost" size="icon" onClick={() => removeDoc(i)}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -162,15 +185,29 @@ export function VendorForm({
           <Card>
             <CardHeader><CardTitle>Services offered</CardTitle></CardHeader>
             <CardContent>
-              <div className="max-h-96 space-y-1.5 overflow-y-auto pr-1">
-                {services.map((s) => (
-                  <label key={s.id} className="flex items-center gap-2 text-sm">
-                    <input type="checkbox" checked={serviceIds.includes(s.id)} onChange={() => toggleService(s.id)} />
-                    {s.name}
-                  </label>
-                ))}
-                {services.length === 0 && <p className="text-sm text-muted-foreground">No services yet.</p>}
-              </div>
+              <ScrollArea className="h-96 pr-3">
+                <div className="space-y-1">
+                  {services.map((s) => (
+                    <Label
+                      key={s.id}
+                      className="flex cursor-pointer items-center gap-2.5 rounded-md px-2 py-1.5 text-sm font-normal hover:bg-accent"
+                    >
+                      <Checkbox
+                        checked={serviceIds.includes(s.id)}
+                        onCheckedChange={() => toggleService(s.id)}
+                      />
+                      {s.name}
+                    </Label>
+                  ))}
+                  {services.length === 0 && (
+                    <p className="text-sm text-muted-foreground">No services yet.</p>
+                  )}
+                </div>
+              </ScrollArea>
+              <Separator className="my-3" />
+              <p className="text-xs text-muted-foreground">
+                {serviceIds.length} of {services.length} selected
+              </p>
             </CardContent>
           </Card>
         </div>

@@ -3,7 +3,7 @@ import type { OrderStatus, PaymentStatus, VendorStatus, InvoiceStatus } from '@p
 
 const ORDER: Record<OrderStatus, { label: string; variant: BadgeProps['variant'] }> = {
   pending: { label: 'Pending', variant: 'warning' },
-  confirmed: { label: 'Confirmed', variant: 'accent' },
+  confirmed: { label: 'Confirmed', variant: 'brand' },
   vendor_assigned: { label: 'Vendor assigned', variant: 'secondary' },
   in_progress: { label: 'In progress', variant: 'default' },
   completed: { label: 'Completed', variant: 'success' },
@@ -14,12 +14,12 @@ const PAYMENT: Record<PaymentStatus, { label: string; variant: BadgeProps['varia
   unpaid: { label: 'Unpaid', variant: 'warning' },
   paid: { label: 'Paid', variant: 'success' },
   refunded: { label: 'Refunded', variant: 'secondary' },
-  partial: { label: 'Partial', variant: 'accent' },
+  partial: { label: 'Partial', variant: 'brand' },
 }
 
 const VENDOR: Record<VendorStatus, { label: string; variant: BadgeProps['variant'] }> = {
   pending: { label: 'Pending', variant: 'warning' },
-  approved: { label: 'Approved', variant: 'accent' },
+  approved: { label: 'Approved', variant: 'brand' },
   active: { label: 'Active', variant: 'success' },
   suspended: { label: 'Suspended', variant: 'secondary' },
   rejected: { label: 'Rejected', variant: 'destructive' },
@@ -52,7 +52,7 @@ export function paymentStatusLabel(status: PaymentStatus) {
 
 const INVOICE: Record<InvoiceStatus, { label: string; variant: BadgeProps['variant'] }> = {
   draft: { label: 'Draft', variant: 'secondary' },
-  sent: { label: 'Sent', variant: 'accent' },
+  sent: { label: 'Sent', variant: 'brand' },
   paid: { label: 'Paid', variant: 'success' },
   overdue: { label: 'Overdue', variant: 'destructive' },
   void: { label: 'Void', variant: 'outline' },

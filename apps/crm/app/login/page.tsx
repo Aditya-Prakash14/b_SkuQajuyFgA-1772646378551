@@ -55,7 +55,7 @@ export default function LoginPage() {
       {/* Brand panel */}
       <div className="relative hidden flex-col justify-between overflow-hidden bg-primary p-12 text-primary-foreground lg:flex">
         <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-32 -left-16 h-96 w-96 rounded-full bg-accent/30 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-32 -left-16 h-96 w-96 rounded-full bg-brand/30 blur-3xl" />
 
         <div className="relative flex items-center gap-2.5">
           <div className="grid h-9 w-9 place-items-center rounded-lg bg-white/15 font-black backdrop-blur">M</div>
@@ -70,7 +70,7 @@ export default function LoginPage() {
           <ul className="mt-8 space-y-3 text-sm text-primary-foreground/85">
             {['Bookings & scheduling in real time', 'Vendor onboarding & assignment', 'Invoicing with payment tracking'].map((f) => (
               <li key={f} className="flex items-center gap-2.5">
-                <CheckCircle2 className="h-4 w-4 text-accent" /> {f}
+                <CheckCircle2 className="h-4 w-4 text-brand" /> {f}
               </li>
             ))}
           </ul>
