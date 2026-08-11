@@ -2,6 +2,10 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "regions": ["bom1"],
+  "env": {
+    "NEXT_PUBLIC_SUPABASE_URL": "https://wsdmfleivhzyeqsmojgm.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzZG1mbGVpdmh6eWVxc21vamdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0NDAyMzUsImV4cCI6MjA5OTAxNjIzNX0.plbP2sdzLGhrcdxnAZRQsP8-tgvXyJa6nDK_MuM1P3g"
+  },
   "headers": [
     {
       "source": "/(.*)",
