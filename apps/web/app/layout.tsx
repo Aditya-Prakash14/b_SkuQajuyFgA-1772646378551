@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { SITE_URL } from '@/lib/env'
@@ -11,6 +12,8 @@ import './globals.css'
 
 const _geist = Geist({ subsets: ['latin'] })
 const _geistMono = Geist_Mono({ subsets: ['latin'] })
+
+const GA_MEASUREMENT_ID = 'G-JGZ52K9QXX'
 
 const TITLE = 'MyPrimeCompany | Professional Home & Office Cleaning Services'
 const DESCRIPTION =
@@ -45,6 +48,17 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           </CityProvider>
         </AuthProvider>
         <Analytics />
+        {/* Google tag (gtag.js) */}
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GA_MEASUREMENT_ID}');`}
+        </Script>
       </body>
     </html>
   )
