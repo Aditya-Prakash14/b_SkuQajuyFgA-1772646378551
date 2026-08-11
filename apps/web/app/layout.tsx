@@ -12,23 +12,24 @@ import './globals.css'
 
 const _geist = Geist({ subsets: ['latin'] })
 const _geistMono = Geist_Mono({ subsets: ['latin'] })
-
+const TITLE = 'My Prime Company'
 const GA_MEASUREMENT_ID = 'G-JGZ52K9QXX'
 
 const TITLE = 'MyPrimeCompany | Professional Home & Office Cleaning Services'
 const DESCRIPTION =
-  'MyPrimeCompany offers home deep cleaning (1/2/3/4 BHK), bathroom & kitchen cleaning, sofa shampooing, carpet cleaning, pest control, marble polishing and corporate cleaning. Book trusted experts at your doorstep.'
+  'My Prime Company offers home deep cleaning (1/2/3/4 BHK), bathroom & kitchen cleaning, sofa shampooing, carpet cleaning, pest control, marble polishing and corporate cleaning. Book trusted experts at your doorstep.'
 
 export const metadata: Metadata = {
   // Resolves relative OG/canonical URLs against the real deployed origin.
   metadataBase: new URL(SITE_URL),
-  title: TITLE,
+  // Pages that set their own title render as "<page> | My Prime Company".
+  title: { default: TITLE, template: `%s | ${TITLE}` },
   description: DESCRIPTION,
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,
     url: SITE_URL,
-    siteName: 'MyPrimeCompany',
+    siteName: TITLE,
     locale: 'en_IN',
     type: 'website',
   },
