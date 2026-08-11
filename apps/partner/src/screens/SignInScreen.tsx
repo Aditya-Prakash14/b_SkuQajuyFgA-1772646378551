@@ -45,8 +45,9 @@ export function SignInScreen() {
   }
 
   async function verify() {
+    // Supabase OTP length is a project setting (this project issues 8 digits).
     if (token.trim().length < 6) {
-      setError('Enter the 6-digit code from your email')
+      setError('Enter the code from your email')
       return
     }
     setBusy(true)
@@ -72,7 +73,7 @@ export function SignInScreen() {
       title="Partner sign in"
       subtitle={
         sent
-          ? `We sent a 6-digit code to ${email.trim()}. It expires in a few minutes.`
+          ? `We sent a sign-in code to ${email.trim()}. Check spam if it doesn't arrive.`
           : 'Join MyPrimeCompany as a service partner. Sign in to start or resume your application.'
       }
     >
@@ -96,12 +97,12 @@ export function SignInScreen() {
         ) : (
           <>
             <Field
-              label="6-digit code"
+              label="Code from your email"
               value={token}
               onChangeText={(t) => setToken(t.replace(/\D/g, ''))}
-              placeholder="123456"
+              placeholder="8-digit code"
               keyboardType="number-pad"
-              maxLength={6}
+              maxLength={10}
               textContentType="oneTimeCode"
               autoFocus
             />
