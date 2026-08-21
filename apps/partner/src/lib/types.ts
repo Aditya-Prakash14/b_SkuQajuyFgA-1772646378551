@@ -74,3 +74,57 @@ export const DOC_HINTS: Record<DocType, string> = {
   police_verification: 'Optional — speeds up approval',
   photo: 'Optional — used on your partner profile',
 }
+
+// ── Jobs (post-onboarding) — mirrors my_jobs() in 0010_vendor_jobs.sql ──────
+
+export type JobStatus = 'vendor_assigned' | 'in_progress' | 'completed' | 'cancelled'
+export type PaymentStatus = 'unpaid' | 'paid' | 'refunded' | 'partial'
+
+export interface JobItem {
+  service_name: string
+  qty: number
+  unit_price: number
+  line_total: number
+}
+
+export interface Job {
+  id: string
+  order_number: string
+  status: JobStatus
+  scheduled_date: string | null // YYYY-MM-DD
+  scheduled_slot: string | null
+  city: string | null
+  address: string | null
+  notes: string | null
+  total: number
+  payment_status: PaymentStatus
+  payment_method: string | null
+  customer_name: string
+  customer_phone: string
+  items: JobItem[]
+  created_at: string
+  updated_at: string
+}
+
+export const JOB_STATUS_LABELS: Record<JobStatus, string> = {
+  vendor_assigned: 'Assigned',
+  in_progress: 'In progress',
+  completed: 'Completed',
+  cancelled: 'Cancelled',
+}
+
+// ── Stats — mirrors my_stats() in 0013_vendor_stats.sql ─────────────────────
+
+export interface VendorStats {
+  /** Platform commission, percent of service value (orders.subtotal). */
+  commission_rate: number
+  completed_count: number
+  month_jobs: number
+  /** What customers paid this month (GST-inclusive). */
+  month_gross: number
+  /** What the partner is owed this month: subtotal × (1 − commission). */
+  month_payout: number
+  all_time_payout: number
+  rating_avg: number | null
+  rating_count: number
+}

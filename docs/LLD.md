@@ -142,6 +142,7 @@ FK/filter indexes on `services(category_id, is_active)`, `orders(status, custome
 | cities | SELECT where `is_active` | ALL |
 | customers / orders / order_items | **none** (write via RPC only) | ALL |
 | addresses / vendors / invoices / price_history | none | ALL |
+| orders / order_items (vendor) | — | SELECT where `assigned_vendor_id = current_vendor_id()` (0010; app reads via `my_jobs()`) |
 | admin_users | none | SELECT own-or-admin; ALL for **super_admin** |
 
 > **Deliberate deviation from the brief:** the brief granted anon raw `INSERT` on
@@ -213,6 +214,48 @@ AND `city = order.city` AND `services_offered` **overlaps** the order's service 
 (status=draft, due +7d, `invoice_number` via trigger). `markInvoicePaid(id, method)` sets
 invoice paid + `paid_at` **and** flips the linked order's `payment_status=paid`. Print via `window.print()` (chrome hidden by `@media print`).
 
+### 5.7 KYC review (CRM ↔ partner app)
+
+Partner uploads to the private `vendor-docs` bucket (`<vendor_id>/<doc_type>.<ext>`, one row
+per type in `vendor_documents`, UNIQUE (vendor_id, doc_type)) → `submit_vendor_for_review()`
+sets `onboarding_step='review'`, `submitted_at`, and (0011) `status='pending'` so a
+resubmission re-enters the queue. CRM vendor detail mints **signed URLs server-side under the
+admin's own session** (storage RLS "admin read vendor-docs"; no service role) and renders the
+KYC panel: per-document **Verify** / **Send back (note)** → `reviewDocument` (sets
+`reviewed_by = auth.uid()`, i.e. `admin_users.id`); decision **Approve & activate** /
+**Approve only** / **Reject (reason)** / **Suspend** → `decideVendor`. Approve/activate is
+guarded: all four required documents must be `verified` (the board's raw status dropdown
+stays as the override). Reject writes `rejection_reason`, which the app shows; the partner
+may delete a `rejected` document (0011 policy) and re-upload, then resubmit. The vendors
+board shows onboarding step, "Review needed", and pending-document counts per card.
+
+### 5.8 Job assignment push (CRM → partner phone)
+
+`assignVendor` (CRM server action) → `notifyVendorOfAssignment(supabase, orderId, vendorId)`
+(`apps/crm/lib/push.ts`) → POST https://exp.host/--/api/v2/push/send with the vendor's
+`expo_push_token` (0012). Best-effort: a push failure never rolls back the assignment;
+`DeviceNotRegistered` clears the token. The app stores its token via
+`register_push_token(p_token)` (SECURITY DEFINER, validates the ExponentPushToken[…]
+shape, `''` clears on sign-out) and, on a received push, refreshes `my_jobs()`; on tap it opens
+that job. Remote push is unavailable in Expo Go on Android (SDK 53+) — a development build
+with an EAS project id is required; the app detects both cases and skips registration.
+
+### 5.9 Partner earnings, rating & realtime
+
+`my_stats()` (0013, authenticated-only, SECURITY DEFINER — `reviews` stays closed to vendors)
+returns `commission_rate, completed_count, month_jobs, month_gross, month_payout,
+all_time_payout, rating_avg, rating_count` for `current_vendor_id()`. Payout rule:
+`subtotal × (1 − commission_rate/100)`; `subtotal` is pre-GST service value, `total` is the
+GST-inclusive amount the customer paid, GST is never part of a payout. Month boundary is
+Asia/Kolkata. Verified live: order PHC-20260820-0020 — customer ₹2,499 = ₹2,117.80 + ₹381.20
+GST, at 15% commission → payout ₹1,800.13.
+
+0014 adds `public.orders` to the `supabase_realtime` publication (`replica identity full`)
+so the app subscribes to `postgres_changes` filtered by `assigned_vendor_id`; RLS (0010)
+scopes delivery. **Client caveat:** `realtime.setAuth(token)` must be re-applied on every auth
+state change or the socket keeps the anon key — the channel subscribes and silently delivers
+nothing (and would die at the hourly token refresh).
+
 ### 5.6 Staff invite (super_admin)
 
 `inviteAdmin` → `requireSuperAdmin()` → service-role `auth.admin.createUser({email_confirm})`
@@ -254,6 +297,18 @@ optimistic UI + `sonner`). Role gating in the sidebar; hard gate for Settings in
 
 ---
 
+### 6.3 Partner app (`apps/partner`, Expo)
+
+Standalone npm project (Metro cannot follow pnpm's symlinked store). Email + password
+sign-in, no confirmation email (see app README for the Supabase toggle). Linear onboarding
+wizard driven by `vendors.onboarding_step`; once `status ∈ {approved, active}` the app
+switches to a three-tab workspace — Jobs (open work bucketed Overdue/Today/Upcoming,
+detail with Call / Maps / Start / Complete), History (finished jobs, count, this month's
+value), Account (profile edit via `upsert_my_vendor_profile`). No router: tab + selected
+job live in state. One `my_jobs()` list feeds every tab; refreshed on pull, foreground and
+after each write. KYC uploads go to the private `vendor-docs` bucket under
+`<vendor_id>/…` (storage RLS by folder).
+
 ## 7. Contracts
 
 ### 7.1 RPC
@@ -265,6 +320,13 @@ create_booking(p_name text, p_phone text, p_email text, p_city text, p_address t
   returns { order_id: uuid, order_number: text }
   errors: 'No items…', 'Name and phone are required', 'Service <id> is not available'
 ```
+
+**Vendor job RPCs (0010, `authenticated` only, SECURITY DEFINER):**
+
+| RPC | Returns | Behavior |
+|---|---|---|
+| `my_jobs()` | table: order fields + `customer_name/phone` + `items jsonb` | Orders where `assigned_vendor_id = current_vendor_id()`, newest scheduled first, limit 200. Customers table stays closed to vendors. |
+| `update_my_job_status(p_order_id, p_status, p_cash_collected=false)` | void | Only `vendor_assigned→in_progress` and `in_progress→completed`, on own jobs, vendor must be active/approved. On completion with cash collected and `payment_status='unpaid'`: sets `paid` / `payment_method='cash'`. |
 
 ### 7.2 Server actions (all return `{ ok: true } | { error: string }`, admin-session authorized)
 

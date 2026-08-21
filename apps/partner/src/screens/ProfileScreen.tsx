@@ -11,7 +11,18 @@ import type { Service, Vendor } from '../lib/types'
  * onboarding_step 'profile' → 'documents' as a side effect, so a successful
  * save is what moves the wizard forward.
  */
-export function ProfileScreen({ vendor, onSaved }: { vendor: Vendor; onSaved: () => void }) {
+export function ProfileScreen({
+  vendor,
+  onSaved,
+  mode = 'onboarding',
+  onCancel,
+}: {
+  vendor: Vendor
+  onSaved: () => void
+  /** 'edit' reuses the form from the Account tab: no wizard header, "Save changes". */
+  mode?: 'onboarding' | 'edit'
+  onCancel?: () => void
+}) {
   const [services, setServices] = useState<Service[] | null>(null)
   const [selected, setSelected] = useState<string[]>(vendor.services_offered ?? [])
   const [note, setNote] = useState(vendor.application_note ?? '')
@@ -62,7 +73,7 @@ export function ProfileScreen({ vendor, onSaved }: { vendor: Vendor; onSaved: ()
 
   return (
     <ScrollView contentContainerStyle={{ padding: space(5), paddingBottom: space(12) }}>
-      <Steps current={1} labels={['Account', 'Profile', 'Documents', 'Review']} />
+      {mode === 'onboarding' ? <Steps current={1} labels={['Account', 'Profile', 'Documents', 'Review']} /> : null}
       <View style={{ height: space(6) }} />
       <Screen
         title="What do you offer?"
@@ -88,7 +99,8 @@ export function ProfileScreen({ vendor, onSaved }: { vendor: Vendor; onSaved: ()
             style={{ minHeight: 100, textAlignVertical: 'top' }}
           />
 
-          <Button label="Save and continue" onPress={save} loading={busy} />
+          <Button label={mode === 'edit' ? 'Save changes' : 'Save and continue'} onPress={save} loading={busy} />
+          {mode === 'edit' && onCancel ? <Button label="Cancel" variant="ghost" onPress={onCancel} /> : null}
         </Card>
       </Screen>
     </ScrollView>

@@ -1,5 +1,6 @@
 import './global.css'
 
+import * as Linking from 'expo-linking'
 import { StatusBar } from 'expo-status-bar'
 import { useCallback, useEffect, useState } from 'react'
 import { KeyboardAvoidingView, Platform, View } from 'react-native'
@@ -7,7 +8,7 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 import type { Session } from '@supabase/supabase-js'
 
 import { Banner, Button, Loading, Screen } from './src/components/ui'
-import { errorMessage, supabase } from './src/lib/supabase'
+import { createSessionFromUrl, errorMessage, supabase } from './src/lib/supabase'
 import { space } from './src/lib/theme'
 import type { Vendor } from './src/lib/types'
 import { ClaimScreen } from './src/screens/ClaimScreen'
@@ -15,6 +16,7 @@ import { DocumentsScreen } from './src/screens/DocumentsScreen'
 import { ProfileScreen } from './src/screens/ProfileScreen'
 import { SignInScreen } from './src/screens/SignInScreen'
 import { StatusScreen } from './src/screens/StatusScreen'
+import { WorkspaceShell } from './src/screens/work/WorkspaceShell'
 
 /**
  * There is no router here on purpose. Onboarding is a strictly linear wizard
@@ -43,7 +45,23 @@ export default function App() {
       setSession(next)
       if (!next) setVendor(null)
     })
-    return () => sub.subscription.unsubscribe()
+
+    // Magic-link landing. The emailed link deep-links back here carrying the
+    // session tokens; turn them into a session. Covers both a cold start from
+    // the link (getInitialURL) and a tap while the app is already open.
+    const onUrl = (url: string | null) => {
+      if (!url) return
+      createSessionFromUrl(url).catch((err) =>
+        setError(errorMessage(err, 'That sign-in link is invalid or expired. Request a new one.')),
+      )
+    }
+    Linking.getInitialURL().then(onUrl)
+    const link = Linking.addEventListener('url', (e) => onUrl(e.url))
+
+    return () => {
+      sub.subscription.unsubscribe()
+      link.remove()
+    }
   }, [])
 
   const loadVendor = useCallback(async () => {
@@ -92,6 +110,13 @@ export default function App() {
 
     if (!vendor) {
       return <ClaimScreen email={session.user.email ?? ''} onClaimed={loadVendor} />
+    }
+
+    // Approved/active partners get the working app regardless of wizard step —
+    // ops may activate a vendor who applied via the website and never ran the
+    // wizard, and the wizard must not reappear for them.
+    if (vendor.status === 'active' || vendor.status === 'approved') {
+      return <WorkspaceShell vendor={vendor} onVendorChanged={loadVendor} />
     }
 
     if (forceDocuments) {

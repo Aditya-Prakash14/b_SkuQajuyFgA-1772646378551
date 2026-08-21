@@ -46,14 +46,69 @@ CTA, `accent` is a neutral press tint. App-level composites (`Screen`, `Field`,
 
 ## Auth
 
-Email OTP (6-digit code), because it works on a stock Supabase project.
+Email + password, **no verification email** — for now. Email delivery on the
+stock Supabase sender (OTP codes, magic links) is capped at ~2 emails/hour and
+often dropped by Gmail, so nothing in sign-in depends on an inbox. One button
+signs in, or creates the account and signs in immediately if the email is new.
+
+That instant sign-up needs **"Confirm email" switched OFF** in Supabase →
+Authentication → Providers → Email. With it on, sign-up returns no session and
+the screen says so.
+
 Google OAuth — which `apps/web` uses — needs native client IDs per build, and
-phone OTP needs a paid SMS provider.
+phone OTP needs a paid SMS provider. The magic-link plumbing is kept for later:
+`App.tsx` still listens for deep links via `expo-linking` and
+`createSessionFromUrl` handles them (also what a password-reset link will
+need). To use it, add these to Authentication → URL Configuration → Redirect
+URLs — `exp://<pc-lan-ip>:8081/**` (Expo Go) and `primepartner://**` (store
+builds) — and `node scripts/dev-magic-link.mjs <email>` mints a test link.
 
 The phone number is still the partner's identity: it is collected on the claim
 screen, and `claim_vendor()` matches it against unclaimed vendor rows so a
 "Become a Partner" application from the website is adopted rather than
 duplicated.
+
+## Earnings, rating and realtime
+
+`my_stats()` (migration 0013) returns the partner's payout, completed count and
+customer rating in one call, so the commission rule lives only in the database:
+
+    payout = orders.subtotal × (1 − vendors.commission_rate / 100)
+
+`subtotal` is the service value before GST; `total` is what the customer paid
+(GST-inclusive). GST is pass-through and never part of a payout. "This month" is
+the calendar month in Asia/Kolkata. History shows the payout, Account shows the
+star rating (average of `reviews` on this vendor's completed orders).
+
+The job list also subscribes to `postgres_changes` on `orders` filtered by
+`assigned_vendor_id` (migration 0014 publishes the table), so a new assignment
+lands within a second without pulling to refresh. **`supabase.realtime.setAuth()`
+must be re-applied on every auth state change** — see `src/lib/supabase.ts`.
+Without it the socket keeps the anon key: channels subscribe successfully and
+then never deliver a row, and an hourly token expiry silently kills the stream.
+Row visibility is enforced by RLS, verified with an unfiltered subscription:
+other vendors' order events do not arrive.
+
+## Push notifications
+
+New-job alerts. The app registers an Expo push token after the partner lands in
+the workspace (`src/lib/push.ts` → `register_push_token()` RPC, migration 0012)
+and clears it on sign-out. The CRM's `assignVendor` action sends the push
+directly to Expo's API (`apps/crm/lib/push.ts`) — assignment only happens there,
+so there is no DB trigger or edge function to keep in sync. Dead tokens
+(`DeviceNotRegistered`) are dropped automatically.
+
+Where it works:
+
+| Runtime | Remote push |
+| --- | --- |
+| Expo Go on Android (SDK 53+) | **No** — removed from the Go client; registration is skipped |
+| Expo Go on iOS | Yes, with an EAS project id |
+| Development / store build (`eas build`) | Yes |
+
+One-time setup for real devices: `npx eas init` (writes `extra.eas.projectId`
+into app.json — needs the owner's Expo account), then a development build.
+Without a project id the app logs one line and carries on; nothing else breaks.
 
 ## Flow
 
@@ -63,11 +118,26 @@ derives the screen from the vendor row — there is no router.
 
 | Step | Screen | Writes via |
 | --- | --- | --- |
-| — | `SignInScreen` | `supabase.auth` email OTP |
+| — | `SignInScreen` | `supabase.auth` email + password (no confirmation email) |
 | — | `ClaimScreen` | `claim_vendor()` → creates/adopts the vendor row |
 | `profile` | `ProfileScreen` | `upsert_my_vendor_profile()` → advances to `documents` |
 | `documents` | `DocumentsScreen` | Storage upload + `vendor_documents` insert |
 | `review` / `done` | `StatusScreen` | `submit_vendor_for_review()` |
+
+Once ops sets the vendor to `approved`/`active`, `App.tsx` routes to the working
+app instead of the wizard, whatever `onboarding_step` says (a website applicant
+activated by ops may never have run it):
+
+| Tab | Screen | Reads / writes |
+| --- | --- | --- |
+| Jobs | `work/JobsScreen` → `JobDetailScreen` | `my_jobs()`; `update_my_job_status()` — Start job, Mark completed (+ cash collected) |
+| History | `work/HistoryScreen` | same list, finished jobs + count / this month's value |
+| Account | `work/AccountScreen` → `ProfileScreen mode="edit"` | `upsert_my_vendor_profile()` |
+
+Jobs appear only after the CRM assigns them (`assignVendor` → `vendor_assigned`).
+The list refreshes on pull, on foreground, and after every status change;
+Realtime is not enabled on the project. Transitions are forward-only and
+re-checked server-side: `vendor_assigned → in_progress → completed`.
 
 ## Documents
 
