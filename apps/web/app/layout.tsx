@@ -15,7 +15,6 @@ const _geistMono = Geist_Mono({ subsets: ['latin'] })
 const TITLE = 'My Prime Company'
 const GA_MEASUREMENT_ID = 'G-JGZ52K9QXX'
 
-const TITLE = 'MyPrimeCompany | Professional Home & Office Cleaning Services'
 const DESCRIPTION =
   'My Prime Company offers home deep cleaning (1/2/3/4 BHK), bathroom & kitchen cleaning, sofa shampooing, carpet cleaning, pest control, marble polishing and corporate cleaning. Book trusted experts at your doorstep.'
 
