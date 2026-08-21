@@ -16,6 +16,7 @@ import { DocumentsScreen } from './src/screens/DocumentsScreen'
 import { ProfileScreen } from './src/screens/ProfileScreen'
 import { SignInScreen } from './src/screens/SignInScreen'
 import { StatusScreen } from './src/screens/StatusScreen'
+import { WorkspaceShell } from './src/screens/work/WorkspaceShell'
 
 /**
  * There is no router here on purpose. Onboarding is a strictly linear wizard
@@ -109,6 +110,13 @@ export default function App() {
 
     if (!vendor) {
       return <ClaimScreen email={session.user.email ?? ''} onClaimed={loadVendor} />
+    }
+
+    // Approved/active partners get the working app regardless of wizard step —
+    // ops may activate a vendor who applied via the website and never ran the
+    // wizard, and the wizard must not reappear for them.
+    if (vendor.status === 'active' || vendor.status === 'approved') {
+      return <WorkspaceShell vendor={vendor} onVendorChanged={loadVendor} />
     }
 
     if (forceDocuments) {

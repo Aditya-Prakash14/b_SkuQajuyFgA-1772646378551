@@ -82,6 +82,21 @@ derives the screen from the vendor row — there is no router.
 | `documents` | `DocumentsScreen` | Storage upload + `vendor_documents` insert |
 | `review` / `done` | `StatusScreen` | `submit_vendor_for_review()` |
 
+Once ops sets the vendor to `approved`/`active`, `App.tsx` routes to the working
+app instead of the wizard, whatever `onboarding_step` says (a website applicant
+activated by ops may never have run it):
+
+| Tab | Screen | Reads / writes |
+| --- | --- | --- |
+| Jobs | `work/JobsScreen` → `JobDetailScreen` | `my_jobs()`; `update_my_job_status()` — Start job, Mark completed (+ cash collected) |
+| History | `work/HistoryScreen` | same list, finished jobs + count / this month's value |
+| Account | `work/AccountScreen` → `ProfileScreen mode="edit"` | `upsert_my_vendor_profile()` |
+
+Jobs appear only after the CRM assigns them (`assignVendor` → `vendor_assigned`).
+The list refreshes on pull, on foreground, and after every status change;
+Realtime is not enabled on the project. Transitions are forward-only and
+re-checked server-side: `vendor_assigned → in_progress → completed`.
+
 ## Documents
 
 Four are mandatory — Aadhaar, PAN, address proof, bank proof — enforced by

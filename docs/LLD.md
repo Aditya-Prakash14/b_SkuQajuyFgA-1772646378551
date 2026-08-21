@@ -142,6 +142,7 @@ FK/filter indexes on `services(category_id, is_active)`, `orders(status, custome
 | cities | SELECT where `is_active` | ALL |
 | customers / orders / order_items | **none** (write via RPC only) | ALL |
 | addresses / vendors / invoices / price_history | none | ALL |
+| orders / order_items (vendor) | — | SELECT where `assigned_vendor_id = current_vendor_id()` (0010; app reads via `my_jobs()`) |
 | admin_users | none | SELECT own-or-admin; ALL for **super_admin** |
 
 > **Deliberate deviation from the brief:** the brief granted anon raw `INSERT` on
@@ -254,6 +255,18 @@ optimistic UI + `sonner`). Role gating in the sidebar; hard gate for Settings in
 
 ---
 
+### 6.3 Partner app (`apps/partner`, Expo)
+
+Standalone npm project (Metro cannot follow pnpm's symlinked store). Email + password
+sign-in, no confirmation email (see app README for the Supabase toggle). Linear onboarding
+wizard driven by `vendors.onboarding_step`; once `status ∈ {approved, active}` the app
+switches to a three-tab workspace — Jobs (open work bucketed Overdue/Today/Upcoming,
+detail with Call / Maps / Start / Complete), History (finished jobs, count, this month's
+value), Account (profile edit via `upsert_my_vendor_profile`). No router: tab + selected
+job live in state. One `my_jobs()` list feeds every tab; refreshed on pull, foreground and
+after each write. KYC uploads go to the private `vendor-docs` bucket under
+`<vendor_id>/…` (storage RLS by folder).
+
 ## 7. Contracts
 
 ### 7.1 RPC
@@ -265,6 +278,13 @@ create_booking(p_name text, p_phone text, p_email text, p_city text, p_address t
   returns { order_id: uuid, order_number: text }
   errors: 'No items…', 'Name and phone are required', 'Service <id> is not available'
 ```
+
+**Vendor job RPCs (0010, `authenticated` only, SECURITY DEFINER):**
+
+| RPC | Returns | Behavior |
+|---|---|---|
+| `my_jobs()` | table: order fields + `customer_name/phone` + `items jsonb` | Orders where `assigned_vendor_id = current_vendor_id()`, newest scheduled first, limit 200. Customers table stays closed to vendors. |
+| `update_my_job_status(p_order_id, p_status, p_cash_collected=false)` | void | Only `vendor_assigned→in_progress` and `in_progress→completed`, on own jobs, vendor must be active/approved. On completion with cash collected and `payment_status='unpaid'`: sets `paid` / `payment_method='cash'`. |
 
 ### 7.2 Server actions (all return `{ ok: true } | { error: string }`, admin-session authorized)
 
