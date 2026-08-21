@@ -229,6 +229,17 @@ stays as the override). Reject writes `rejection_reason`, which the app shows; t
 may delete a `rejected` document (0011 policy) and re-upload, then resubmit. The vendors
 board shows onboarding step, "Review needed", and pending-document counts per card.
 
+### 5.8 Job assignment push (CRM → partner phone)
+
+`assignVendor` (CRM server action) → `notifyVendorOfAssignment(supabase, orderId, vendorId)`
+(`apps/crm/lib/push.ts`) → POST https://exp.host/--/api/v2/push/send with the vendor's
+`expo_push_token` (0012). Best-effort: a push failure never rolls back the assignment;
+`DeviceNotRegistered` clears the token. The app stores its token via
+`register_push_token(p_token)` (SECURITY DEFINER, validates the ExponentPushToken[…]
+shape, `''` clears on sign-out) and, on a received push, refreshes `my_jobs()`; on tap it opens
+that job. Remote push is unavailable in Expo Go on Android (SDK 53+) — a development build
+with an EAS project id is required; the app detects both cases and skips registration.
+
 ### 5.6 Staff invite (super_admin)
 
 `inviteAdmin` → `requireSuperAdmin()` → service-role `auth.admin.createUser({email_confirm})`

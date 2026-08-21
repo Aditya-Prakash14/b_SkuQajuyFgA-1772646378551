@@ -68,6 +68,27 @@ screen, and `claim_vendor()` matches it against unclaimed vendor rows so a
 "Become a Partner" application from the website is adopted rather than
 duplicated.
 
+## Push notifications
+
+New-job alerts. The app registers an Expo push token after the partner lands in
+the workspace (`src/lib/push.ts` → `register_push_token()` RPC, migration 0012)
+and clears it on sign-out. The CRM's `assignVendor` action sends the push
+directly to Expo's API (`apps/crm/lib/push.ts`) — assignment only happens there,
+so there is no DB trigger or edge function to keep in sync. Dead tokens
+(`DeviceNotRegistered`) are dropped automatically.
+
+Where it works:
+
+| Runtime | Remote push |
+| --- | --- |
+| Expo Go on Android (SDK 53+) | **No** — removed from the Go client; registration is skipped |
+| Expo Go on iOS | Yes, with an EAS project id |
+| Development / store build (`eas build`) | Yes |
+
+One-time setup for real devices: `npx eas init` (writes `extra.eas.projectId`
+into app.json — needs the owner's Expo account), then a development build.
+Without a project id the app logs one line and carries on; nothing else breaks.
+
 ## Flow
 
 The wizard position lives in `vendors.onboarding_step`, not in navigation state,

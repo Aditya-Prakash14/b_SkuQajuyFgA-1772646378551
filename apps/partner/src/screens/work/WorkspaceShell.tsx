@@ -3,6 +3,7 @@ import { AppState, Pressable, View } from 'react-native'
 
 import { Loading, Text } from '../../components/ui'
 import { fetchMyJobs, isOpen } from '../../lib/jobs'
+import { onPush, registerForPush, unregisterPush } from '../../lib/push'
 import { errorMessage, supabase } from '../../lib/supabase'
 import type { Job, Vendor } from '../../lib/types'
 import { ProfileScreen } from '../ProfileScreen'
@@ -49,7 +50,24 @@ export function WorkspaceShell({ vendor, onVendorChanged }: { vendor: Vendor; on
     const sub = AppState.addEventListener('change', (s) => {
       if (s === 'active') load()
     })
-    return () => sub.remove()
+    // Push: register this device for assignment alerts (no-op where unsupported,
+    // e.g. Expo Go on Android), refresh on arrival, open the job on tap.
+    registerForPush()
+    const offPush = onPush({
+      onReceived: () => load(),
+      onTap: (orderId) => {
+        load().then(() => {
+          if (orderId) {
+            setTab('jobs')
+            setSelectedId(orderId)
+          }
+        })
+      },
+    })
+    return () => {
+      sub.remove()
+      offPush()
+    }
   }, [load])
 
   if (jobs === null) return <Loading label="Loading your jobs…" />
@@ -103,7 +121,14 @@ export function WorkspaceShell({ vendor, onVendorChanged }: { vendor: Vendor; on
             onOpen={(j) => setSelectedId(j.id)}
           />
         ) : (
-          <AccountScreen vendor={vendor} onEdit={() => setEditing(true)} onSignOut={() => supabase.auth.signOut()} />
+          <AccountScreen
+            vendor={vendor}
+            onEdit={() => setEditing(true)}
+            onSignOut={async () => {
+              await unregisterPush() // this phone must stop getting job alerts once signed out
+              await supabase.auth.signOut()
+            }}
+          />
         )}
       </View>
 

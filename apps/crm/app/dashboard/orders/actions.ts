@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { notifyVendorOfAssignment } from '@/lib/push'
 import { gstInclusive, type OrderStatus, type PaymentStatus } from '@prime/shared'
 
 export interface ManualOrderInput {
@@ -124,6 +125,16 @@ export async function assignVendor(id: string, vendorId: string): Promise<Result
     })
     .eq('id', id)
   if (error) return { error: error.message }
+
+  // Tell the partner's phone. Best-effort: the assignment is already saved,
+  // and a push failure (no token yet, dead device) must not roll it back.
+  if (vendorId) {
+    const push = await notifyVendorOfAssignment(supabase, id, vendorId)
+    if (!push.sent && push.reason !== 'no-token') {
+      console.warn(`[push] assignment push not sent for ${id}: ${push.reason} ${push.detail ?? ''}`)
+    }
+  }
+
   revalidatePath('/dashboard/orders')
   revalidatePath(`/dashboard/orders/${id}`)
   return { ok: true }

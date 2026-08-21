@@ -594,11 +594,13 @@ export type Database = {
           created_at: string | null
           documents: Json | null
           email: string | null
+          expo_push_token: string | null
           id: string
           name: string
           onboarded_at: string | null
           onboarding_step: string
           phone: string
+          push_token_updated_at: string | null
           rating: number | null
           rejection_reason: string | null
           services_offered: string[] | null
@@ -613,11 +615,13 @@ export type Database = {
           created_at?: string | null
           documents?: Json | null
           email?: string | null
+          expo_push_token?: string | null
           id?: string
           name: string
           onboarded_at?: string | null
           onboarding_step?: string
           phone: string
+          push_token_updated_at?: string | null
           rating?: number | null
           rejection_reason?: string | null
           services_offered?: string[] | null
@@ -632,11 +636,13 @@ export type Database = {
           created_at?: string | null
           documents?: Json | null
           email?: string | null
+          expo_push_token?: string | null
           id?: string
           name?: string
           onboarded_at?: string | null
           onboarding_step?: string
           phone?: string
+          push_token_updated_at?: string | null
           rating?: number | null
           rejection_reason?: string | null
           services_offered?: string[] | null
