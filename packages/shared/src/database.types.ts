@@ -534,9 +534,61 @@ export type Database = {
           },
         ]
       }
+      vendor_documents: {
+        Row: {
+          doc_type: string
+          id: string
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          storage_path: string
+          uploaded_at: string | null
+          vendor_id: string
+        }
+        Insert: {
+          doc_type: string
+          id?: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          storage_path: string
+          uploaded_at?: string | null
+          vendor_id: string
+        }
+        Update: {
+          doc_type?: string
+          id?: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          storage_path?: string
+          uploaded_at?: string | null
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_documents_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vendor_documents_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendors: {
         Row: {
           application_note: string | null
+          auth_user_id: string | null
           city: string | null
           commission_rate: number | null
           created_at: string | null
@@ -545,13 +597,17 @@ export type Database = {
           id: string
           name: string
           onboarded_at: string | null
+          onboarding_step: string
           phone: string
           rating: number | null
+          rejection_reason: string | null
           services_offered: string[] | null
           status: string
+          submitted_at: string | null
         }
         Insert: {
           application_note?: string | null
+          auth_user_id?: string | null
           city?: string | null
           commission_rate?: number | null
           created_at?: string | null
@@ -560,13 +616,17 @@ export type Database = {
           id?: string
           name: string
           onboarded_at?: string | null
+          onboarding_step?: string
           phone: string
           rating?: number | null
+          rejection_reason?: string | null
           services_offered?: string[] | null
           status?: string
+          submitted_at?: string | null
         }
         Update: {
           application_note?: string | null
+          auth_user_id?: string | null
           city?: string | null
           commission_rate?: number | null
           created_at?: string | null
@@ -575,10 +635,13 @@ export type Database = {
           id?: string
           name?: string
           onboarded_at?: string | null
+          onboarding_step?: string
           phone?: string
           rating?: number | null
+          rejection_reason?: string | null
           services_offered?: string[] | null
           status?: string
+          submitted_at?: string | null
         }
         Relationships: []
       }
@@ -588,6 +651,15 @@ export type Database = {
     }
     Functions: {
       cancel_booking: { Args: { p_order_id: string }; Returns: undefined }
+      claim_vendor: {
+        Args: {
+          p_city: string
+          p_email: string
+          p_name: string
+          p_phone: string
+        }
+        Returns: string
+      }
       create_booking: {
         Args: {
           p_address: string
@@ -603,8 +675,30 @@ export type Database = {
         Returns: Json
       }
       current_customer_id: { Args: never; Returns: string }
+      current_vendor_id: { Args: never; Returns: string }
       is_admin: { Args: never; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
+      my_jobs: {
+        Args: never
+        Returns: {
+          address: string
+          city: string
+          created_at: string
+          customer_name: string
+          customer_phone: string
+          id: string
+          items: Json
+          notes: string
+          order_number: string
+          payment_method: string
+          payment_status: string
+          scheduled_date: string
+          scheduled_slot: string
+          status: string
+          total: number
+          updated_at: string
+        }[]
+      }
       reschedule_booking: {
         Args: { p_date: string; p_order_id: string; p_slot?: string }
         Returns: undefined
@@ -627,6 +721,25 @@ export type Database = {
           p_phone: string
         }
         Returns: Json
+      }
+      submit_vendor_for_review: { Args: never; Returns: undefined }
+      update_my_job_status: {
+        Args: {
+          p_cash_collected?: boolean
+          p_order_id: string
+          p_status: string
+        }
+        Returns: undefined
+      }
+      upsert_my_vendor_profile: {
+        Args: {
+          p_city: string
+          p_email: string
+          p_name: string
+          p_note?: string
+          p_services: string[]
+        }
+        Returns: undefined
       }
     }
     Enums: {
@@ -808,3 +921,18 @@ export type OrderItem = Tables<'order_items'>
 export type Vendor = Tables<'vendors'>
 export type Invoice = Tables<'invoices'>
 export type Review = Tables<'reviews'>
+
+// KYC (vendor_documents + vendors.onboarding_step) — added with migrations 0008–0011
+export type OnboardingStep = 'profile' | 'documents' | 'review' | 'done'
+export type KycDocType = 'aadhaar' | 'pan' | 'address_proof' | 'bank_proof' | 'police_verification' | 'photo'
+export type KycDocStatus = 'pending' | 'verified' | 'rejected'
+export type VendorKycDocument = Tables<'vendor_documents'>
+export const KYC_REQUIRED_DOCS: KycDocType[] = ['aadhaar', 'pan', 'address_proof', 'bank_proof']
+export const KYC_DOC_LABELS: Record<KycDocType, string> = {
+  aadhaar: 'Aadhaar card',
+  pan: 'PAN card',
+  address_proof: 'Address proof',
+  bank_proof: 'Bank proof',
+  police_verification: 'Police verification',
+  photo: 'Passport photo',
+}

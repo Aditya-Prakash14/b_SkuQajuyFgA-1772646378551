@@ -214,6 +214,21 @@ AND `city = order.city` AND `services_offered` **overlaps** the order's service 
 (status=draft, due +7d, `invoice_number` via trigger). `markInvoicePaid(id, method)` sets
 invoice paid + `paid_at` **and** flips the linked order's `payment_status=paid`. Print via `window.print()` (chrome hidden by `@media print`).
 
+### 5.7 KYC review (CRM ↔ partner app)
+
+Partner uploads to the private `vendor-docs` bucket (`<vendor_id>/<doc_type>.<ext>`, one row
+per type in `vendor_documents`, UNIQUE (vendor_id, doc_type)) → `submit_vendor_for_review()`
+sets `onboarding_step='review'`, `submitted_at`, and (0011) `status='pending'` so a
+resubmission re-enters the queue. CRM vendor detail mints **signed URLs server-side under the
+admin's own session** (storage RLS "admin read vendor-docs"; no service role) and renders the
+KYC panel: per-document **Verify** / **Send back (note)** → `reviewDocument` (sets
+`reviewed_by = auth.uid()`, i.e. `admin_users.id`); decision **Approve & activate** /
+**Approve only** / **Reject (reason)** / **Suspend** → `decideVendor`. Approve/activate is
+guarded: all four required documents must be `verified` (the board's raw status dropdown
+stays as the override). Reject writes `rejection_reason`, which the app shows; the partner
+may delete a `rejected` document (0011 policy) and re-upload, then resubmit. The vendors
+board shows onboarding step, "Review needed", and pending-document counts per card.
+
 ### 5.6 Staff invite (super_admin)
 
 `inviteAdmin` → `requireSuperAdmin()` → service-role `auth.admin.createUser({email_confirm})`
