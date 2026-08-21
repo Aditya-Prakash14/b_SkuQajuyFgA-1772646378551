@@ -2,28 +2,31 @@ import { useState } from 'react'
 import { Text, View } from 'react-native'
 
 import { Banner, Button, Card, Field, Screen } from '../components/ui'
-import { errorMessage, supabase } from '../lib/supabase'
+import { authRedirectUrl, errorMessage, supabase } from '../lib/supabase'
 import { colors, space } from '../lib/theme'
 
 /**
- * Email OTP sign-in.
+ * Magic-link sign-in.
+ *
+ * The partner enters an email and taps the link we send; the link deep-links
+ * back into this app and App.tsx turns it into a session. No code to type —
+ * Supabase's stock "Magic Link" email carries a link, not a token, so a code
+ * field only ever confused people.
  *
  * Deliberately not Google OAuth (which apps/web uses): that needs native client
- * IDs and a custom scheme per build, which a partner-facing APK cannot assume.
- * Deliberately not phone OTP either — that needs a paid SMS provider wired into
- * Supabase Auth. Email OTP works on a stock project with no extra setup.
+ * IDs per build, which a partner-facing APK cannot assume. Deliberately not
+ * phone OTP either — that needs a paid SMS provider wired into Supabase Auth.
  *
  * The phone number is still the partner's identity: it is collected on the next
  * screen and is what claim_vendor() matches against.
  */
 export function SignInScreen() {
   const [email, setEmail] = useState('')
-  const [token, setToken] = useState('')
   const [sent, setSent] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  async function sendCode() {
+  async function sendLink() {
     if (!/^\S+@\S+\.\S+$/.test(email.trim())) {
       setError('Enter a valid email address')
       return
@@ -33,36 +36,19 @@ export function SignInScreen() {
     try {
       const { error } = await supabase.auth.signInWithOtp({
         email: email.trim(),
-        options: { shouldCreateUser: true },
+        options: {
+          shouldCreateUser: true,
+          // Where the emailed link lands: exp://<host>/--/auth/callback in Expo
+          // Go, primepartner://auth/callback in a store build. Must be on the
+          // Supabase Auth redirect allow-list or the link falls back to the
+          // website instead of the app.
+          emailRedirectTo: authRedirectUrl(),
+        },
       })
       if (error) throw error
       setSent(true)
     } catch (err) {
-      setError(errorMessage(err, 'Could not send the code. Check the email and try again.'))
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  async function verify() {
-    // Supabase OTP length is a project setting (this project issues 8 digits).
-    if (token.trim().length < 6) {
-      setError('Enter the code from your email')
-      return
-    }
-    setBusy(true)
-    setError(null)
-    try {
-      const { error } = await supabase.auth.verifyOtp({
-        email: email.trim(),
-        token: token.trim(),
-        type: 'email',
-      })
-      if (error) throw error
-      // No navigation here: App.tsx listens on onAuthStateChange and swaps the
-      // screen as soon as the session lands.
-    } catch (err) {
-      setError(errorMessage(err, 'That code was not accepted. Request a new one.'))
+      setError(errorMessage(err, 'Could not send the link. Check the email and try again.'))
     } finally {
       setBusy(false)
     }
@@ -73,7 +59,7 @@ export function SignInScreen() {
       title="Partner sign in"
       subtitle={
         sent
-          ? `We sent a sign-in code to ${email.trim()}. Check spam if it doesn't arrive.`
+          ? `We emailed a sign-in link to ${email.trim()}. Open it on this phone — check spam if it doesn't arrive.`
           : 'Join MyPrimeCompany as a service partner. Sign in to start or resume your application.'
       }
     >
@@ -92,27 +78,20 @@ export function SignInScreen() {
               keyboardType="email-address"
               textContentType="emailAddress"
             />
-            <Button label="Send code" onPress={sendCode} loading={busy} />
+            <Button label="Email me a sign-in link" onPress={sendLink} loading={busy} />
           </>
         ) : (
           <>
-            <Field
-              label="Code from your email"
-              value={token}
-              onChangeText={(t) => setToken(t.replace(/\D/g, ''))}
-              placeholder="8-digit code"
-              keyboardType="number-pad"
-              maxLength={10}
-              textContentType="oneTimeCode"
-              autoFocus
-            />
-            <Button label="Verify and continue" onPress={verify} loading={busy} />
+            <Text style={{ fontSize: 14, color: colors.muted, lineHeight: 20 }}>
+              Tap the link in the email and you'll land back here, signed in. The
+              link works once and expires in an hour.
+            </Text>
+            <Button label="Resend link" variant="ghost" onPress={sendLink} loading={busy} />
             <Button
               label="Use a different email"
               variant="ghost"
               onPress={() => {
                 setSent(false)
-                setToken('')
                 setError(null)
               }}
             />
