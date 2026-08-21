@@ -2,10 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { AppState, Pressable, View } from 'react-native'
 
 import { Loading, Text } from '../../components/ui'
-import { fetchMyJobs, isOpen } from '../../lib/jobs'
+import { fetchMyJobs, fetchMyStats, isOpen } from '../../lib/jobs'
 import { onPush, registerForPush, unregisterPush } from '../../lib/push'
 import { errorMessage, supabase } from '../../lib/supabase'
-import type { Job, Vendor } from '../../lib/types'
+import type { Job, Vendor, VendorStats } from '../../lib/types'
 import { ProfileScreen } from '../ProfileScreen'
 import { AccountScreen } from './AccountScreen'
 import { HistoryScreen } from './HistoryScreen'
@@ -23,6 +23,7 @@ type Tab = 'jobs' | 'history' | 'account'
 export function WorkspaceShell({ vendor, onVendorChanged }: { vendor: Vendor; onVendorChanged: () => void }) {
   const [tab, setTab] = useState<Tab>('jobs')
   const [jobs, setJobs] = useState<Job[] | null>(null)
+  const [stats, setStats] = useState<VendorStats | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [editing, setEditing] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
@@ -34,7 +35,10 @@ export function WorkspaceShell({ vendor, onVendorChanged }: { vendor: Vendor; on
     inflight.current = true
     setRefreshing(true)
     try {
-      setJobs(await fetchMyJobs())
+      // Stats are secondary: a stats failure must not blank the job list.
+      const [list, s] = await Promise.all([fetchMyJobs(), fetchMyStats().catch(() => null)])
+      setJobs(list)
+      setStats(s)
       setError(null)
     } catch (err) {
       setError(errorMessage(err, 'Could not load your jobs.'))
@@ -50,6 +54,18 @@ export function WorkspaceShell({ vendor, onVendorChanged }: { vendor: Vendor; on
     const sub = AppState.addEventListener('change', (s) => {
       if (s === 'active') load()
     })
+    // Realtime: any change to an order assigned to this vendor (new assignment,
+    // reschedule, cancellation) refreshes the list within a second. RLS on
+    // orders scopes the stream to our own rows; the filter just cuts noise.
+    const channel = supabase
+      .channel(`jobs:${vendor.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'orders', filter: `assigned_vendor_id=eq.${vendor.id}` },
+        () => load(),
+      )
+      .subscribe()
+
     // Push: register this device for assignment alerts (no-op where unsupported,
     // e.g. Expo Go on Android), refresh on arrival, open the job on tap.
     registerForPush()
@@ -67,8 +83,9 @@ export function WorkspaceShell({ vendor, onVendorChanged }: { vendor: Vendor; on
     return () => {
       sub.remove()
       offPush()
+      supabase.removeChannel(channel)
     }
-  }, [load])
+  }, [load, vendor.id])
 
   if (jobs === null) return <Loading label="Loading your jobs…" />
 
@@ -115,6 +132,7 @@ export function WorkspaceShell({ vendor, onVendorChanged }: { vendor: Vendor; on
         ) : tab === 'history' ? (
           <HistoryScreen
             jobs={jobs}
+            stats={stats}
             refreshing={refreshing}
             error={error}
             onRefresh={load}
@@ -123,6 +141,7 @@ export function WorkspaceShell({ vendor, onVendorChanged }: { vendor: Vendor; on
         ) : (
           <AccountScreen
             vendor={vendor}
+            stats={stats}
             onEdit={() => setEditing(true)}
             onSignOut={async () => {
               await unregisterPush() // this phone must stop getting job alerts once signed out

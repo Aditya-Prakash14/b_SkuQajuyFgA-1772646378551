@@ -68,6 +68,27 @@ screen, and `claim_vendor()` matches it against unclaimed vendor rows so a
 "Become a Partner" application from the website is adopted rather than
 duplicated.
 
+## Earnings, rating and realtime
+
+`my_stats()` (migration 0013) returns the partner's payout, completed count and
+customer rating in one call, so the commission rule lives only in the database:
+
+    payout = orders.subtotal × (1 − vendors.commission_rate / 100)
+
+`subtotal` is the service value before GST; `total` is what the customer paid
+(GST-inclusive). GST is pass-through and never part of a payout. "This month" is
+the calendar month in Asia/Kolkata. History shows the payout, Account shows the
+star rating (average of `reviews` on this vendor's completed orders).
+
+The job list also subscribes to `postgres_changes` on `orders` filtered by
+`assigned_vendor_id` (migration 0014 publishes the table), so a new assignment
+lands within a second without pulling to refresh. **`supabase.realtime.setAuth()`
+must be re-applied on every auth state change** — see `src/lib/supabase.ts`.
+Without it the socket keeps the anon key: channels subscribe successfully and
+then never deliver a row, and an hourly token expiry silently kills the stream.
+Row visibility is enforced by RLS, verified with an unfiltered subscription:
+other vendors' order events do not arrive.
+
 ## Push notifications
 
 New-job alerts. The app registers an Expo push token after the partner lands in

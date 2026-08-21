@@ -240,6 +240,22 @@ shape, `''` clears on sign-out) and, on a received push, refreshes `my_jobs()`; 
 that job. Remote push is unavailable in Expo Go on Android (SDK 53+) — a development build
 with an EAS project id is required; the app detects both cases and skips registration.
 
+### 5.9 Partner earnings, rating & realtime
+
+`my_stats()` (0013, authenticated-only, SECURITY DEFINER — `reviews` stays closed to vendors)
+returns `commission_rate, completed_count, month_jobs, month_gross, month_payout,
+all_time_payout, rating_avg, rating_count` for `current_vendor_id()`. Payout rule:
+`subtotal × (1 − commission_rate/100)`; `subtotal` is pre-GST service value, `total` is the
+GST-inclusive amount the customer paid, GST is never part of a payout. Month boundary is
+Asia/Kolkata. Verified live: order PHC-20260820-0020 — customer ₹2,499 = ₹2,117.80 + ₹381.20
+GST, at 15% commission → payout ₹1,800.13.
+
+0014 adds `public.orders` to the `supabase_realtime` publication (`replica identity full`)
+so the app subscribes to `postgres_changes` filtered by `assigned_vendor_id`; RLS (0010)
+scopes delivery. **Client caveat:** `realtime.setAuth(token)` must be re-applied on every auth
+state change or the socket keeps the anon key — the channel subscribes and silently delivers
+nothing (and would die at the hourly token refresh).
+
 ### 5.6 Staff invite (super_admin)
 
 `inviteAdmin` → `requireSuperAdmin()` → service-role `auth.admin.createUser({email_confirm})`

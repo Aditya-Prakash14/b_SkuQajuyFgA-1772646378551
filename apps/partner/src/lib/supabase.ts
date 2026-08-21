@@ -36,6 +36,20 @@ AppState.addEventListener('change', (state) => {
   else supabase.auth.stopAutoRefresh()
 })
 
+/**
+ * Hand the current JWT to the realtime socket.
+ *
+ * Postgres-changes subscriptions are filtered by RLS, and the socket does NOT
+ * pick up the session on its own — without this it stays on the anon key and a
+ * channel subscribes successfully but never receives a single row (verified:
+ * 0 events before, events immediately after). Re-running it on TOKEN_REFRESHED
+ * matters just as much: the access token expires hourly, and a stale socket
+ * goes quiet rather than erroring.
+ */
+supabase.auth.onAuthStateChange((_event, session) => {
+  supabase.realtime.setAuth(session?.access_token ?? null)
+})
+
 /** Postgres exceptions from our RPCs are already human-readable — surface them. */
 export function errorMessage(err: unknown, fallback = 'Something went wrong. Please try again.') {
   if (err && typeof err === 'object' && 'message' in err) {

@@ -112,3 +112,19 @@ export const JOB_STATUS_LABELS: Record<JobStatus, string> = {
   completed: 'Completed',
   cancelled: 'Cancelled',
 }
+
+// ── Stats — mirrors my_stats() in 0013_vendor_stats.sql ─────────────────────
+
+export interface VendorStats {
+  /** Platform commission, percent of service value (orders.subtotal). */
+  commission_rate: number
+  completed_count: number
+  month_jobs: number
+  /** What customers paid this month (GST-inclusive). */
+  month_gross: number
+  /** What the partner is owed this month: subtotal × (1 − commission). */
+  month_payout: number
+  all_time_payout: number
+  rating_avg: number | null
+  rating_count: number
+}

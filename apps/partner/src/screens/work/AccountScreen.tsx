@@ -3,15 +3,17 @@ import { ScrollView, View } from 'react-native'
 
 import { Badge, Button, Card, Text } from '../../components/ui'
 import { supabase } from '../../lib/supabase'
-import type { Service, Vendor } from '../../lib/types'
+import type { Service, Vendor, VendorStats } from '../../lib/types'
 
-/** Profile summary + the two things a working partner needs: edit profile, sign out. */
+/** Profile summary, customer rating, and the two things a working partner needs: edit profile, sign out. */
 export function AccountScreen({
   vendor,
+  stats,
   onEdit,
   onSignOut,
 }: {
   vendor: Vendor
+  stats: VendorStats | null
   onEdit: () => void
   onSignOut: () => void
 }) {
@@ -56,6 +58,24 @@ export function AccountScreen({
             Ops activates your account after a final check; jobs are assigned only to active partners.
           </Text>
         ) : null}
+      </Card>
+
+      <Card>
+        <Text className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Customer rating</Text>
+        {stats && stats.rating_count > 0 && stats.rating_avg !== null ? (
+          <View className="mt-2 flex-row items-baseline gap-2">
+            <Text className="text-3xl font-bold text-foreground">
+              {'★'} {stats.rating_avg.toFixed(1)}
+            </Text>
+            <Text className="text-sm text-muted-foreground">
+              from {stats.rating_count} review{stats.rating_count === 1 ? '' : 's'}
+            </Text>
+          </View>
+        ) : (
+          <Text className="mt-2 text-sm text-muted-foreground">
+            No ratings yet — customers are asked to rate each completed job.
+          </Text>
+        )}
       </Card>
 
       <Card>

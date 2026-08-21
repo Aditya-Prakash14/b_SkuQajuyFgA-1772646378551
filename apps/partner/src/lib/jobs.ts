@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import type { Job, JobStatus } from './types'
+import type { Job, JobStatus, VendorStats } from './types'
 
 /** All jobs ever assigned to the signed-in vendor, newest scheduled first. */
 export async function fetchMyJobs(): Promise<Job[]> {
@@ -17,6 +17,24 @@ export async function fetchMyJobs(): Promise<Job[]> {
       line_total: Number(i.line_total),
     })),
   }))
+}
+
+/** Earnings + rating, computed server-side so the commission rule lives in one place (0013). */
+export async function fetchMyStats(): Promise<VendorStats | null> {
+  const { data, error } = await supabase.rpc('my_stats')
+  if (error) throw error
+  const row = (data as VendorStats[] | null)?.[0]
+  if (!row) return null
+  return {
+    commission_rate: Number(row.commission_rate ?? 0),
+    completed_count: Number(row.completed_count ?? 0),
+    month_jobs: Number(row.month_jobs ?? 0),
+    month_gross: Number(row.month_gross ?? 0),
+    month_payout: Number(row.month_payout ?? 0),
+    all_time_payout: Number(row.all_time_payout ?? 0),
+    rating_avg: row.rating_avg === null || row.rating_avg === undefined ? null : Number(row.rating_avg),
+    rating_count: Number(row.rating_count ?? 0),
+  }
 }
 
 /** vendor_assigned → in_progress → completed; anything else is rejected server-side. */
@@ -68,9 +86,7 @@ export function dayBucket(key: string | null): 'today' | 'overdue' | 'upcoming' 
   return key < t ? 'overdue' : 'upcoming'
 }
 
-/** Jobs completed in the current calendar month, by updated_at. */
-export function isThisMonth(iso: string) {
-  const d = new Date(iso)
-  const n = new Date()
-  return d.getFullYear() === n.getFullYear() && d.getMonth() === n.getMonth()
+/** Name of the current month, for the History header. */
+export function currentMonthName() {
+  return MONTHS[new Date().getMonth()]
 }
