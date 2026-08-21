@@ -46,23 +46,22 @@ CTA, `accent` is a neutral press tint. App-level composites (`Screen`, `Field`,
 
 ## Auth
 
-Email magic link, because it works on a stock Supabase project. Google OAuth —
-which `apps/web` uses — needs native client IDs per build, and phone OTP needs
-a paid SMS provider.
+Email + password, **no verification email** — for now. Email delivery on the
+stock Supabase sender (OTP codes, magic links) is capped at ~2 emails/hour and
+often dropped by Gmail, so nothing in sign-in depends on an inbox. One button
+signs in, or creates the account and signs in immediately if the email is new.
 
-The emailed link deep-links back into the app (`App.tsx` listens via
-`expo-linking` and calls `createSessionFromUrl`). Both landing URLs must be on
-**Supabase → Authentication → URL Configuration → Redirect URLs**, or GoTrue
-silently substitutes the Site URL and the link opens the website instead:
+That instant sign-up needs **"Confirm email" switched OFF** in Supabase →
+Authentication → Providers → Email. With it on, sign-up returns no session and
+the screen says so.
 
-```
-exp://192.168.1.37:8081/**     # Expo Go — use your PC's LAN IP
-primepartner://**              # store builds (scheme in app.json)
-```
-
-Email delivery: the built-in sender is capped at ~2 emails/hour. For testing
-without an inbox, `node scripts/dev-magic-link.mjs <email>` (repo root) mints a
-link you can open on the phone.
+Google OAuth — which `apps/web` uses — needs native client IDs per build, and
+phone OTP needs a paid SMS provider. The magic-link plumbing is kept for later:
+`App.tsx` still listens for deep links via `expo-linking` and
+`createSessionFromUrl` handles them (also what a password-reset link will
+need). To use it, add these to Authentication → URL Configuration → Redirect
+URLs — `exp://<pc-lan-ip>:8081/**` (Expo Go) and `primepartner://**` (store
+builds) — and `node scripts/dev-magic-link.mjs <email>` mints a test link.
 
 The phone number is still the partner's identity: it is collected on the claim
 screen, and `claim_vendor()` matches it against unclaimed vendor rows so a
@@ -77,7 +76,7 @@ derives the screen from the vendor row — there is no router.
 
 | Step | Screen | Writes via |
 | --- | --- | --- |
-| — | `SignInScreen` | `supabase.auth` magic link → deep link back |
+| — | `SignInScreen` | `supabase.auth` email + password (no confirmation email) |
 | — | `ClaimScreen` | `claim_vendor()` → creates/adopts the vendor row |
 | `profile` | `ProfileScreen` | `upsert_my_vendor_profile()` → advances to `documents` |
 | `documents` | `DocumentsScreen` | Storage upload + `vendor_documents` insert |
