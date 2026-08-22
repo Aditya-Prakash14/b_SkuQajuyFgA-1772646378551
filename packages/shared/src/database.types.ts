@@ -725,6 +725,8 @@ export type Database = {
           onboarded_at: string | null
           onboarding_step: string
           is_online: boolean
+          accepts_deep_clean: boolean
+          accepts_prime_now: boolean
           last_online_at: string | null
           phone: string
           push_token_updated_at: string | null
@@ -748,6 +750,8 @@ export type Database = {
           onboarded_at?: string | null
           onboarding_step?: string
           is_online?: boolean
+          accepts_deep_clean?: boolean
+          accepts_prime_now?: boolean
           last_online_at?: string | null
           phone: string
           push_token_updated_at?: string | null
@@ -771,6 +775,8 @@ export type Database = {
           onboarded_at?: string | null
           onboarding_step?: string
           is_online?: boolean
+          accepts_deep_clean?: boolean
+          accepts_prime_now?: boolean
           last_online_at?: string | null
           phone?: string
           push_token_updated_at?: string | null
@@ -921,6 +927,8 @@ export type Database = {
       }
       upsert_my_vendor_profile: {
         Args: {
+          p_accepts_deep_clean?: boolean
+          p_accepts_prime_now?: boolean
           p_city: string
           p_email: string
           p_name: string

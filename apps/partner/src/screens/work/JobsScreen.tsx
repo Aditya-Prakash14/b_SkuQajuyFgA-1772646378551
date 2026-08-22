@@ -13,6 +13,7 @@ import { OffersBanner } from './OffersBanner'
 export function JobsScreen({
   jobs,
   offers,
+  wantsPrimeNow,
   online,
   onlineBusy,
   refreshing,
@@ -24,6 +25,8 @@ export function JobsScreen({
 }: {
   jobs: Job[]
   offers: Offer[]
+  /** False when the partner has not opted into Prime Now at all. */
+  wantsPrimeNow: boolean
   online: boolean
   onlineBusy: boolean
   refreshing: boolean
@@ -57,22 +60,25 @@ export function JobsScreen({
         </Text>
       </View>
 
-      {/* Availability gate — no online, no instant work. */}
-      <Card>
-        <View className="flex-row items-center justify-between gap-3">
-          <View className="flex-1">
-            <Text className="text-base font-semibold text-foreground">
-              {online ? "You're online" : "You're offline"}
-            </Text>
-            <Text className="mt-0.5 text-xs leading-4 text-muted-foreground">
-              {online
-                ? 'Prime Now jobs near you will be offered to you as they come in.'
-                : 'Go online to receive Prime Now jobs. Scheduled work is unaffected.'}
-            </Text>
+      {/* Availability gate — no online, no instant work. Pointless if the
+          partner has not opted into Prime Now, so it is hidden then. */}
+      {wantsPrimeNow ? (
+        <Card>
+          <View className="flex-row items-center justify-between gap-3">
+            <View className="flex-1">
+              <Text className="text-base font-semibold text-foreground">
+                {online ? "You're online" : "You're offline"}
+              </Text>
+              <Text className="mt-0.5 text-xs leading-4 text-muted-foreground">
+                {online
+                  ? 'Prime Now jobs near you will be offered to you as they come in.'
+                  : 'Go online to receive Prime Now jobs. Scheduled work is unaffected.'}
+              </Text>
+            </View>
+            <Switch value={online} onValueChange={onToggleOnline} disabled={onlineBusy} />
           </View>
-          <Switch value={online} onValueChange={onToggleOnline} disabled={onlineBusy} />
-        </View>
-      </Card>
+        </Card>
+      ) : null}
 
       <OffersBanner offers={offers} onResponded={onOffersChanged} />
 

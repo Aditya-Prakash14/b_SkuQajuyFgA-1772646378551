@@ -121,7 +121,7 @@ export function Label({ children }: { children: ReactNode }) {
 export function Loading({ label }: { label?: string }) {
   return (
     <View className="flex-1 items-center justify-center p-10">
-      <ActivityIndicator color="#2E1BAD" size="large" />
+      <ActivityIndicator color="#0E5A63" size="large" />
       {label ? <Text className="mt-3 text-xs text-muted-foreground">{label}</Text> : null}
     </View>
   )

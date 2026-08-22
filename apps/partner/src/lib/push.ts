@@ -53,7 +53,7 @@ export async function registerForPush(): Promise<string | null> {
       name: 'Job assignments',
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#E8712C',
+      lightColor: '#E8A33D',
     })
   }
 

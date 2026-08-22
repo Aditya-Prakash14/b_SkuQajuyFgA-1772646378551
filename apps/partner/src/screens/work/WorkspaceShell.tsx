@@ -108,14 +108,14 @@ export function WorkspaceShell({ vendor, onVendorChanged }: { vendor: Vendor; on
   // Offers expire in about two minutes and are not delivered over Realtime,
   // so while online we re-check often enough to actually catch one.
   useEffect(() => {
-    if (!online) return
+    if (!online || !vendor.accepts_prime_now) return
     const t = setInterval(() => {
       fetchMyOffers()
         .then(setOffers)
         .catch(() => {})
     }, 15000)
     return () => clearInterval(t)
-  }, [online])
+  }, [online, vendor.accepts_prime_now])
 
   async function toggleOnline(next: boolean) {
     setOnlineBusy(true)
@@ -169,6 +169,7 @@ export function WorkspaceShell({ vendor, onVendorChanged }: { vendor: Vendor; on
           <JobsScreen
             jobs={jobs}
             offers={offers}
+            wantsPrimeNow={vendor.accepts_prime_now}
             online={online}
             onlineBusy={onlineBusy}
             refreshing={refreshing}

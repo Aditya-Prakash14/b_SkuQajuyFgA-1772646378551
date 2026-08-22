@@ -50,7 +50,7 @@ export type ButtonProps = PressableProps &
   }
 
 export function Button({ className, variant, size, loading, disabled, children, ...props }: ButtonProps) {
-  const spinnerColor = variant === 'outline' || variant === 'ghost' || variant === 'link' ? '#2E1BAD' : '#FFFFFF'
+  const spinnerColor = variant === 'outline' || variant === 'ghost' || variant === 'link' ? '#0E5A63' : '#FFFFFF'
   return (
     <TextClassContext.Provider value={buttonTextVariants({ variant, size })}>
       <Pressable

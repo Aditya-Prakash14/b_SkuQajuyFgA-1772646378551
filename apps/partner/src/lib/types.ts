@@ -32,6 +32,9 @@ export interface Vendor {
   onboarding_step: OnboardingStep
   /** Partner-controlled availability; gates Prime Now offers. */
   is_online: boolean
+  /** Which business the partner is in. Dispatch honours both. */
+  accepts_deep_clean: boolean
+  accepts_prime_now: boolean
   submitted_at: string | null
   rejection_reason: string | null
 }

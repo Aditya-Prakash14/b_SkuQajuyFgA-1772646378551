@@ -58,11 +58,11 @@ export function SiteHeader() {
       <header className="sticky top-0 z-50 border-b bg-background shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
           <Link href="/" className="flex shrink-0 items-center gap-2.5" aria-label="My Prime Company home">
-            <span className="flex h-10 w-[4.5rem] items-center justify-center overflow-hidden rounded-xl bg-white ring-1 ring-border">
-              <Image src="/logo.png" alt="PC monogram" width={64} height={30} priority className="h-8 w-auto" />
+            <span className="flex h-8 w-14 items-center justify-center overflow-hidden rounded-lg bg-white ring-1 ring-border">
+              <Image src="/logo.png" alt="PC monogram" width={48} height={22} priority className="h-5 w-auto" />
             </span>
             <span className="flex flex-col leading-none">
-              <span className="text-lg font-black tracking-tight text-foreground">My Prime Company</span>
+              <span className="text-base font-black tracking-tight text-foreground">My Prime Company</span>
               <span className="mt-0.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Home &amp; Office Care</span>
             </span>
           </Link>
