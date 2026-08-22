@@ -1,28 +1,44 @@
-import { Pressable, RefreshControl, ScrollView, View } from 'react-native'
+import { Pressable, RefreshControl, ScrollView, Switch, View } from 'react-native'
 
 import { Badge, Banner, Button, Card, Text } from '../../components/ui'
 import { dayBucket, formatDay, formatINR, isOpen } from '../../lib/jobs'
-import { JOB_STATUS_LABELS, type Job } from '../../lib/types'
+import { JOB_STATUS_LABELS, type Job, type Offer } from '../../lib/types'
+import { OffersBanner } from './OffersBanner'
 
 /**
  * Open work, bucketed by urgency: Overdue → Today → Upcoming → Unscheduled.
- * Jobs arrive here only after ops assigns them in the CRM.
+ * Above it: offers waiting on an answer, and the go-online switch that decides
+ * whether Prime Now work is offered to this partner at all.
  */
 export function JobsScreen({
   jobs,
+  offers,
+  online,
+  onlineBusy,
   refreshing,
   error,
+  onToggleOnline,
   onRefresh,
   onOpen,
+  onOffersChanged,
 }: {
   jobs: Job[]
+  offers: Offer[]
+  online: boolean
+  onlineBusy: boolean
   refreshing: boolean
   error: string | null
+  onToggleOnline: (next: boolean) => void
   onRefresh: () => void
   onOpen: (job: Job) => void
+  onOffersChanged: () => Promise<void> | void
 }) {
   const open = jobs.filter(isOpen)
-  const groups: { key: ReturnType<typeof dayBucket>; title: string; tone: 'destructive' | 'brand' | 'default' | 'secondary' }[] = [
+  const groups: {
+    key: ReturnType<typeof dayBucket>
+    title: string
+    tone: 'destructive' | 'brand' | 'default' | 'secondary'
+  }[] = [
     { key: 'overdue', title: 'Overdue', tone: 'destructive' },
     { key: 'today', title: 'Today', tone: 'brand' },
     { key: 'upcoming', title: 'Upcoming', tone: 'default' },
@@ -41,13 +57,32 @@ export function JobsScreen({
         </Text>
       </View>
 
+      {/* Availability gate — no online, no instant work. */}
+      <Card>
+        <View className="flex-row items-center justify-between gap-3">
+          <View className="flex-1">
+            <Text className="text-base font-semibold text-foreground">
+              {online ? "You're online" : "You're offline"}
+            </Text>
+            <Text className="mt-0.5 text-xs leading-4 text-muted-foreground">
+              {online
+                ? 'Prime Now jobs near you will be offered to you as they come in.'
+                : 'Go online to receive Prime Now jobs. Scheduled work is unaffected.'}
+            </Text>
+          </View>
+          <Switch value={online} onValueChange={onToggleOnline} disabled={onlineBusy} />
+        </View>
+      </Card>
+
+      <OffersBanner offers={offers} onResponded={onOffersChanged} />
+
       {error ? <Banner tone="error">{error}</Banner> : null}
 
       {open.length === 0 && !error ? (
         <Card>
-          <Text className="text-base font-semibold text-foreground">You're all caught up</Text>
+          <Text className="text-base font-semibold text-foreground">You&apos;re all caught up</Text>
           <Text className="mt-1 text-sm leading-5 text-muted-foreground">
-            New jobs in your city and services appear here as soon as our ops team assigns them.
+            New jobs appear here as soon as you accept an offer or our ops team assigns you one.
             Pull down to refresh.
           </Text>
           <View className="mt-3">
@@ -80,19 +115,37 @@ export function JobsScreen({
 }
 
 export function JobCard({ job, onPress }: { job: Job; onPress: () => void }) {
-  const services = job.items.map((i) => (i.qty > 1 ? `${i.service_name} ×${i.qty}` : i.service_name)).join(', ')
+  const services = job.items
+    .map((i) => {
+      if (i.units && i.units > 1) return `${i.service_name} · ${i.units}`
+      return i.qty > 1 ? `${i.service_name} ×${i.qty}` : i.service_name
+    })
+    .join(', ')
   const statusTone =
-    job.status === 'in_progress' ? 'brand' : job.status === 'completed' ? 'success' : job.status === 'cancelled' ? 'destructive' : 'default'
+    job.status === 'in_progress'
+      ? 'brand'
+      : job.status === 'completed'
+        ? 'success'
+        : job.status === 'cancelled'
+          ? 'destructive'
+          : 'default'
 
   return (
     <Pressable onPress={onPress} accessibilityRole="button" className="active:opacity-80">
       <Card>
         <View className="flex-row items-start justify-between gap-3">
           <View className="flex-1">
-            <Text className="text-[15px] font-semibold leading-5 text-foreground" numberOfLines={2}>
+            <View className="flex-row items-center gap-2">
+              {job.kind === 'prime_now' ? (
+                <Badge variant="brand">
+                  <Text>Prime Now</Text>
+                </Badge>
+              ) : null}
+              <Text className="text-xs text-muted-foreground">{job.order_number}</Text>
+            </View>
+            <Text className="mt-1 text-[15px] font-semibold leading-5 text-foreground" numberOfLines={2}>
               {services || 'Service'}
             </Text>
-            <Text className="mt-0.5 text-xs text-muted-foreground">{job.order_number}</Text>
           </View>
           <Badge variant={statusTone}>
             <Text>{JOB_STATUS_LABELS[job.status]}</Text>

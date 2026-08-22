@@ -48,7 +48,6 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
     getServiceReviews(service.id),
   ])
 
-  const numericPrice = Number(service.price.replace(/[^0-9.]/g, '')) || 0
   // The spec asks for six included items in two columns.
   const included = service.whatsIncluded.slice(0, 6)
 
@@ -160,8 +159,9 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
               id={service.id}
               name={service.name}
               img={service.heroImg}
-              price={numericPrice}
+              rate={service.rate}
               priceStr={service.price}
+              priceUnit={service.priceUnit}
               duration={service.duration}
               category={service.category}
             />
@@ -210,15 +210,27 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
                           </span>
                         )}
                       </span>
-                      <AddToCartButton
-                        item={{
-                          id: s.id,
-                          name: s.name,
-                          img: s.img,
-                          price: s.price,
-                          priceStr: s.priceStr,
-                        }}
-                      />
+                      {s.priceUnit === 'fixed' ? (
+                        <AddToCartButton
+                          item={{
+                            id: s.id,
+                            name: s.name,
+                            img: s.img,
+                            price: s.price,
+                            priceStr: s.priceStr,
+                            priceUnit: s.priceUnit,
+                          }}
+                        />
+                      ) : (
+                        // Priced per unit — the area is asked for on the detail
+                        // page, so a card cannot add it straight to the cart.
+                        <Link
+                          href={`/services/${s.slug}`}
+                          className="rounded-2xl border border-primary px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-secondary"
+                        >
+                          Choose area
+                        </Link>
+                      )}
                     </div>
                   </div>
                 </article>

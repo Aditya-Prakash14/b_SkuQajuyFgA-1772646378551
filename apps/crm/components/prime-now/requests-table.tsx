@@ -1,15 +1,17 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Clock, MapPin, Phone, Zap } from 'lucide-react'
+import { Clock, MapPin, MessageCircle, Phone, Zap } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatINR } from '@prime/shared'
 import {
   assignPrimeNowVendor,
+  dispatchPrimeNow,
   updatePrimeNowStatus,
   type PrimeNowStatus,
 } from '@/app/dashboard/prime-now/actions'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
   Select,
   SelectContent,
@@ -36,6 +38,8 @@ export interface PrimeNowRow {
   status: PrimeNowStatus
   assigned_vendor_id: string | null
   created_at: string
+  /** Live offers currently sitting with partners. */
+  openOffers: number
 }
 
 const STATUSES: PrimeNowStatus[] = ['new', 'dispatched', 'in_progress', 'completed', 'cancelled']
@@ -62,6 +66,24 @@ const TASK_LABEL: Record<string, string> = {
   party: 'Before/after a party',
   moving: 'Packing & moving',
   other: 'Something else',
+}
+
+/**
+ * A status-appropriate WhatsApp message to the customer.
+ *
+ * Sending is manual on purpose: there is no SMS/WhatsApp Business provider
+ * wired up yet, so rather than pretend to automate it we hand ops a prefilled
+ * chat. Swap this for a provider call when one exists.
+ */
+function notifyHref(r: PrimeNowRow) {
+  const lines: Record<PrimeNowStatus, string> = {
+    new: `Hi ${r.name}, we have your Prime Now request ${r.request_number} and are finding a helper near you.`,
+    dispatched: `Hi ${r.name}, a verified helper has accepted your request ${r.request_number} and is on the way.`,
+    in_progress: `Hi ${r.name}, your helper has started work on ${r.request_number}.`,
+    completed: `Hi ${r.name}, your Prime Now job ${r.request_number} is complete. Thank you for choosing My Prime Company!`,
+    cancelled: `Hi ${r.name}, your Prime Now request ${r.request_number} has been cancelled. Please call us if this is unexpected.`,
+  }
+  return `https://wa.me/91${r.phone.replace(/D/g, '').slice(-10)}?text=${encodeURIComponent(lines[r.status])}`
 }
 
 function when(r: PrimeNowRow) {
@@ -132,6 +154,14 @@ export function PrimeNowRequestsTable({
               >
                 <Phone className="h-3 w-3" /> {r.phone}
               </a>
+              <a
+                href={notifyHref(r)}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+              >
+                <MessageCircle className="h-3 w-3" /> Update customer
+              </a>
               <span className="flex max-w-56 items-start gap-1 text-xs text-muted-foreground">
                 <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
                 <span className="truncate">
@@ -159,6 +189,28 @@ export function PrimeNowRequestsTable({
             </TD>
             <TD className="whitespace-nowrap font-medium tabular-nums">{formatINR(Number(r.price))}</TD>
             <TD>
+              {!r.assigned_vendor_id && (
+                <div className="mb-1.5 flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs"
+                    onClick={() =>
+                      start(async () => {
+                        const res = await dispatchPrimeNow(r.id)
+                        if ('error' in res) toast.error(res.error)
+                        else if (res.sent === 0) toast.warning('No online partner matches this city right now')
+                        else toast.success(`Offered to ${res.sent} partner${res.sent === 1 ? '' : 's'}`)
+                      })
+                    }
+                  >
+                    Find a partner
+                  </Button>
+                  {r.openOffers > 0 && (
+                    <span className="text-xs text-muted-foreground">{r.openOffers} out</span>
+                  )}
+                </div>
+              )}
               <Select
                 value={r.assigned_vendor_id ?? undefined}
                 onValueChange={(v) =>

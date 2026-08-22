@@ -141,7 +141,7 @@ export default function CartDrawer() {
         p_address: form.address,
         p_scheduled_date: form.date,
         p_slot: form.slot || undefined,
-        p_items: cart.map((c) => ({ service_id: c.id, qty: c.qty })),
+        p_items: cart.map((c) => ({ service_id: c.id, qty: c.qty, units: c.units ?? 1 })),
       })
       if (error) throw error
       const result = data as { order_id: string; order_number: string } | null

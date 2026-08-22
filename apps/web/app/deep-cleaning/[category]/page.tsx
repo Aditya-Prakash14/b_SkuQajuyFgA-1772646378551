@@ -103,15 +103,27 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
                           </span>
                         )}
                       </span>
-                      <AddToCartButton
-                        item={{
-                          id: s.id,
-                          name: s.name,
-                          img: s.img,
-                          price: s.price,
-                          priceStr: s.priceStr,
-                        }}
-                      />
+                      {s.priceUnit === 'fixed' ? (
+                        <AddToCartButton
+                          item={{
+                            id: s.id,
+                            name: s.name,
+                            img: s.img,
+                            price: s.price,
+                            priceStr: s.priceStr,
+                            priceUnit: s.priceUnit,
+                          }}
+                        />
+                      ) : (
+                        // Priced per unit — the area is asked for on the detail
+                        // page, so a card cannot add it straight to the cart.
+                        <Link
+                          href={`/services/${s.slug}`}
+                          className="rounded-2xl border border-primary px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-secondary"
+                        >
+                          Choose area
+                        </Link>
+                      )}
                     </div>
                   </div>
                 </article>

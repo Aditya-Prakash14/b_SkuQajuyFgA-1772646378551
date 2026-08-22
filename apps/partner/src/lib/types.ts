@@ -30,6 +30,8 @@ export interface Vendor {
   services_offered: string[] | null
   application_note: string | null
   onboarding_step: OnboardingStep
+  /** Partner-controlled availability; gates Prime Now offers. */
+  is_online: boolean
   submitted_at: string | null
   rejection_reason: string | null
 }
@@ -83,11 +85,19 @@ export type PaymentStatus = 'unpaid' | 'paid' | 'refunded' | 'partial'
 export interface JobItem {
   service_name: string
   qty: number
+  /** Area / panel count for per-unit services; 1 otherwise. */
+  units?: number
   unit_price: number
   line_total: number
+  /** Prime Now only: what the customer asked for. */
+  tasks?: string[]
 }
 
+/** Deep Cleaning order, or a Prime Now hourly request — same job list. */
+export type JobKind = 'deep_clean' | 'prime_now'
+
 export interface Job {
+  kind: JobKind
   id: string
   order_number: string
   status: JobStatus
@@ -127,4 +137,21 @@ export interface VendorStats {
   all_time_payout: number
   rating_avg: number | null
   rating_count: number
+}
+
+// ── Offers (auto-dispatch) — mirrors my_offers() in 0019 ────────────────────
+
+export interface Offer {
+  offer_id: string
+  kind: JobKind
+  job_id: string
+  reference: string
+  /** ISO timestamp; the offer disappears after this. */
+  expires_at: string
+  city: string | null
+  address: string | null
+  notes: string | null
+  total: number
+  scheduled_label: string | null
+  summary: string | null
 }

@@ -10,6 +10,10 @@ export interface Service {
   heroImg: string
   galleryImgs: string[]
   price: string // display label, e.g. "₹1,499" or "₹7 / sq. ft."
+  /** Numeric rate: the flat price, or the price of one unit. */
+  rate: number
+  /** 'fixed' | 'per_sqft' | 'per_panel' — drives the area input at checkout. */
+  priceUnit: string
   duration: string
   rating: number
   reviews: number
@@ -24,7 +28,7 @@ export interface Service {
 }
 
 const SELECT =
-  'id,slug,name,tagline,hero_img,gallery_imgs,display_price_label,duration,rating,reviews_count,bookings_count,description,what_we_clean,how_it_works,whats_included,not_included,faqs,related_service_ids,category:service_categories(name)'
+  'id,slug,name,tagline,hero_img,gallery_imgs,price,price_unit,display_price_label,duration,rating,reviews_count,bookings_count,description,what_we_clean,how_it_works,whats_included,not_included,faqs,related_service_ids,category:service_categories(name)'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 function mapService(row: any): Service {
@@ -37,6 +41,8 @@ function mapService(row: any): Service {
     heroImg: row.hero_img ?? '',
     galleryImgs: row.gallery_imgs ?? [],
     price: row.display_price_label ?? '',
+    rate: Number(row.price ?? 0),
+    priceUnit: row.price_unit ?? 'fixed',
     duration: row.duration ?? '',
     rating: Number(row.rating ?? 0),
     reviews: row.reviews_count ?? 0,
@@ -58,6 +64,7 @@ export interface HomeService {
   name: string
   price: number
   priceStr: string
+  priceUnit: string
   img: string
   category: string
   tagline: string
@@ -75,7 +82,7 @@ export async function getAllServices(): Promise<HomeService[]> {
   const { data } = await supabase
     .from('services')
     .select(
-      'id,slug,name,price,display_price_label,hero_img,tagline,duration,category:service_categories(name,sort_order)',
+      'id,slug,name,price,price_unit,display_price_label,hero_img,tagline,duration,category:service_categories(name,sort_order)',
     )
     .eq('is_active', true)
     .order('name')
@@ -87,6 +94,7 @@ export async function getAllServices(): Promise<HomeService[]> {
       name: s.name,
       price: Number(s.price),
       priceStr: s.display_price_label ?? '',
+      priceUnit: s.price_unit ?? 'fixed',
       img: s.hero_img ?? '',
       category: s.category?.name ?? 'Other',
       tagline: s.tagline ?? '',
@@ -221,7 +229,7 @@ export async function getCategoryBySlug(slug: string): Promise<CategoryDetail | 
   const { data } = await supabase
     .from('services')
     .select(
-      'id,slug,name,price,display_price_label,hero_img,tagline,duration,category:service_categories!inner(name,slug)',
+      'id,slug,name,price,price_unit,display_price_label,hero_img,tagline,duration,category:service_categories!inner(name,slug)',
     )
     .eq('category.slug', slug)
     .eq('is_active', true)
@@ -247,6 +255,7 @@ export async function getCategoryBySlug(slug: string): Promise<CategoryDetail | 
       name: s.name,
       price: Number(s.price),
       priceStr: s.display_price_label ?? '',
+      priceUnit: s.price_unit ?? 'fixed',
       img: s.hero_img ?? '',
       category: s.category?.name ?? '',
       tagline: s.tagline ?? '',

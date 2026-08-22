@@ -256,6 +256,43 @@ scopes delivery. **Client caveat:** `realtime.setAuth(token)` must be re-applied
 state change or the socket keeps the anon key — the channel subscribes and silently delivers
 nothing (and would die at the hourly token refresh).
 
+### 5.10 Auto-dispatch and offers (0019)
+
+`vendors.is_online` is the partner's own availability switch; only online partners are offered
+Prime Now work. `job_offers` broadcasts one job to a **wave** of eligible partners at once:
+
+    create prime_now_request  →  trigger  →  dispatch_prime_now()  →  N offers (expire in 2 min)
+    partner accepts  →  accept_offer()  →  job assigned, sibling offers superseded
+    nobody accepts   →  pg_cron every minute  →  escalate_offers()  →  next wave
+
+`accept_offer()` locks the job row, so a race between two partners resolves to exactly one
+winner; the loser gets "Another partner took this job". Eligibility for Prime Now is
+active + online + same city; for `dispatch_order()` it is active + same city + offers that
+service (availability is not required — scheduled work is not instant). Manual assignment in
+the CRM always wins: dispatch skips any job that already has a partner.
+
+### 5.11 One job list, both domains (0018)
+
+`my_jobs()` had read only `orders`, so a dispatched Prime Now request never reached the
+assigned partner's phone — the business could accept work it had no way to deliver. It now
+returns both, discriminated by `kind` ('deep_clean' | 'prime_now'), and maps Prime Now
+statuses onto the order vocabulary ('dispatched' → 'vendor_assigned') so the app's state
+machine is unchanged. `update_my_job_status()` keeps its signature and routes on which table
+owns the id. `prime_now_requests` is in the realtime publication, so the app's second
+subscription sees assignments live.
+
+### 5.12 Per-unit pricing (0017)
+
+`create_booking` priced every line `price * qty`, which billed the **rate** for the six
+services with `price_unit <> 'fixed'` — a ₹5/sq ft exterior clean became a ₹5 order. Items may
+now carry `units` (area or panel count); per-unit services require it and are refused without
+it, fixed-price services ignore it. `order_items.units` records what was quoted. The site asks
+for the area on the service page: per-unit services cannot be added straight from a card.
+
+**Customer notification** is still manual: the CRM offers a per-status prefilled WhatsApp
+("Update customer"), because no SMS/WhatsApp Business provider is configured. Automating it is
+a provider integration, not a code change.
+
 ### 5.6 Staff invite (super_admin)
 
 `inviteAdmin` → `requireSuperAdmin()` → service-role `auth.admin.createUser({email_confirm})`

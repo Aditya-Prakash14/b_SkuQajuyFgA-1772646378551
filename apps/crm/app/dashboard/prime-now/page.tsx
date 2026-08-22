@@ -3,7 +3,6 @@ import {
   PrimeNowRequestsTable,
   type PrimeNowRow,
 } from '@/components/prime-now/requests-table'
-import type { PrimeNowStatus } from './actions'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 export const dynamic = 'force-dynamic'
@@ -16,7 +15,7 @@ export const dynamic = 'force-dynamic'
 export default async function PrimeNowPage() {
   const supabase = await createClient()
 
-  const [{ data: requests }, { data: vendors }] = await Promise.all([
+  const [{ data: requests }, { data: vendors }, { data: offerRows }] = await Promise.all([
     supabase
       .from('prime_now_requests')
       .select(
@@ -25,9 +24,23 @@ export default async function PrimeNowPage() {
       .order('created_at', { ascending: false })
       .limit(200),
     supabase.from('vendors').select('id,name,city').eq('status', 'active').order('name'),
+    supabase
+      .from('job_offers')
+      .select('job_id')
+      .eq('kind', 'prime_now')
+      .eq('status', 'offered')
+      .gt('expires_at', 'now()'),
   ])
 
-  const rows = ((requests ?? []) as unknown[]).map((r) => r as PrimeNowRow)
+  const openOffers = new Map<string, number>()
+  for (const o of offerRows ?? []) {
+    openOffers.set(o.job_id, (openOffers.get(o.job_id) ?? 0) + 1)
+  }
+
+  const rows = ((requests ?? []) as unknown[]).map((r) => {
+    const row = r as PrimeNowRow
+    return { ...row, openOffers: openOffers.get(row.id) ?? 0 }
+  })
   const open = rows.filter((r) => r.status === 'new').length
   const asap = rows.filter((r) => r.status === 'new' && r.timing === 'now').length
 

@@ -74,7 +74,7 @@ export default function App() {
       const { data, error } = await supabase
         .from('vendors')
         .select(
-          'id, name, phone, email, city, status, services_offered, application_note, onboarding_step, submitted_at, rejection_reason',
+          'id, name, phone, email, city, status, services_offered, application_note, onboarding_step, submitted_at, rejection_reason, is_online',
         )
         .eq('auth_user_id', session.user.id)
         .maybeSingle()

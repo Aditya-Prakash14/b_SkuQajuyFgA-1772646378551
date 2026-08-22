@@ -201,6 +201,50 @@ export type Database = {
           },
         ]
       }
+      job_offers: {
+        Row: {
+          expires_at: string
+          id: string
+          job_id: string
+          kind: string
+          offered_at: string
+          responded_at: string | null
+          status: string
+          vendor_id: string
+          wave: number
+        }
+        Insert: {
+          expires_at: string
+          id?: string
+          job_id: string
+          kind: string
+          offered_at?: string
+          responded_at?: string | null
+          status?: string
+          vendor_id: string
+          wave?: number
+        }
+        Update: {
+          expires_at?: string
+          id?: string
+          job_id?: string
+          kind?: string
+          offered_at?: string
+          responded_at?: string | null
+          status?: string
+          vendor_id?: string
+          wave?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_offers_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           id: string
@@ -210,6 +254,7 @@ export type Database = {
           service_id: string | null
           service_name: string
           unit_price: number
+          units: number
         }
         Insert: {
           id?: string
@@ -219,6 +264,7 @@ export type Database = {
           service_id?: string | null
           service_name: string
           unit_price: number
+          units?: number // defaults to 1 for fixed-price services
         }
         Update: {
           id?: string
@@ -228,6 +274,7 @@ export type Database = {
           service_id?: string | null
           service_name?: string
           unit_price?: number
+          units?: number
         }
         Relationships: [
           {
@@ -677,6 +724,8 @@ export type Database = {
           name: string
           onboarded_at: string | null
           onboarding_step: string
+          is_online: boolean
+          last_online_at: string | null
           phone: string
           push_token_updated_at: string | null
           rating: number | null
@@ -698,6 +747,8 @@ export type Database = {
           name: string
           onboarded_at?: string | null
           onboarding_step?: string
+          is_online?: boolean
+          last_online_at?: string | null
           phone: string
           push_token_updated_at?: string | null
           rating?: number | null
@@ -719,6 +770,8 @@ export type Database = {
           name?: string
           onboarded_at?: string | null
           onboarding_step?: string
+          is_online?: boolean
+          last_online_at?: string | null
           phone?: string
           push_token_updated_at?: string | null
           rating?: number | null
@@ -772,6 +825,28 @@ export type Database = {
         }
         Returns: Json
       }
+      accept_offer: { Args: { p_offer_id: string }; Returns: Json }
+      decline_offer: { Args: { p_offer_id: string }; Returns: undefined }
+      dispatch_order: { Args: { p_order_id: string; p_wave_size?: number }; Returns: number }
+      dispatch_prime_now: { Args: { p_request_id: string; p_wave_size?: number }; Returns: number }
+      escalate_offers: { Args: never; Returns: number }
+      set_my_availability: { Args: { p_online: boolean }; Returns: undefined }
+      my_offers: {
+        Args: never
+        Returns: {
+          address: string
+          city: string
+          expires_at: string
+          job_id: string
+          kind: string
+          notes: string
+          offer_id: string
+          reference: string
+          scheduled_label: string
+          summary: string
+          total: number
+        }[]
+      }
       current_customer_id: { Args: never; Returns: string }
       current_vendor_id: { Args: never; Returns: string }
       is_admin: { Args: never; Returns: boolean }
@@ -779,6 +854,7 @@ export type Database = {
       my_jobs: {
         Args: never
         Returns: {
+          kind: string
           address: string
           city: string
           created_at: string

@@ -58,7 +58,7 @@ export function BookingPage() {
         p_scheduled_date: form.date,
         p_slot: form.slot || undefined,
         p_notes: form.notes.trim() || undefined,
-        p_items: cart.map((c) => ({ service_id: c.id, qty: c.qty })),
+        p_items: cart.map((c) => ({ service_id: c.id, qty: c.qty, units: c.units ?? 1 })),
       })
       if (rpcError) throw rpcError
       const result = data as { order_id: string; order_number: string } | null

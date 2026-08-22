@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import type { Job, JobStatus, VendorStats } from './types'
+import type { Job, JobStatus, Offer, VendorStats } from './types'
 
 /** All jobs ever assigned to the signed-in vendor, newest scheduled first. */
 export async function fetchMyJobs(): Promise<Job[]> {
@@ -89,4 +89,38 @@ export function dayBucket(key: string | null): 'today' | 'overdue' | 'upcoming' 
 /** Name of the current month, for the History header. */
 export function currentMonthName() {
   return MONTHS[new Date().getMonth()]
+}
+
+// ── Availability and offers (auto-dispatch) ─────────────────────────────────
+
+/** Go online / offline. Only online partners receive Prime Now offers. */
+export async function setAvailability(online: boolean) {
+  const { error } = await supabase.rpc('set_my_availability', { p_online: online })
+  if (error) throw error
+}
+
+/** Open offers for this partner — already filtered to unexpired, server-side. */
+export async function fetchMyOffers(): Promise<Offer[]> {
+  const { data, error } = await supabase.rpc('my_offers')
+  if (error) throw error
+  return ((data ?? []) as Offer[]).map((o) => ({ ...o, total: Number(o.total) }))
+}
+
+/**
+ * Take the job. First accept wins: if another partner got there first the
+ * server raises, and the message is safe to show as-is.
+ */
+export async function acceptOffer(offerId: string) {
+  const { error } = await supabase.rpc('accept_offer', { p_offer_id: offerId })
+  if (error) throw error
+}
+
+export async function declineOffer(offerId: string) {
+  const { error } = await supabase.rpc('decline_offer', { p_offer_id: offerId })
+  if (error) throw error
+}
+
+/** Whole seconds left on an offer, floored at 0. */
+export function secondsLeft(expiresAt: string, now = Date.now()) {
+  return Math.max(0, Math.floor((new Date(expiresAt).getTime() - now) / 1000))
 }
