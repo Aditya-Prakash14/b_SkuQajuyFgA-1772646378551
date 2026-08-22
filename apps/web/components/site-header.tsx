@@ -30,13 +30,13 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
 
+// The site has exactly two business domains; everything else is secondary.
 const NAV = [
-  { href: '/services', label: 'Services' },
+  { href: '/deep-cleaning', label: 'Deep Cleaning' },
+  { href: '/prime-now', label: 'Prime Now' },
   { href: '/#gallery', label: 'Gallery' },
-  { href: '/#why-us', label: 'Why Us' },
-  { href: '/blog', label: 'Blog' },
+  { href: '/faq', label: 'FAQ' },
   { href: '/contact', label: 'Contact' },
-  { href: '/become-partner', label: 'Become Partner' },
 ]
 
 export function SiteHeader() {

@@ -1,11 +1,16 @@
-/** Bookable 2-hour arrival windows, offered at checkout and on reschedule. */
+/**
+ * Bookable arrival windows, offered at checkout, on the booking page and on
+ * reschedule.
+ *
+ * These replaced six 2-hour windows: crews are dispatched by half-day, so the
+ * narrower promise was one we could not keep. `orders.scheduled_slot` is free
+ * text, so orders placed under the old windows keep their original label and
+ * still render correctly everywhere.
+ */
 export const TIME_SLOTS = [
-  '08:00 AM – 10:00 AM',
-  '10:00 AM – 12:00 PM',
-  '12:00 PM – 02:00 PM',
-  '02:00 PM – 04:00 PM',
-  '04:00 PM – 06:00 PM',
-  '06:00 PM – 08:00 PM',
+  'Morning · 8 AM – 12 PM',
+  'Afternoon · 12 PM – 4 PM',
+  'Evening · 4 PM – 8 PM',
 ] as const
 
 export type TimeSlot = (typeof TIME_SLOTS)[number]

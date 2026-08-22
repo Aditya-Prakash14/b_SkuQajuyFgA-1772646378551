@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Script from 'next/script'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Manrope, JetBrains_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { SITE_URL } from '@/lib/env'
 import { AuthProvider } from '@/lib/auth-context'
@@ -10,8 +10,15 @@ import CartDrawer from '@/components/cart-drawer'
 // @ts-ignore: CSS module side-effect import (no type declarations in this repo)
 import './globals.css'
 
-const _geist = Geist({ subsets: ['latin'] })
-const _geistMono = Geist_Mono({ subsets: ['latin'] })
+// Manrope carries the whole site; JetBrains Mono is reserved for small
+// uppercase metadata (category counts, labels) — see .label-mono in globals.css.
+const manrope = Manrope({ subsets: ['latin'], variable: '--font-manrope', display: 'swap' })
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-jetbrains-mono',
+  display: 'swap',
+})
 const TITLE = 'My Prime Company'
 const GA_MEASUREMENT_ID = 'G-JGZ52K9QXX'
 
@@ -37,7 +44,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${manrope.variable} ${jetbrainsMono.variable}`}>
       <body className="font-sans antialiased" suppressHydrationWarning>
         <AuthProvider>
           <CityProvider>

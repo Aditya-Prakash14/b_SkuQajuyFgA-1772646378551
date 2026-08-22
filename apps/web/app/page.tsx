@@ -1,35 +1,34 @@
-import { SiteHeader } from '@/components/site-header'
-import { SiteFooter } from '@/components/site-footer'
-import { ServicesExplorer } from '@/components/services-explorer'
+import { PageShell } from '@/components/page-shell'
 import {
-  HeroSection, WhyUs, Gallery, Testimonials, BlogPreview, Clients, CtaBanner, FloatingButtons,
+  Clients,
+  CtaBanner,
+  DomainCards,
+  Faq,
+  Gallery,
+  HeroSection,
+  HowItWorks,
+  Testimonials,
+  TrustStrip,
+  WhyUs,
 } from '@/components/home-sections'
-import { getAllServices, getServiceCategories } from '@/lib/services-data'
 
-// ISR — CRM catalog edits appear within this window.
-export const revalidate = 300
-
-export default async function Page() {
-  const [services, categories] = await Promise.all([getAllServices(), getServiceCategories()])
-
+/**
+ * The homepage presents exactly two business domains and never lists individual
+ * services — browsing happens one level down, at /deep-cleaning.
+ */
+export default function Page() {
   return (
-    <div className="min-h-screen bg-white font-sans text-gray-800">
-      <SiteHeader />
+    <PageShell>
       <HeroSection />
-      <ServicesExplorer
-        services={services}
-        categories={categories}
-        heading="Our Services"
-        subheading="Browse by category — from BHK deep-cleaning packages to corporate contracts"
-      />
+      <TrustStrip />
+      <DomainCards />
+      <HowItWorks />
       <WhyUs />
       <Gallery />
       <Testimonials />
-      <BlogPreview />
       <Clients />
+      <Faq />
       <CtaBanner />
-      <SiteFooter />
-      <FloatingButtons />
-    </div>
+    </PageShell>
   )
 }

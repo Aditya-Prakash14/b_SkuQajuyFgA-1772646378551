@@ -309,6 +309,34 @@ job live in state. One `my_jobs()` list feeds every tab; refreshed on pull, fore
 after each write. KYC uploads go to the private `vendor-docs` bucket under
 `<vendor_id>/…` (storage RLS by folder).
 
+### 6.4 Website information architecture (two domains)
+
+The site presents exactly **two business domains**; the homepage lists no individual services.
+
+**Deep Cleaning** — scheduled, flat-priced, three levels, each its own page (never a card grid
+nested in a card):
+
+| Level | Route | Content |
+|---|---|---|
+| 1 | `/deep-cleaning` | Category cards: photo, count, "From <price>" |
+| 2 | `/deep-cleaning/[category]` | Every service in that category |
+| 3 | `/services/[slug]` | Detail + sticky booking panel + 4 siblings from the same category |
+
+Level 3 keeps the `/services/<slug>` URL because it is already indexed; the breadcrumb and the
+"related" list resolve to the service's **category**, not to a flat index. `/services` 307s to
+`/deep-cleaning`. Per-unit prices ("₹5 / sq. ft.") render as amount + unit on two lines so they
+never flatten to a misleading flat fee.
+
+**Prime Now** — `/prime-now`, on-demand hourly help with **no catalogue**: slot → task chips →
+when/where, priced live in a sticky panel. Submitting calls `create_prime_now_request()` (0015)
+and *then* opens WhatsApp, so ops has a queue (CRM → Prime Now) even when the chat is never sent.
+Slot pricing is re-derived server-side; the browser cannot choose what a slot costs.
+
+Visual identity: deep teal `#0E5A63` on warm off-white `#FBFAF7`, dark bands `#12212A`, amber
+`#E8A33D` **on dark grounds only**; Manrope throughout with JetBrains Mono for uppercase
+metadata; 18–24px radii; one soft shadow (hero search bar and sticky panels); no gradients.
+Tokens live in `apps/web/app/globals.css` — the CRM keeps its own palette.
+
 ## 7. Contracts
 
 ### 7.1 RPC

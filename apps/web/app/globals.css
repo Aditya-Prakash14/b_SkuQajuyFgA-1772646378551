@@ -3,87 +3,119 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ============================================================================
+ * MyPrimeCompany — public site.
+ *
+ * Deep teal on warm off-white, with amber reserved for dark bands only.
+ * Neutrals carry a deliberate warm/teal bias (never pure grey) so borders and
+ * secondary text sit in the same world as the ground rather than on top of it.
+ * The CRM keeps its own palette in apps/crm/app/globals.css — this file is
+ * scoped to the website.
+ * ========================================================================= */
+
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.18 0.02 264);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.02 264);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.02 264);
-  --primary: oklch(0.36 0.22 264);
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.70 0.18 45);
-  --secondary-foreground: oklch(1 0 0);
-  --muted: oklch(0.95 0.005 264);
-  --muted-foreground: oklch(0.50 0.04 264);
-  /* shadcn reserves --accent for neutral hover/focus tints. Pointing it at
-   * the brand orange made every ghost button and menu-item hover render
-   * solid orange, so the brand lives in --brand instead. */
-  --accent: oklch(0.95 0.005 264);
-  --accent-foreground: oklch(0.18 0.02 264);
-  --brand: oklch(0.70 0.18 45);
-  --brand-foreground: oklch(1 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.90 0.005 264);
-  --input: oklch(0.95 0.003 264);
-  --ring: oklch(0.36 0.22 264);
-  --chart-1: oklch(0.36 0.22 264);
-  --chart-2: oklch(0.70 0.18 45);
-  --chart-3: oklch(0.45 0.18 264);
-  --chart-4: oklch(0.60 0.16 264);
-  --chart-5: oklch(0.30 0.15 264);
-  --radius: 0.625rem;
-  --sidebar: oklch(1 0 0);
-  --sidebar-foreground: oklch(0.18 0.02 264);
-  --sidebar-primary: oklch(0.36 0.22 264);
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.70 0.18 45);
-  --sidebar-accent-foreground: oklch(1 0 0);
-  --sidebar-border: oklch(0.90 0.005 264);
-  --sidebar-ring: oklch(0.36 0.22 264);
+  --background: #fbfaf7; /* warm off-white page ground */
+  --foreground: #12212a; /* dark bands and body text */
+  --card: #ffffff;
+  --card-foreground: #12212a;
+  --popover: #ffffff;
+  --popover-foreground: #12212a;
+
+  --primary: #0e5a63; /* deep teal */
+  --primary-foreground: #ffffff;
+
+  /* Dark bands: the near-black used for full-bleed sections and the footer. */
+  --ink: #12212a;
+  --ink-foreground: #fbfaf7;
+
+  --secondary: #edf3f2; /* teal tint */
+  --secondary-foreground: #0e5a63;
+  --muted: #edf3f2;
+  --muted-foreground: #5f6b70; /* warm-cool grey, biased toward the teal */
+
+  /* shadcn treats --accent as a neutral hover tint; the amber lives in --brand
+   * and is used on dark grounds only (see the spec's "accent on dark"). */
+  --accent: #edf3f2;
+  --accent-foreground: #0e5a63;
+  --brand: #e8a33d; /* amber */
+  --brand-foreground: #12212a;
+
+  --destructive: #b3261e;
+  --destructive-foreground: #ffffff;
+
+  --border: #e7e3db;
+  --input: #e7e3db;
+  --ring: #0e5a63;
+
+  --chart-1: #0e5a63;
+  --chart-2: #e8a33d;
+  --chart-3: #3e8e97;
+  --chart-4: #12212a;
+  --chart-5: #8fb3ae;
+
+  /* Spec: 18–24px radii. */
+  --radius: 1.25rem;
+
+  --sidebar: #ffffff;
+  --sidebar-foreground: #12212a;
+  --sidebar-primary: #0e5a63;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #edf3f2;
+  --sidebar-accent-foreground: #0e5a63;
+  --sidebar-border: #e7e3db;
+  --sidebar-ring: #0e5a63;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --brand: oklch(0.70 0.18 45);
-  --brand-foreground: oklch(0.145 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  --background: #0d1a21;
+  --foreground: #f4f2ed;
+  --card: #12212a;
+  --card-foreground: #f4f2ed;
+  --popover: #12212a;
+  --popover-foreground: #f4f2ed;
+
+  --primary: #4ea3ac; /* teal lifted to hold contrast on dark */
+  --primary-foreground: #06171b;
+
+  --ink: #0a151b;
+  --ink-foreground: #f4f2ed;
+
+  --secondary: #1b2f38;
+  --secondary-foreground: #cfe4e2;
+  --muted: #1b2f38;
+  --muted-foreground: #9aabb0;
+
+  --accent: #1b2f38;
+  --accent-foreground: #cfe4e2;
+  --brand: #e8a33d;
+  --brand-foreground: #12212a;
+
+  --destructive: #e5645b;
+  --destructive-foreground: #1a0b0a;
+
+  --border: rgb(255 255 255 / 12%);
+  --input: rgb(255 255 255 / 14%);
+  --ring: #4ea3ac;
+
+  --chart-1: #4ea3ac;
+  --chart-2: #e8a33d;
+  --chart-3: #8fb3ae;
+  --chart-4: #f4f2ed;
+  --chart-5: #2c5a63;
+
+  --sidebar: #12212a;
+  --sidebar-foreground: #f4f2ed;
+  --sidebar-primary: #4ea3ac;
+  --sidebar-primary-foreground: #06171b;
+  --sidebar-accent: #1b2f38;
+  --sidebar-accent-foreground: #cfe4e2;
+  --sidebar-border: rgb(255 255 255 / 12%);
+  --sidebar-ring: #4ea3ac;
 }
 
 @theme inline {
-  --font-sans: 'Geist', 'Geist Fallback';
-  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -92,6 +124,8 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-ink: var(--ink);
+  --color-ink-foreground: var(--ink-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -110,8 +144,8 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 8px);
+  --radius-md: calc(var(--radius) - 4px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --color-sidebar: var(--sidebar);
@@ -130,5 +164,33 @@
   }
   body {
     @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* Large headlines run tight; the spec calls for -0.03em at weights 700–800. */
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+}
+
+@layer components {
+  /* Small uppercase metadata: category counts, labels, breadcrumb eyebrows. */
+  .label-mono {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  /* The one soft shadow the spec allows — hero search bar and sticky panels. */
+  .shadow-panel {
+    box-shadow:
+      0 1px 2px rgb(18 33 42 / 4%),
+      0 24px 48px -24px rgb(18 33 42 / 18%);
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
   }
 }

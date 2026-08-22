@@ -1,21 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Phone, MapPin, Calendar, ShoppingBag, CheckCircle, LocateFixed, Loader2 } from 'lucide-react'
+import { Check, Clock, LocateFixed, Loader2, MapPin, MessageCircle, Phone, ShoppingBag, Tag } from 'lucide-react'
 import { useCart } from '@/lib/cart-context'
 import { useCity } from '@/lib/city-context'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { cn } from '@/lib/utils'
 
 interface Props {
   id: string
@@ -23,110 +11,142 @@ interface Props {
   img: string
   price: number
   priceStr: string
+  duration: string
+  category: string
 }
 
-export default function ServiceBookingCard({ id, name, img, price, priceStr }: Props) {
+/**
+ * The sticky booking panel on a service page: what it costs, how long it takes,
+ * which category it belongs to, where we cover — then the three ways to book.
+ */
+export default function ServiceBookingCard({
+  id,
+  name,
+  img,
+  price,
+  priceStr,
+  duration,
+  category,
+}: Props) {
   const { addToCart, cart, setCartOpen } = useCart()
   const { city, setCity, cities, detectCity, detecting } = useCity()
   const inCart = cart.some((c) => c.id === id)
   const [added, setAdded] = useState(false)
 
-  const minDate = new Date()
-  minDate.setDate(minDate.getDate() + 1)
-  const minDateStr = minDate.toISOString().split('T')[0]
+  const [amount, unit] = priceStr.split(' / ')
 
-  const handleAdd = () => {
+  const whatsapp = `https://wa.me/917349603429?text=${encodeURIComponent(
+    `Hi, I would like to book: ${name} (${priceStr})${city ? ` in ${city}` : ''}.`,
+  )}`
+
+  function handleAdd() {
     addToCart({ id, name, img, price, priceStr })
     setAdded(true)
     setTimeout(() => setAdded(false), 2000)
   }
 
   return (
-    <Card className="gap-0 overflow-hidden py-0 shadow-lg">
-      <div className="bg-primary p-5 text-primary-foreground">
-        <p className="mb-1 text-sm opacity-80">Starting from</p>
-        <p className="text-4xl font-black">{priceStr}</p>
-        <p className="mt-1 text-sm opacity-70">Inclusive of all taxes</p>
+    <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-panel">
+      <div className="border-b border-border p-6">
+        <p className="label-mono text-muted-foreground">Starting from</p>
+        <p className="mt-1">
+          <span className="tabular text-4xl font-extrabold">{amount}</span>
+          {unit && <span className="ml-1.5 text-sm text-muted-foreground">/ {unit}</span>}
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">Inclusive of all taxes</p>
       </div>
 
-      <CardContent className="space-y-4 p-5">
-        <div className="grid gap-1.5">
-          <div className="flex items-center justify-between">
-            <Label className="text-xs uppercase tracking-wide text-muted-foreground">Select City</Label>
-            <Button
+      <dl className="divide-y divide-border border-b border-border text-sm">
+        <Row icon={<Clock className="h-4 w-4" />} label="Duration" value={duration || 'Depends on area'} />
+        <Row icon={<Tag className="h-4 w-4" />} label="Category" value={category} />
+        <div className="flex items-center justify-between gap-3 px-6 py-3.5">
+          <dt className="flex items-center gap-2 text-muted-foreground">
+            <MapPin className="h-4 w-4" /> Coverage
+          </dt>
+          <dd className="flex items-center gap-2">
+            <select
+              value={city ?? ''}
+              onChange={(e) => setCity(e.target.value)}
+              className="max-w-32 bg-transparent text-right font-medium outline-none"
+              aria-label="Select your city"
+            >
+              <option value="">Select city</option>
+              {cities.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+            <button
               type="button"
-              variant="link"
               onClick={detectCity}
               disabled={detecting}
-              className="h-auto gap-1 p-0 text-[11px] font-semibold"
+              className="text-primary disabled:opacity-50"
+              aria-label="Detect my city"
             >
-              {detecting ? <Loader2 className="size-3 animate-spin" /> : <LocateFixed className="size-3" />}
-              {detecting ? 'Detecting…' : 'Detect'}
-            </Button>
-          </div>
-          {/* Radix Select reserves "" for "no value" — undefined shows the placeholder. */}
-          <Select value={city ?? undefined} onValueChange={setCity}>
-            <SelectTrigger className="h-11 w-full rounded-xl">
-              <span className="flex items-center gap-2">
-                <MapPin className="size-4 shrink-0 text-primary" />
-                <SelectValue placeholder="Choose your city" />
-              </span>
-            </SelectTrigger>
-            <SelectContent>
-              {cities.map((c) => (
-                <SelectItem key={c} value={c}>{c}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+              {detecting ? <Loader2 className="h-4 w-4 animate-spin" /> : <LocateFixed className="h-4 w-4" />}
+            </button>
+          </dd>
         </div>
+      </dl>
 
-        <div className="grid gap-1.5">
-          <Label htmlFor="preferred-date" className="text-xs uppercase tracking-wide text-muted-foreground">
-            Preferred Date
-          </Label>
-          <div className="relative">
-            <Calendar className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-primary" />
-            <Input id="preferred-date" type="date" min={minDateStr} className="h-11 rounded-xl pl-9" />
-          </div>
-        </div>
-
-        <Button
+      <div className="space-y-2.5 p-6">
+        <button
+          type="button"
           onClick={handleAdd}
-          variant="brand"
-          size="lg"
-          className={cn(
-            'w-full rounded-xl font-bold shadow-md shadow-brand/30',
-            (added || inCart) && 'bg-emerald-600 text-white shadow-emerald-600/30 hover:bg-emerald-600/90',
-          )}
+          className={`flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3.5 font-bold transition-opacity hover:opacity-90 ${
+            added || inCart
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-brand text-brand-foreground'
+          }`}
         >
           {added || inCart ? (
-            <><CheckCircle /> Added to Cart</>
+            <>
+              <Check className="h-4 w-4" /> Added to cart
+            </>
           ) : (
-            <><ShoppingBag /> Add to Cart</>
+            <>
+              <ShoppingBag className="h-4 w-4" /> Add to cart
+            </>
           )}
-        </Button>
+        </button>
 
         {inCart && (
-          <Button
+          <button
+            type="button"
             onClick={() => setCartOpen(true)}
-            variant="outline"
-            className="w-full rounded-xl border-2 border-brand font-bold text-brand hover:bg-brand/5 hover:text-brand"
+            className="w-full rounded-2xl border border-primary px-5 py-3 font-semibold text-primary transition-colors hover:bg-secondary"
           >
-            View Cart &amp; Book
-          </Button>
+            View cart &amp; book
+          </button>
         )}
 
-        <Button
-          asChild
-          variant="outline"
-          size="lg"
-          className="w-full rounded-xl border-2 border-primary font-bold text-primary hover:bg-primary/5 hover:text-primary"
+        <a
+          href={whatsapp}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border px-5 py-3 font-semibold transition-colors hover:border-primary hover:text-primary"
         >
-          <a href="tel:+917349603429">
-            <Phone /> Call to Book
-          </a>
-        </Button>
-      </CardContent>
-    </Card>
+          <MessageCircle className="h-4 w-4" /> WhatsApp us
+        </a>
+        <a
+          href="tel:+917349603429"
+          className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border px-5 py-3 font-semibold transition-colors hover:border-primary hover:text-primary"
+        >
+          <Phone className="h-4 w-4" /> Call to book
+        </a>
+      </div>
+    </div>
+  )
+}
+
+function Row({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-3 px-6 py-3.5">
+      <dt className="flex items-center gap-2 text-muted-foreground">
+        {icon} {label}
+      </dt>
+      <dd className="text-right font-medium">{value}</dd>
+    </div>
   )
 }

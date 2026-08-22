@@ -1,87 +1,77 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import Link from 'next/link'
-import {
-  Phone, Star, ArrowRight, CheckCircle, Shield, Clock, ThumbsUp,
-  ChevronLeft, ChevronRight, LocateFixed, Loader2, MapPin,
-} from 'lucide-react'
-import { useCart } from '@/lib/cart-context'
+import Image from 'next/image'
+import { ArrowRight, Check, MessageCircle, Minus, Plus, Search, Star } from 'lucide-react'
 import { useCity } from '@/lib/city-context'
-import { BLOG_POSTS } from '@/lib/blog-data'
 
-// ─── Hero ─────────────────────────────────────────────────────────────────────
+const WHATSAPP = 'https://wa.me/917349603429'
+
+/* ── 3. Hero ──────────────────────────────────────────────────────────────── */
 
 export function HeroSection() {
-  const { setCartOpen } = useCart()
-  const { city, detectCity, detecting, detectMessage, detectError } = useCity()
+  const { city, setCity, cities } = useCity()
 
   return (
-    <section className="relative overflow-hidden bg-linear-to-br from-primary/5 via-white to-brand/5 py-16 md:py-24 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-4 leading-tight">
-              Professional Services<br />
-              <span className="text-primary">at Your Doorstep</span>
-            </h1>
-            <p className="text-lg text-gray-500 mb-6">
-              Home deep cleaning by BHK, residential & corporate cleaning, pest control and more —
-              trusted by 1 million+ happy customers across India.
-            </p>
+    <section className="border-b border-border px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
+      <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-2">
+        <div>
+          <p className="label-mono text-primary">Home &amp; office care</p>
+          <h1 className="mt-4 text-4xl font-extrabold leading-[1.05] sm:text-5xl lg:text-6xl">
+            Professional Services at Your Doorstep
+          </h1>
+          <p className="mt-5 max-w-lg text-lg text-muted-foreground">
+            Book a scheduled deep clean, or get instant house help by the hour. Verified
+            professionals, flat prices, across India.
+          </p>
 
-            {/* Location */}
-            <div className="mb-8 rounded-2xl border border-primary/15 bg-white/70 backdrop-blur p-4">
-              <div className="flex flex-wrap items-center gap-3">
-                <MapPin className="w-4 h-4 text-primary shrink-0" />
-                <span className="text-sm text-gray-600">
-                  {city ? (
-                    <>Serving <strong className="text-gray-900">{city}</strong></>
-                  ) : (
-                    'Where do you need the service?'
-                  )}
-                </span>
-                <Button
-                  variant="link"
-                  onClick={detectCity}
-                  disabled={detecting}
-                  className="ml-auto h-auto gap-1.5 p-0 text-sm font-semibold"
-                >
-                  {detecting ? <Loader2 className="animate-spin" /> : <LocateFixed />}
-                  {detecting ? 'Detecting…' : city ? 'Change' : 'Detect my location'}
-                </Button>
-              </div>
-              {detectMessage && <p className="mt-2 text-xs text-green-600">{detectMessage}</p>}
-              {detectError && <p className="mt-2 text-xs text-red-500">{detectError}</p>}
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Button
-                variant="brand"
-                size="lg"
-                onClick={() => setCartOpen(true)}
-                className="rounded-xl px-8 py-6 text-base font-bold shadow-lg shadow-brand/30 transition-all hover:scale-105"
+          {/* The one soft shadow the palette allows, per the spec. */}
+          <div className="mt-8 flex flex-col gap-2 rounded-3xl border border-border bg-card p-2 shadow-panel sm:flex-row sm:items-center">
+            <label className="flex flex-1 items-center gap-3 px-4 py-2">
+              <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <span className="sr-only">Your city</span>
+              <select
+                value={city ?? ''}
+                onChange={(e) => setCity(e.target.value)}
+                className="w-full bg-transparent text-sm outline-none"
               >
-                Book Now
-              </Button>
-              <a
-                href="#services"
-                className="flex items-center justify-center gap-2 border-2 border-primary text-primary px-8 py-3.5 rounded-xl font-bold hover:bg-primary hover:text-white transition-all text-base"
-              >
-                Explore Services <ArrowRight className="w-4 h-4" />
-              </a>
-            </div>
+                <option value="">Where do you need us?</option>
+                {cities.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <Link
+              href="/deep-cleaning"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-3.5 font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+            >
+              Book Now <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
 
-          <div className="relative hidden lg:block">
-            <div className="w-full h-96 rounded-3xl overflow-hidden border border-primary/10 shadow-2xl">
-              <img src="/Office%20cleaning%20PC.jpg" alt="Professional cleaning team" className="w-full h-full object-cover" />
+          <p className="mt-4 text-sm text-muted-foreground">
+            Not happy? We will come back and re-clean at no extra cost.
+          </p>
+        </div>
+
+        {/* Image collage with the 1M+ stat tile */}
+        <div className="relative">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-3">
+              <Photo src="/Office cleaning PC.jpg" alt="Team cleaning an office" className="h-44 sm:h-56" />
+              <Photo src="/Sofa Shampooing PC.jpg" alt="Sofa shampooing" className="h-32 sm:h-40" />
             </div>
-            <div className="absolute -bottom-4 -left-4 bg-white rounded-2xl shadow-xl px-5 py-3 border border-gray-100">
-              <p className="text-xs text-gray-500">Happy customers</p>
-              <p className="text-primary font-black text-2xl">1M+</p>
+            <div className="space-y-3 pt-8">
+              <Photo src="/marble polishing PC.jpg" alt="Marble polishing" className="h-32 sm:h-40" />
+              <Photo src="/glass cleaning PC.jpg" alt="Glass cleaning" className="h-44 sm:h-56" />
             </div>
+          </div>
+          <div className="absolute -bottom-4 left-4 rounded-2xl bg-ink px-5 py-4 text-ink-foreground shadow-panel">
+            <p className="tabular text-3xl font-extrabold">1M+</p>
+            <p className="label-mono mt-0.5 text-brand">Customers served</p>
           </div>
         </div>
       </div>
@@ -89,33 +79,154 @@ export function HeroSection() {
   )
 }
 
-// ─── Why us ───────────────────────────────────────────────────────────────────
+function Photo({ src, alt, className }: { src: string; alt: string; className: string }) {
+  return (
+    <div className={`relative overflow-hidden rounded-2xl border border-border ${className}`}>
+      <Image src={src} alt={alt} fill sizes="(max-width: 1024px) 45vw, 22vw" className="object-cover" />
+    </div>
+  )
+}
 
-const WHY_US = [
-  { Icon: CheckCircle, title: 'Verified Professionals', desc: 'All our staff are background-checked and professionally trained.' },
-  { Icon: Shield, title: 'Satisfaction Guaranteed', desc: 'Not happy? We will come back and re-clean at no extra cost.' },
-  { Icon: Clock, title: 'On-Time Service', desc: 'We respect your time and always arrive on schedule.' },
-  { Icon: ThumbsUp, title: 'Eco-Friendly Products', desc: 'Safe cleaning agents that protect your family and the environment.' },
+/* ── 4. Trust strip ───────────────────────────────────────────────────────── */
+
+const STATS = [
+  { value: '1M+', label: 'Customers served' },
+  { value: '4.8', label: 'Average rating' },
+  { value: '14', label: 'Cities covered' },
+  { value: '100%', label: 'Verified professionals' },
+]
+
+export function TrustStrip() {
+  return (
+    <section className="border-b border-border bg-secondary/50 px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-6 lg:grid-cols-4">
+        {STATS.map((s) => (
+          <div key={s.label} className="text-center">
+            <p className="tabular text-3xl font-extrabold text-primary">{s.value}</p>
+            <p className="label-mono mt-1 text-muted-foreground">{s.label}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+/* ── 5. The two domains ───────────────────────────────────────────────────── */
+
+export function DomainCards() {
+  return (
+    <section className="px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+      <div className="mx-auto max-w-7xl">
+        <h2 className="text-3xl font-extrabold sm:text-4xl">Two ways we help</h2>
+        <p className="mt-3 max-w-xl text-muted-foreground">
+          Plan a deep clean in advance, or get someone to your door within the hour.
+        </p>
+
+        <div className="mt-10 grid gap-6 lg:grid-cols-2">
+          {/* Deep Cleaning — light */}
+          <Link
+            href="/deep-cleaning"
+            className="group flex flex-col justify-between rounded-3xl border border-border bg-card p-8 transition-colors hover:border-primary"
+          >
+            <div>
+              <p className="label-mono text-primary">Scheduled · flat price</p>
+              <h3 className="mt-4 text-3xl font-extrabold">Deep Cleaning</h3>
+              <p className="mt-3 max-w-sm text-muted-foreground">
+                Homes, offices, marble floors and painting. Booked in advance, priced up front,
+                done by a trained crew.
+              </p>
+            </div>
+            <div className="mt-10 flex items-end justify-between">
+              <span>
+                <span className="label-mono block text-muted-foreground">From</span>
+                <span className="tabular text-3xl font-extrabold">₹1,499</span>
+              </span>
+              <span className="inline-flex items-center gap-2 font-semibold text-primary">
+                Browse categories
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </span>
+            </div>
+          </Link>
+
+          {/* Prime Now — dark */}
+          <Link
+            href="/prime-now"
+            className="group flex flex-col justify-between rounded-3xl bg-ink p-8 text-ink-foreground transition-opacity hover:opacity-95"
+          >
+            <div>
+              <p className="label-mono text-brand">On demand · by the hour</p>
+              <h3 className="mt-4 text-3xl font-extrabold">Prime Now</h3>
+              <p className="mt-3 max-w-sm text-ink-foreground/70">
+                Instant house help. Tell us what needs doing and a verified helper arrives — today,
+                within the hour.
+              </p>
+            </div>
+            <div className="mt-10 flex items-end justify-between">
+              <span>
+                <span className="label-mono block text-ink-foreground/60">From</span>
+                <span className="tabular text-3xl font-extrabold">₹199</span>
+                <span className="ml-1 text-sm text-ink-foreground/60">/ 30 min</span>
+              </span>
+              <span className="inline-flex items-center gap-2 font-semibold text-brand">
+                Request a helper
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </span>
+            </div>
+          </Link>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ── 6. How it works ──────────────────────────────────────────────────────── */
+
+const STEPS = [
+  { title: 'Tell us what you need', body: 'Pick a service and a time, or describe the job for Prime Now.' },
+  { title: 'We assign a verified pro', body: 'A background-checked professional near you takes the job.' },
+  { title: 'Pay after the work is done', body: 'Flat price, no surprises. Not happy? We re-clean free.' },
+]
+
+export function HowItWorks() {
+  return (
+    <section className="border-y border-border bg-secondary/40 px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+      <div className="mx-auto max-w-7xl">
+        <h2 className="text-3xl font-extrabold sm:text-4xl">How it works</h2>
+        {/* Numbered because these are genuinely sequential. */}
+        <ol className="mt-10 grid gap-8 lg:grid-cols-3">
+          {STEPS.map((s, i) => (
+            <li key={s.title}>
+              <span className="label-mono text-primary">Step {String(i + 1).padStart(2, '0')}</span>
+              <h3 className="mt-3 text-xl font-bold">{s.title}</h3>
+              <p className="mt-2 text-muted-foreground">{s.body}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  )
+}
+
+/* ── 7. Why choose us — dark band ─────────────────────────────────────────── */
+
+const WHY = [
+  { title: 'Verified Professionals', body: 'Every professional is background-checked and trained before their first job.' },
+  { title: 'Eco-Friendly Products', body: 'Cleaning agents that are safe around children and pets.' },
+  { title: 'On-Time Service', body: 'We arrive in the slot you booked, or we tell you before it starts.' },
+  { title: 'Free re-clean', body: 'Not happy? We will come back and re-clean at no extra cost.' },
 ]
 
 export function WhyUs() {
   return (
-    <section id="why-us" className="py-16 px-4 sm:px-6 lg:px-8 bg-linear-to-br from-primary/5 to-brand/5">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-black text-gray-900">Why Choose MyPrimeCompany?</h2>
-          <p className="text-gray-500 mt-2 max-w-xl mx-auto">
-            India&apos;s most trusted professional cleaning and facility services partner
-          </p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {WHY_US.map((item) => (
-            <div key={item.title} className="bg-white rounded-2xl p-6 hover:shadow-xl transition-all border border-gray-100 hover:border-primary/20 text-center group">
-              <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mx-auto mb-4 group-hover:bg-primary group-hover:text-white transition-all">
-                <item.Icon className="w-6 h-6" />
-              </div>
-              <h3 className="font-bold text-gray-900 mb-2 group-hover:text-primary transition-colors">{item.title}</h3>
-              <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
+    <section id="why-us" className="bg-ink px-4 py-16 text-ink-foreground sm:px-6 lg:px-8 lg:py-24">
+      <div className="mx-auto max-w-7xl">
+        <h2 className="text-3xl font-extrabold sm:text-4xl">Why Choose MyPrimeCompany?</h2>
+        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {WHY.map((w) => (
+            <div key={w.title} className="rounded-2xl border border-white/10 p-6">
+              <Check className="h-5 w-5 text-brand" />
+              <h3 className="mt-4 font-bold">{w.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-ink-foreground/70">{w.body}</p>
             </div>
           ))}
         </div>
@@ -124,31 +235,25 @@ export function WhyUs() {
   )
 }
 
-// ─── Gallery ──────────────────────────────────────────────────────────────────
+/* ── 8. Gallery ───────────────────────────────────────────────────────────── */
 
 const GALLERY = [
-  { label: 'Residential Clean', src: '/Sofa%20Shampooing%20PC.jpg' },
-  { label: 'Commercial Clean', src: '/Office%20cleaning%20PC.jpg' },
-  { label: 'Pest Control', src: '/Living%20area%20Pest%20PC.jpg' },
-  { label: 'Marble Polish', src: '/marble%20polishing%20PC.jpg' },
+  { src: '/Office Interior glass PC.jpg', alt: 'Interior glass cleaning in an office' },
+  { src: '/floor polishing PC.jpg', alt: 'Floor polishing in progress' },
+  { src: '/Kitchen Sink cleaning PC.jpg', alt: 'Kitchen sink deep cleaning' },
+  { src: '/toilet cleaning PC.jpg', alt: 'Bathroom deep cleaning' },
 ]
 
 export function Gallery() {
   return (
-    <section id="gallery" className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-black text-gray-900">Our Work</h2>
-          <p className="text-gray-500 mt-2">Real results from our professional cleaning team</p>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {GALLERY.map((cat) => (
-            <div key={cat.label} className="group relative rounded-2xl overflow-hidden border border-gray-100 hover:shadow-xl transition-all aspect-[3/4]">
-              <img src={cat.src} alt={cat.label} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-4">
-                <p className="text-white font-bold text-sm md:text-base">{cat.label}</p>
-              </div>
+    <section id="gallery" className="px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+      <div className="mx-auto max-w-7xl">
+        <h2 className="text-3xl font-extrabold sm:text-4xl">Our work</h2>
+        <p className="mt-3 text-muted-foreground">Real jobs, photographed on site.</p>
+        <div className="mt-10 grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {GALLERY.map((g) => (
+            <div key={g.src} className="relative h-48 overflow-hidden rounded-2xl border border-border sm:h-64">
+              <Image src={g.src} alt={g.alt} fill sizes="(max-width: 1024px) 45vw, 22vw" className="object-cover" />
             </div>
           ))}
         </div>
@@ -157,135 +262,45 @@ export function Gallery() {
   )
 }
 
-// ─── Testimonials ─────────────────────────────────────────────────────────────
-
-const TESTIMONIALS = [
-  { name: 'Abhi A', rating: 5, text: 'I had booked a deep cleaning service with MyPrimeCompany for my flat. The team was meticulous. Really appreciate the quick response time and professionalism.' },
-  { name: 'Dibyabharati Mohapatra', rating: 5, text: 'Every time we booked MyPrimeCompany for deep cleaning, they do an excellent job and are very punctual. I would recommend them to everyone.' },
-  { name: 'Vijaya Lakshmi', rating: 5, text: 'I booked a window and sofa cleaning service, and the experience was excellent. Big thanks to the MyPrimeCompany team for their outstanding work!' },
-  { name: 'Sherry Wasandi', rating: 5, text: 'I availed deep cleaning services recently and was very impressed. The team worked extremely diligently, exceeding expectations. Strongly recommending them.' },
-  { name: 'Prateek Sharma', rating: 5, text: 'I recently got my sofa cleaned, and I am extremely satisfied! The team was punctual, professional, and did a thorough job. My sofa looks and smells fresh.' },
-  { name: 'Deepti Krishnan', rating: 5, text: 'Wonderful job! Upholstery and carpets were well cleaned. We have been using MyPrimeCompany for a while now and highly recommend.' },
-]
+/* ── 9. Testimonial ───────────────────────────────────────────────────────── */
 
 export function Testimonials() {
-  const [current, setCurrent] = useState(0)
-  const total = TESTIMONIALS.length
-  const t = TESTIMONIALS[current]
-
   return (
-    <section className="py-16 bg-gray-50">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-black text-gray-900">Top Testimonials</h2>
-          <p className="text-gray-500 mt-2">What our customers say about us</p>
-        </div>
-
-        <div className="relative bg-white rounded-2xl p-8 border border-gray-100 shadow-lg">
-          <div className="flex gap-1 mb-4 justify-center">
-            {Array(t.rating).fill(0).map((_, j) => (
-              <Star key={j} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-            ))}
-          </div>
-          <p className="text-gray-600 text-base leading-relaxed mb-6 italic text-center">&ldquo;{t.text}&rdquo;</p>
-          <div className="flex items-center justify-center gap-3">
-            <div className="w-11 h-11 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold">{t.name[0]}</div>
-            <div>
-              <p className="font-bold text-gray-900 text-sm">{t.name}</p>
-              <p className="text-xs text-gray-400">Verified Customer</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-center gap-6 mt-6">
-          <Button
-            variant="outline"
-            size="icon-lg"
-            onClick={() => setCurrent((c) => (c - 1 + total) % total)}
-            aria-label="Previous"
-            className="rounded-full shadow-sm hover:border-primary hover:text-primary"
-          >
-            <ChevronLeft className="size-5" />
-          </Button>
-          <div className="flex gap-2">
-            {TESTIMONIALS.map((_, i) => (
-              <button key={i} onClick={() => setCurrent(i)} aria-label={`Testimonial ${i + 1}`}
-                className={`w-2.5 h-2.5 rounded-full transition-all ${i === current ? 'bg-primary scale-125' : 'bg-muted-foreground/30'}`} />
-            ))}
-          </div>
-          <Button
-            variant="outline"
-            size="icon-lg"
-            onClick={() => setCurrent((c) => (c + 1) % total)}
-            aria-label="Next"
-            className="rounded-full shadow-sm hover:border-primary hover:text-primary"
-          >
-            <ChevronRight className="size-5" />
-          </Button>
-        </div>
-      </div>
-    </section>
-  )
-}
-
-// ─── Blog preview ─────────────────────────────────────────────────────────────
-
-export function BlogPreview() {
-  return (
-    <section id="blog" className="py-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
-          <div>
-            <h2 className="text-3xl md:text-4xl font-black text-gray-900">Cleaning Tips &amp; Guides</h2>
-            <p className="text-gray-500 mt-2 max-w-xl">Expert insights, practical tips and the latest updates.</p>
-          </div>
-          <Link href="/blog" className="flex items-center gap-1 text-primary font-semibold text-sm hover:underline shrink-0">
-            View All Posts <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {BLOG_POSTS.slice(0, 3).map((post) => (
-            <Link key={post.slug} href={`/blog/${post.slug}`} className="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl hover:border-primary/20 transition-all">
-              <div className="h-44 overflow-hidden">
-                <img src={post.img} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-              </div>
-              <div className="p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-xs font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full">{post.category}</span>
-                  <span className="text-xs text-gray-400">{post.date}</span>
-                </div>
-                <h3 className="font-bold text-gray-900 text-sm leading-snug group-hover:text-primary transition-colors line-clamp-2">{post.title}</h3>
-                <span className="mt-4 text-xs font-semibold text-primary flex items-center gap-1 group-hover:gap-2 transition-all">
-                  Read More <ArrowRight className="w-3 h-3" />
-                </span>
-              </div>
-            </Link>
+    <section className="border-y border-border bg-secondary/40 px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+      <figure className="mx-auto max-w-3xl text-center">
+        <div className="flex justify-center gap-1" aria-label="Rated 5 out of 5">
+          {Array.from({ length: 5 }, (_, i) => (
+            <Star key={i} className="h-4 w-4 fill-brand text-brand" />
           ))}
         </div>
-      </div>
+        <blockquote className="mt-6 text-2xl font-bold leading-snug sm:text-3xl">
+          “The team arrived on time and left the flat spotless. Booking took two minutes and the
+          price was exactly what was quoted.”
+        </blockquote>
+        <figcaption className="label-mono mt-6 text-muted-foreground">Abhi A · Verified customer</figcaption>
+      </figure>
     </section>
   )
 }
 
-// ─── Clients ──────────────────────────────────────────────────────────────────
+/* ── 10. Corporate clients ────────────────────────────────────────────────── */
+
+const CLIENTS = [
+  { src: '/viatris.webp', alt: 'Viatris' },
+  { src: '/mylan.webp', alt: 'Mylan' },
+  { src: '/LaurusBio_Black.png', alt: 'Laurus Bio' },
+  { src: '/primeeagle.jpeg', alt: 'Prime Eagle' },
+]
 
 export function Clients() {
-  const CLIENTS = [
-    { src: '/viatris.webp', alt: 'Viatris' },
-    { src: '/mylan.webp', alt: 'Mylan' },
-    { src: '/LaurusBio_Black.png', alt: 'Laurus Bio' },
-    { src: '/primeeagle.jpeg', alt: 'Prime Eagle' },
-  ]
   return (
-    <section id="clients" className="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 border-t border-gray-100">
-      <div className="max-w-7xl mx-auto text-center">
-        <h2 className="text-2xl font-black text-gray-900 mb-2">Our Clients</h2>
-        <p className="text-gray-500 text-sm mb-8">Proud to partner with industry leaders and trusted brands</p>
-        <div className="flex flex-wrap justify-center items-center gap-8">
+    <section className="px-4 py-16 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        <p className="label-mono text-center text-muted-foreground">Trusted by</p>
+        <div className="mt-8 grid grid-cols-2 items-center gap-8 sm:grid-cols-4">
           {CLIENTS.map((c) => (
-            <div key={c.alt} className="bg-white rounded-xl border border-gray-100 px-6 py-4 hover:border-primary/30 hover:shadow-md transition-all flex items-center justify-center" style={{ minWidth: '140px', height: '80px' }}>
-              <img src={c.src} alt={c.alt} className="max-h-12 max-w-[120px] object-contain grayscale hover:grayscale-0 transition-all" />
+            <div key={c.src} className="relative mx-auto h-12 w-full max-w-36">
+              <Image src={c.src} alt={c.alt} fill sizes="150px" className="object-contain" />
             </div>
           ))}
         </div>
@@ -294,47 +309,137 @@ export function Clients() {
   )
 }
 
-// ─── CTA ──────────────────────────────────────────────────────────────────────
+/* ── 11. FAQ ──────────────────────────────────────────────────────────────── */
+
+const FAQS = [
+  {
+    q: 'What is the difference between Deep Cleaning and Prime Now?',
+    a: 'Deep Cleaning is booked in advance at a flat price for a defined job — a 2 BHK flat, an office, a marble floor. Prime Now is instant help charged by the hour: you tell us what needs doing and a helper comes over, usually within the hour.',
+  },
+  {
+    q: 'Do I need to provide cleaning supplies?',
+    a: 'No. Our professionals bring their own equipment and eco-friendly cleaning products.',
+  },
+  {
+    q: 'How are your professionals verified?',
+    a: 'Every professional completes an ID and address check and is trained before taking their first job.',
+  },
+  {
+    q: 'What if I am not satisfied with the work?',
+    a: 'Not happy? We will come back and re-clean at no extra cost. Tell us within 24 hours of the visit.',
+  },
+  {
+    q: 'How do I pay?',
+    a: 'Pay after the work is done, by cash or UPI. The price you see when booking is the price you pay.',
+  },
+  {
+    q: 'Can I reschedule or cancel a booking?',
+    a: 'Yes. Reschedule or cancel from your account, or call us. There is no charge if you tell us before the professional sets out.',
+  },
+  {
+    q: 'Which cities do you serve?',
+    a: 'We currently operate in 14 cities. Pick your city at the top of the page to see availability.',
+  },
+]
+
+export function Faq() {
+  // One item open at a time, per the spec.
+  const [open, setOpen] = useState<number | null>(0)
+
+  return (
+    <section id="faq" className="px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
+      <div className="mx-auto max-w-3xl">
+        <h2 className="text-3xl font-extrabold sm:text-4xl">Frequently asked questions</h2>
+        <dl className="mt-10 divide-y divide-border border-y border-border">
+          {FAQS.map((f, i) => {
+            const isOpen = open === i
+            return (
+              <div key={f.q}>
+                <dt>
+                  <button
+                    type="button"
+                    onClick={() => setOpen(isOpen ? null : i)}
+                    aria-expanded={isOpen}
+                    className="flex w-full items-center justify-between gap-6 py-5 text-left font-semibold"
+                  >
+                    {f.q}
+                    {isOpen ? (
+                      <Minus className="h-4 w-4 shrink-0 text-primary" />
+                    ) : (
+                      <Plus className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    )}
+                  </button>
+                </dt>
+                {isOpen && (
+                  <dd className="pb-6 pr-10 text-muted-foreground">{f.a}</dd>
+                )}
+              </div>
+            )
+          })}
+        </dl>
+      </div>
+    </section>
+  )
+}
+
+/* ── 12. CTA band + partner panel ─────────────────────────────────────────── */
 
 export function CtaBanner() {
-  const { setCartOpen } = useCart()
   return (
-    <section id="contact-cta" className="py-16 px-4 sm:px-6 lg:px-8 bg-primary text-white">
-      <div className="max-w-3xl mx-auto text-center">
-        <h2 className="text-3xl md:text-4xl font-black mb-4">Ready for a Spotless Home?</h2>
-        <p className="text-white/80 mb-8 text-lg">Book your service today and experience the MyPrimeCompany difference.</p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button
-            variant="brand"
-            size="lg"
-            onClick={() => setCartOpen(true)}
-            className="rounded-xl px-8 py-6 text-base font-bold shadow-lg transition-all hover:scale-105"
+    <section className="bg-primary px-4 py-16 text-primary-foreground sm:px-6 lg:px-8 lg:py-20">
+      <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-[1fr_360px]">
+        <div>
+          <h2 className="text-3xl font-extrabold sm:text-4xl">Ready when you are</h2>
+          <p className="mt-3 max-w-lg text-primary-foreground/80">
+            Book a deep clean for the weekend, or get a helper to your door within the hour.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link
+              href="/deep-cleaning"
+              className="rounded-2xl bg-background px-6 py-3.5 font-semibold text-primary transition-opacity hover:opacity-90"
+            >
+              Book a deep clean
+            </Link>
+            <Link
+              href="/prime-now"
+              className="rounded-2xl border border-primary-foreground/30 px-6 py-3.5 font-semibold transition-colors hover:bg-white/10"
+            >
+              Get help now
+            </Link>
+          </div>
+        </div>
+
+        <div className="rounded-3xl bg-ink p-6 text-ink-foreground">
+          <p className="label-mono text-brand">For professionals</p>
+          <h3 className="mt-3 text-xl font-bold">Become a Prime Partner</h3>
+          <p className="mt-2 text-sm text-ink-foreground/70">
+            Steady work in your city, paid on time, on your own schedule.
+          </p>
+          <Link
+            href="/become-partner"
+            className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-brand px-5 py-3 font-bold text-brand-foreground transition-opacity hover:opacity-90"
           >
-            Book Now
-          </Button>
-          <a href="tel:+917349603429" className="flex items-center justify-center gap-2 bg-white/20 text-white border-2 border-white/30 px-8 py-3.5 rounded-xl font-bold hover:bg-white/30 transition-all text-base">
-            <Phone className="w-4 h-4" /> +91 73496 03429
-          </a>
+            Apply to join <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </div>
     </section>
   )
 }
 
-// ─── Floating buttons ─────────────────────────────────────────────────────────
+/* ── 14. Floating WhatsApp ────────────────────────────────────────────────── */
 
 export function FloatingButtons() {
   return (
-    <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-40">
-      <a href="https://wa.me/917349603429" target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp"
-         className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform" style={{ backgroundColor: '#25D366' }}>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" className="w-7 h-7 fill-white">
-          <path d="M16 0C7.163 0 0 7.163 0 16c0 2.822.737 5.469 2.027 7.773L0 32l8.437-2.013A15.938 15.938 0 0 0 16 32c8.837 0 16-7.163 16-16S24.837 0 16 0zm0 29.333a13.27 13.27 0 0 1-6.773-1.853l-.486-.289-5.007 1.195 1.219-4.879-.317-.502A13.267 13.267 0 0 1 2.667 16C2.667 8.636 8.636 2.667 16 2.667S29.333 8.636 29.333 16 23.364 29.333 16 29.333zm7.307-9.907c-.4-.2-2.368-1.168-2.735-1.301-.367-.133-.634-.2-.9.2-.267.4-1.034 1.301-1.267 1.568-.233.267-.467.3-.867.1-.4-.2-1.688-.622-3.215-1.983-1.188-1.06-1.99-2.37-2.223-2.77-.233-.4-.025-.616.175-.815.18-.18.4-.467.6-.7.2-.233.267-.4.4-.667.133-.267.067-.5-.033-.7-.1-.2-.9-2.168-1.234-2.968-.325-.78-.655-.674-.9-.686l-.767-.013c-.267 0-.7.1-1.067.5-.367.4-1.4 1.368-1.4 3.335s1.433 3.868 1.633 4.135c.2.267 2.82 4.305 6.832 6.035.955.413 1.7.659 2.282.843.958.305 1.831.262 2.52.159.769-.115 2.368-.968 2.702-1.903.333-.935.333-1.735.233-1.903-.1-.167-.367-.267-.767-.467z" />
-        </svg>
-      </a>
-      <a href="tel:+917349603429" aria-label="Call us" className="w-14 h-14 bg-primary rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
-        <Phone className="w-6 h-6 text-white" />
-      </a>
-    </div>
+    <a
+      href={WHATSAPP}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Chat with us on WhatsApp"
+      // z-40 keeps it under the cart drawer / modals but over page content.
+      className="fixed bottom-6 right-6 z-40 grid h-14 w-14 place-items-center rounded-full bg-ink text-ink-foreground shadow-panel transition-transform hover:scale-105"
+    >
+      <MessageCircle className="h-6 w-6" />
+    </a>
   )
 }
