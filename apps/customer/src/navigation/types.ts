@@ -34,6 +34,7 @@ export type BookingsStackParams = {
   MyBookings: undefined
   Tracking: { booking: Booking }
   RateTip: { booking: Booking }
+  Receipt: { booking: Booking }
 }
 
 export type AccountStackParams = AddressRoutes & {

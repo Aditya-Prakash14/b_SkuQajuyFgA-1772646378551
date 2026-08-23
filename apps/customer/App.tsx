@@ -45,6 +45,7 @@ import {
 import { VerifyCodeScreen } from './src/screens/auth/VerifyCodeScreen'
 import { MyBookingsScreen } from './src/screens/bookings/MyBookingsScreen'
 import { RateTipScreen } from './src/screens/bookings/RateTipScreen'
+import { ReceiptScreen } from './src/screens/bookings/ReceiptScreen'
 import { TrackingScreen } from './src/screens/bookings/TrackingScreen'
 import { CartScreen } from './src/screens/checkout/CartScreen'
 import { ConfirmedScreen } from './src/screens/checkout/ConfirmedScreen'
@@ -147,6 +148,7 @@ function BookingsNavigator() {
       <BookingsStack.Screen name="MyBookings" component={MyBookingsScreen} options={{ headerShown: false }} />
       <BookingsStack.Screen name="Tracking" component={TrackingScreen} options={{ title: 'Booking' }} />
       <BookingsStack.Screen name="RateTip" component={RateTipScreen} options={{ title: 'Rate' }} />
+      <BookingsStack.Screen name="Receipt" component={ReceiptScreen} options={{ title: 'Receipt' }} />
     </BookingsStack.Navigator>
   )
 }

@@ -121,6 +121,9 @@ export interface Booking {
   tax: number
   total: number
   paymentStatus: string
+  paymentMethod: string | null
+  /** Stamped by the database when payment_status flips to paid (0031). */
+  paidAt: string | null
   items: BookingItem[]
   createdAt: string
   /** Prime Now requests are a separate table; the list merges both. */
@@ -134,6 +137,14 @@ export interface BookingEvent {
   status: string
   note: string | null
   created_at: string
+}
+
+/** A GST invoice the CRM has issued for a booking; readable by its customer since 0031. */
+export interface Invoice {
+  invoice_number: string
+  issue_date: string | null
+  status: string
+  pdf_url: string | null
 }
 
 /** What my_booking_helper() lets a customer know about the partner on their job. */

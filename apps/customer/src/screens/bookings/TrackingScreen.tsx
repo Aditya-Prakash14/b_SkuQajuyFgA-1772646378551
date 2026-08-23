@@ -394,7 +394,9 @@ export function TrackingScreen({ route, navigation }: BookingsStackProps<'Tracki
           </View>
           <Muted className="text-[11px]">
             {isNow ? 'Flat price for the slot. No travel charge.' : 'Inclusive of 18% GST.'}
-            {booking.paymentStatus === 'paid' ? ' Paid.' : ' Pay after the work is done, by cash or UPI.'}
+            {booking.paymentStatus === 'paid'
+              ? ` Paid${booking.paymentMethod ? ` by ${booking.paymentMethod}` : ''}${booking.paidAt ? ` on ${formatStamp(booking.paidAt)}` : ''}.`
+              : ' Pay after the work is done, by cash or UPI.'}
           </Muted>
           <Muted className="text-[12px]">
             {booking.address}
@@ -408,6 +410,10 @@ export function TrackingScreen({ route, navigation }: BookingsStackProps<'Tracki
           variant="outline"
           onPress={() => Linking.openURL(`tel:+${SUPPORT_PHONE}`)}
         />
+
+        {status === 'completed' || booking.paymentStatus === 'paid' ? (
+          <Button label="View receipt" variant="outline" onPress={() => navigation.navigate('Receipt', { booking })} />
+        ) : null}
 
         {/* Only Deep Cleaning can be rated: submit_review is keyed to an
             order line, and a Prime Now request has no order. */}

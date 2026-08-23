@@ -8,6 +8,7 @@ import type {
   BookingStatus,
   CartLine,
   Helper,
+  Invoice,
   NotificationPrefs,
   Profile,
 } from './types'
@@ -159,13 +160,13 @@ export function fetchBookings(): Promise<Booking[]> {
       supabase
         .from('orders')
         .select(
-          'id,order_number,status,scheduled_date,scheduled_slot,city,address,notes,subtotal,tax,total,payment_status,created_at,order_items(service_id,service_name,qty,units,unit_price,line_total)',
+          'id,order_number,status,scheduled_date,scheduled_slot,city,address,notes,subtotal,tax,total,payment_status,payment_method,paid_at,created_at,order_items(service_id,service_name,qty,units,unit_price,line_total)',
         )
         .order('created_at', { ascending: false }),
       supabase
         .from('prime_now_requests')
         .select(
-          'id,request_number,status,scheduled_for,timing,city,address,notes,price,payment_status,slot_minutes,tasks,created_at',
+          'id,request_number,status,scheduled_for,timing,city,address,notes,price,payment_status,payment_method,paid_at,slot_minutes,tasks,created_at',
         )
         .order('created_at', { ascending: false }),
     ])
@@ -185,6 +186,8 @@ export function fetchBookings(): Promise<Booking[]> {
       tax: Number(o.tax ?? 0),
       total: Number(o.total ?? 0),
       paymentStatus: o.payment_status ?? 'unpaid',
+      paymentMethod: o.payment_method ?? null,
+      paidAt: o.paid_at ?? null,
       items: ((o.order_items as any[]) ?? []).map((i) => ({
         service_id: i.service_id ?? null,
         service_name: i.service_name,
@@ -210,6 +213,8 @@ export function fetchBookings(): Promise<Booking[]> {
       tax: 0,
       total: Number(r.price ?? 0),
       paymentStatus: r.payment_status ?? 'unpaid',
+      paymentMethod: r.payment_method ?? null,
+      paidAt: r.paid_at ?? null,
       items: [
         {
           service_id: null,
@@ -238,6 +243,31 @@ export async function fetchBookingEvents(orderId: string): Promise<BookingEvent[
     .order('created_at')
   if (error) throw error
   return (data as BookingEvent[] | null) ?? []
+}
+
+/** The CRM-issued GST invoice for an order, if one exists. */
+export async function fetchInvoice(orderId: string): Promise<Invoice | null> {
+  const { data, error } = await supabase
+    .from('invoices')
+    .select('invoice_number,issue_date,status,pdf_url')
+    .eq('order_id', orderId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (error) throw error
+  return (data as Invoice | null) ?? null
+}
+
+/**
+ * A link to the invoice PDF. pdf_url is either a full URL or a path inside
+ * the private `invoices` bucket, which needs a short-lived signed URL.
+ */
+export async function invoiceLink(inv: Invoice): Promise<string | null> {
+  if (!inv.pdf_url) return null
+  if (/^https?:\/\//i.test(inv.pdf_url)) return inv.pdf_url
+  const { data, error } = await supabase.storage.from('invoices').createSignedUrl(inv.pdf_url, 3600)
+  if (error) throw error
+  return data?.signedUrl ?? null
 }
 
 /** Who is coming. Null until a partner is assigned. */
