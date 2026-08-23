@@ -3,12 +3,14 @@ import { Animated, Easing, Image, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { Text } from '../../components/ui'
+import { useColors } from '../../lib/theme'
 
 /**
  * Screen 1. Shown while fonts and the stored session load — a real wait, not a
  * timed delay, so the app never sits here longer than it has to.
  */
 export function SplashScreen() {
+  const colors = useColors()
   const progress = useRef(new Animated.Value(0)).current
 
   useEffect(() => {
@@ -25,7 +27,7 @@ export function SplashScreen() {
   const width = progress.interpolate({ inputRange: [0, 1], outputRange: ['12%', '100%'] })
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} className="flex-1" style={{ backgroundColor: '#0E5A63' }}>
+    <SafeAreaView edges={['top', 'bottom']} className="flex-1" style={{ backgroundColor: colors.deep }}>
       <View className="flex-1 items-center justify-center gap-6">
         <View className="h-24 w-24 items-center justify-center rounded-lg bg-white p-4">
           <Image

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Linking, RefreshControl, ScrollView, View } from 'react-native'
+import { Linking, ScrollView, View } from 'react-native'
 
-import { Badge, Button, Card, Divider, Eyebrow, H1, Muted, Screen, Text } from '../../components/ui'
+import { Badge, Button, Card, Divider, Eyebrow, H1, Muted, Refresher, Screen, Text } from '../../components/ui'
 import { cancelBooking, fetchBookingEvents } from '../../lib/bookings'
 import { formatDay, formatINR, formatStamp } from '../../lib/format'
 import { errorMessage, supabase } from '../../lib/supabase'
@@ -85,7 +85,7 @@ export function TrackingScreen({ route, navigation }: BookingsStackProps<'Tracki
     <Screen edges={[]}>
       <ScrollView
         contentContainerStyle={{ padding: 22, paddingBottom: 32, gap: 16 }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={load} />}
+        refreshControl={<Refresher refreshing={refreshing} onRefresh={load} />}
       >
         <View className="gap-2">
           <Eyebrow className="text-primary">{booking.reference}</Eyebrow>

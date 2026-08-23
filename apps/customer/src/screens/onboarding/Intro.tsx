@@ -3,7 +3,7 @@ import { Image, Pressable, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { Button, Dots, Eyebrow, H1, Muted, Text } from '../../components/ui'
-import { colors } from '../../lib/theme'
+import { useColors } from '../../lib/theme'
 
 /**
  * Screens 2–4: the two domains, then the trust close.
@@ -46,6 +46,7 @@ const SLIDES: Slide[] = [
 ]
 
 export function IntroScreen({ onDone }: { onDone: () => void }) {
+  const colors = useColors()
   const [index, setIndex] = useState(0)
   const slide = SLIDES[index]
   const last = index === SLIDES.length - 1

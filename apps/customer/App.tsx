@@ -17,14 +17,16 @@ import { NavigationContainer, type Theme } from '@react-navigation/native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { StatusBar } from 'expo-status-bar'
+import { useColorScheme } from 'nativewind'
 import { useState } from 'react'
 import { Text as RNText, View } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 import { Text } from './src/components/ui'
+import { AppearanceProvider } from './src/lib/appearance'
 import { CartProvider, useCart } from './src/lib/cart'
 import { SessionProvider, useSession } from './src/lib/session'
-import { colors } from './src/lib/theme'
+import { useColors } from './src/lib/theme'
 import { PHONE_OTP_ENABLED } from './src/lib/supabase'
 import type { BookingsStackParams, HomeStackParams } from './src/navigation/types'
 import { AccountScreen } from './src/screens/account/AccountScreen'
@@ -57,33 +59,48 @@ const HomeStack = createNativeStackNavigator<HomeStackParams>()
 const BookingsStack = createNativeStackNavigator<BookingsStackParams>()
 const Tabs = createBottomTabNavigator()
 
-const navTheme: Theme = {
-  dark: false,
-  colors: {
-    primary: colors.primary,
-    background: colors.bg,
-    card: colors.card,
-    text: colors.text,
-    border: colors.border,
-    notification: colors.brand,
-  },
-  fonts: {
-    regular: { fontFamily: 'Manrope_400Regular', fontWeight: '400' },
-    medium: { fontFamily: 'Manrope_500Medium', fontWeight: '500' },
-    bold: { fontFamily: 'Manrope_700Bold', fontWeight: '700' },
-    heavy: { fontFamily: 'Manrope_800ExtraBold', fontWeight: '800' },
-  },
+const NAV_FONTS = {
+  regular: { fontFamily: 'Manrope_400Regular', fontWeight: '400' },
+  medium: { fontFamily: 'Manrope_500Medium', fontWeight: '500' },
+  bold: { fontFamily: 'Manrope_700Bold', fontWeight: '700' },
+  heavy: { fontFamily: 'Manrope_800ExtraBold', fontWeight: '800' },
+} as const
+
+/**
+ * Navigation chrome cannot take a className, so it is built from the active
+ * palette instead. Both must be derived per render, not module constants, or
+ * headers and screen backgrounds stay light while the content goes dark.
+ */
+function useNavTheme(): Theme {
+  const c = useColors()
+  const { colorScheme } = useColorScheme()
+  return {
+    dark: colorScheme === 'dark',
+    colors: {
+      primary: c.primary,
+      background: c.bg,
+      card: c.card,
+      text: c.text,
+      border: c.border,
+      notification: c.brand,
+    },
+    fonts: NAV_FONTS,
+  }
 }
 
-const stackOptions = {
-  headerShadowVisible: false,
-  headerTintColor: colors.primary,
-  headerTitleStyle: { fontFamily: 'Manrope_700Bold', fontSize: 16, color: colors.text },
-  headerStyle: { backgroundColor: colors.bg },
-  contentStyle: { backgroundColor: colors.bg },
+function useStackOptions() {
+  const c = useColors()
+  return {
+    headerShadowVisible: false,
+    headerTintColor: c.primary,
+    headerTitleStyle: { fontFamily: 'Manrope_700Bold', fontSize: 16, color: c.text },
+    headerStyle: { backgroundColor: c.bg },
+    contentStyle: { backgroundColor: c.bg },
+  }
 }
 
 function HomeNavigator() {
+  const stackOptions = useStackOptions()
   return (
     <HomeStack.Navigator screenOptions={stackOptions}>
       <HomeStack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
@@ -114,6 +131,7 @@ function HomeNavigator() {
 }
 
 function BookingsNavigator() {
+  const stackOptions = useStackOptions()
   return (
     <BookingsStack.Navigator screenOptions={stackOptions}>
       <BookingsStack.Screen name="MyBookings" component={MyBookingsScreen} options={{ headerShown: false }} />
@@ -141,6 +159,7 @@ function TabItem({
   focused: boolean
   badge?: number
 }) {
+  const colors = useColors()
   const tint = focused ? colors.primary : colors.muted
   return (
     <View style={{ alignItems: 'center', gap: 3, width: 72 }}>
@@ -171,6 +190,7 @@ function TabItem({
 }
 
 function MainTabs() {
+  const colors = useColors()
   const { count } = useCart()
   return (
     <Tabs.Navigator
@@ -278,6 +298,24 @@ function Root() {
   return <MainTabs />
 }
 
+function Shell() {
+  const navTheme = useNavTheme()
+  const { colorScheme } = useColorScheme()
+  return (
+    <>
+      {/* Follows the theme, so the clock and battery stay legible on both. */}
+      <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+      <NavigationContainer theme={navTheme}>
+        <SessionProvider>
+          <CartProvider>
+            <Root />
+          </CartProvider>
+        </SessionProvider>
+      </NavigationContainer>
+    </>
+  )
+}
+
 export default function App() {
   const [fontsLoaded] = useFonts({
     Manrope_400Regular,
@@ -287,16 +325,16 @@ export default function App() {
     Manrope_800ExtraBold,
     JetBrainsMono_400Regular,
     JetBrainsMono_500Medium,
+    // Load the icon font through the same gate as the text faces. Left to load
+    // itself, @expo/vector-icons registers on first render — which Fast Refresh
+    // does not re-run, so tab icons stay blank until the app is fully
+    // restarted. Gating it here makes them appear on the first paint, always.
+    ...Ionicons.font,
   })
 
   return (
     <SafeAreaProvider>
-      <StatusBar style="dark" />
-      <NavigationContainer theme={navTheme}>
-        <SessionProvider>
-          <CartProvider>{fontsLoaded ? <Root /> : <SplashScreen />}</CartProvider>
-        </SessionProvider>
-      </NavigationContainer>
+      <AppearanceProvider>{fontsLoaded ? <Shell /> : <SplashScreen />}</AppearanceProvider>
     </SafeAreaProvider>
   )
 }

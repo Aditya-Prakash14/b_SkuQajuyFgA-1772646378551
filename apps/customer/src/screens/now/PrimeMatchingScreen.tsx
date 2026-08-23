@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { Button, Text } from '../../components/ui'
 import { fetchDispatchState } from '../../lib/prime-now'
-import { colors } from '../../lib/theme'
+import { useColors } from '../../lib/theme'
 import type { HomeStackProps } from '../../navigation/types'
 
 /**
@@ -25,6 +25,7 @@ const STEPS = [
 ]
 
 export function PrimeMatchingScreen({ route, navigation }: HomeStackProps<'PrimeMatching'>) {
+  const colors = useColors()
   const { requestId, reference } = route.params
   const [step, setStep] = useState(0)
   const [matched, setMatched] = useState(false)
@@ -92,7 +93,7 @@ export function PrimeMatchingScreen({ route, navigation }: HomeStackProps<'Prime
             {matched ? (
               <Text className="font-black text-[30px] text-brand-foreground">✓</Text>
             ) : (
-              <ActivityIndicator color={colors.ink} />
+              <ActivityIndicator color={colors.brandForeground} />
             )}
           </View>
         </View>

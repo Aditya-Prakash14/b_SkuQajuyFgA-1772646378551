@@ -2,18 +2,27 @@ import { useEffect, useState } from 'react'
 import { Linking, Pressable, ScrollView, Switch, View } from 'react-native'
 
 import { Button, Card, Divider, Eyebrow, Field, H1, Muted, Screen, Text } from '../../components/ui'
+import { useAppearance, type ThemePref } from '../../lib/appearance'
 import { fetchNotificationPrefs, saveNotificationPrefs, upsertMyProfile } from '../../lib/bookings'
 import { useSession } from '../../lib/session'
 import { errorMessage } from '../../lib/supabase'
-import { colors } from '../../lib/theme'
+import { useColors } from '../../lib/theme'
 import type { NotificationPrefs } from '../../lib/types'
 
 const SUPPORT_PHONE = '917349603429'
 const SUPPORT_EMAIL = 'support@myprimecompany.in'
 
+const THEME_OPTIONS: { value: ThemePref; label: string }[] = [
+  { value: 'system', label: 'System' },
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+]
+
 /** Screen 24. Profile, membership, settings, sign out. */
 export function AccountScreen() {
   const { profile, draft, addresses, defaultAddress, signOut, refresh } = useSession()
+  const { pref, setPref } = useAppearance()
+  const colors = useColors()
   const [prefs, setPrefs] = useState<NotificationPrefs | null>(null)
   const [editing, setEditing] = useState(false)
   const [editName, setEditName] = useState('')
@@ -186,6 +195,35 @@ export function AccountScreen() {
           ) : (
             <Muted className="text-[13px]">Loading…</Muted>
           )}
+        </Card>
+
+        <Card className="gap-3">
+          <Eyebrow>Appearance</Eyebrow>
+          <View className="flex-row gap-2">
+            {THEME_OPTIONS.map((o) => {
+              const on = pref === o.value
+              return (
+                <Pressable
+                  key={o.value}
+                  onPress={() => setPref(o.value)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: on }}
+                  accessibilityLabel={`Appearance: ${o.label}`}
+                  className={[
+                    'min-h-[44px] flex-1 items-center justify-center rounded-md border px-3',
+                    on ? 'border-ink bg-ink' : 'border-border bg-card',
+                  ].join(' ')}
+                >
+                  <Text className={on ? 'font-bold text-[13px] text-ink-foreground' : 'font-medium text-[13px] text-foreground'}>
+                    {o.label}
+                  </Text>
+                </Pressable>
+              )
+            })}
+          </View>
+          <Muted className="text-[12px]">
+            {pref === 'system' ? 'Following your phone’s setting.' : `Always ${pref}, whatever your phone is set to.`}
+          </Muted>
         </Card>
 
         <Card className="gap-0">

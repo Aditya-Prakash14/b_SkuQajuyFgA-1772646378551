@@ -2,6 +2,7 @@ import { createContext, useContext, type ReactNode } from 'react'
 import {
   ActivityIndicator,
   Pressable,
+  RefreshControl,
   ScrollView,
   Text as RNText,
   TextInput,
@@ -12,7 +13,9 @@ import {
 } from 'react-native'
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context'
 
-import { colors } from '../lib/theme'
+import { useColorScheme } from 'nativewind'
+
+import { useColors, type Palette } from '../lib/theme'
 
 /**
  * The app's whole UI vocabulary. Small on purpose: the spec's visual system is
@@ -141,6 +144,14 @@ const BUTTON_TEXT: Record<ButtonVariant, string> = {
   ghost: 'text-primary',
 }
 
+const SPINNER: Record<ButtonVariant, (c: Palette) => string> = {
+  primary: (c) => c.primaryForeground,
+  brand: (c) => c.brandForeground,
+  dark: (c) => c.inkForeground,
+  outline: (c) => c.primary,
+  ghost: (c) => c.primary,
+}
+
 export function Button({
   label,
   onPress,
@@ -156,6 +167,7 @@ export function Button({
   disabled?: boolean
   className?: string
 }) {
+  const colors = useColors()
   const off = disabled || loading
   return (
     <Pressable
@@ -173,9 +185,7 @@ export function Button({
         .filter(Boolean)
         .join(' ')}
     >
-      {loading ? (
-        <ActivityIndicator color={variant === 'outline' || variant === 'ghost' ? colors.primary : '#FFFFFF'} />
-      ) : null}
+      {loading ? <ActivityIndicator color={SPINNER[variant](colors)} /> : null}
       <Text className={['font-bold text-[15px]', BUTTON_TEXT[variant]].join(' ')}>{label}</Text>
     </Pressable>
   )
@@ -188,11 +198,14 @@ export function Field({
   className,
   ...props
 }: TextInputProps & { label?: string; hint?: string; error?: string; className?: string }) {
+  const colors = useColors()
+  const { colorScheme: scheme } = useColorScheme()
   return (
     <View className={['gap-1.5', className].filter(Boolean).join(' ')}>
       {label ? <Eyebrow>{label}</Eyebrow> : null}
       <TextInput
         placeholderTextColor={colors.faint}
+        keyboardAppearance={scheme === 'dark' ? 'dark' : 'light'}
         className={[
           'h-[52px] rounded-md border bg-card px-4 font-sans text-[15px] text-foreground',
           error ? 'border-destructive' : 'border-input',
@@ -267,6 +280,7 @@ export function Badge({ label, tone = 'default' }: { label: string; tone?: Tone 
 
 /** Three-dot pager on the intro screens. */
 export function Dots({ count, active, activeColor }: { count: number; active: number; activeColor?: string }) {
+  const colors = useColors()
   return (
     <View className="flex-row items-center gap-2">
       {Array.from({ length: count }, (_, i) => (
@@ -281,11 +295,29 @@ export function Dots({ count, active, activeColor }: { count: number; active: nu
 }
 
 export function Loading({ label }: { label?: string }) {
+  const colors = useColors()
   return (
     <View className="flex-1 items-center justify-center gap-3 bg-background p-10">
       <ActivityIndicator size="large" color={colors.primary} />
       {label ? <Muted>{label}</Muted> : null}
     </View>
+  )
+}
+
+/**
+ * Pull-to-refresh, themed. The platform default is a light puck with a dark
+ * arrow, which sits on a dark screen as a bright white disc.
+ */
+export function Refresher({ refreshing, onRefresh }: { refreshing: boolean; onRefresh: () => void }) {
+  const colors = useColors()
+  return (
+    <RefreshControl
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      tintColor={colors.primary}
+      colors={[colors.primary]}
+      progressBackgroundColor={colors.card}
+    />
   )
 }
 
@@ -300,12 +332,13 @@ export function Banner({ tone = 'destructive', children }: { tone?: Tone; childr
 
 /** Sticky bottom action bar: price on the left, primary action filling the rest. */
 export function StickyBar({ children }: { children: ReactNode }) {
+  const colors = useColors()
   return (
     <SafeAreaView edges={['bottom']} className="border-t border-border bg-card">
       <View
         className="flex-row items-center gap-3 px-[22px] py-3"
         style={{
-          shadowColor: '#12212A',
+          shadowColor: colors.ink,
           shadowOpacity: 0.08,
           shadowRadius: 24,
           shadowOffset: { width: 0, height: -8 },

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Pressable, TextInput, View } from 'react-native'
 
 import { Banner, Body, Button, Eyebrow, H1, Muted, Screen, Text } from '../../components/ui'
-import { colors } from '../../lib/theme'
+import { useColors } from '../../lib/theme'
 import { errorMessage, sendPhoneOtp, verifyPhoneOtp } from '../../lib/supabase'
 
 const LENGTH = 6
@@ -15,6 +15,7 @@ const RESEND_SECONDS = 30
  * Only reachable when PHONE_OTP_ENABLED is true.
  */
 export function VerifyCodeScreen({ phone, onBack }: { phone: string; onBack: () => void }) {
+  const colors = useColors()
   const [code, setCode] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)

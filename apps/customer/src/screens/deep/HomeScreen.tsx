@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Pressable, RefreshControl, ScrollView, View } from 'react-native'
+import { Pressable, ScrollView, View } from 'react-native'
 
-import { Badge, Card, Eyebrow, H1, H2, Muted, Screen, Text } from '../../components/ui'
+import { Badge, Card, Eyebrow, H1, H2, Muted, Refresher, Screen, Text } from '../../components/ui'
 import { fetchBookings, isUpcoming } from '../../lib/bookings'
 import { formatDay, formatINR, splitPriceLabel } from '../../lib/format'
 import { useSession } from '../../lib/session'
@@ -42,7 +42,7 @@ export function HomeScreen({ navigation }: HomeStackProps<'Home'>) {
     <Screen>
       <ScrollView
         contentContainerStyle={{ padding: 22, paddingBottom: 32, gap: 18 }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={load} />}
+        refreshControl={<Refresher refreshing={refreshing} onRefresh={load} />}
       >
         <View className="flex-row items-start justify-between gap-3">
           <View className="flex-1">

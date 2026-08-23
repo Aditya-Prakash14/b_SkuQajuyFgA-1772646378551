@@ -1,29 +1,32 @@
 /** @type {import('tailwindcss').Config} */
+
+// Every colour resolves through a CSS variable defined in global.css, so a
+// component styles once and both themes follow. <alpha-value> keeps opacity
+// utilities (bg-brand/20, border-white/10) working.
+const token = (name) => `rgb(var(--${name}) / <alpha-value>)`
+
 module.exports = {
   darkMode: 'class',
   content: ['./App.tsx', './src/**/*.{ts,tsx}'],
   presets: [require('nativewind/preset')],
   theme: {
     extend: {
-      // One palette across website, partner app and customer app.
-      // See apps/web/app/globals.css — this is the same system in hex,
-      // because React Native has no oklch support.
       colors: {
-        border: '#E7E3DB',
-        input: '#E7E3DB',
-        ring: '#0E5A63',
-        background: '#FBFAF7',
-        foreground: '#12212A',
-        primary: { DEFAULT: '#0E5A63', foreground: '#FFFFFF' },
-        secondary: { DEFAULT: '#EDF3F2', foreground: '#0E5A63' },
-        muted: { DEFAULT: '#EDF3F2', foreground: '#5F6B70' },
-        accent: { DEFAULT: '#EDF3F2', foreground: '#0E5A63' },
-        brand: { DEFAULT: '#E8A33D', foreground: '#12212A' },
-        ink: { DEFAULT: '#12212A', foreground: '#FBFAF7' },
-        destructive: { DEFAULT: '#C0553F', foreground: '#FFFFFF' },
-        success: { DEFAULT: '#1F8A4C', foreground: '#FFFFFF' },
-        warning: { DEFAULT: '#B45309', foreground: '#FFFFFF' },
-        card: { DEFAULT: '#FFFFFF', foreground: '#12212A' },
+        border: token('border'),
+        input: token('input'),
+        ring: token('ring'),
+        background: token('background'),
+        foreground: token('foreground'),
+        primary: { DEFAULT: token('primary'), foreground: token('primary-foreground') },
+        secondary: { DEFAULT: token('secondary'), foreground: token('secondary-foreground') },
+        muted: { DEFAULT: token('muted'), foreground: token('muted-foreground') },
+        accent: { DEFAULT: token('accent'), foreground: token('accent-foreground') },
+        brand: { DEFAULT: token('brand'), foreground: token('brand-foreground') },
+        ink: { DEFAULT: token('ink'), foreground: token('ink-foreground') },
+        destructive: { DEFAULT: token('destructive'), foreground: token('destructive-foreground') },
+        success: { DEFAULT: token('success'), foreground: token('success-foreground') },
+        warning: { DEFAULT: token('warning'), foreground: token('warning-foreground') },
+        card: { DEFAULT: token('card'), foreground: token('card-foreground') },
       },
       // Spec: 14–18px on cards and inputs, 16px on buttons, 999px on chips.
       borderRadius: { sm: '10px', md: '14px', lg: '18px', pill: '999px' },

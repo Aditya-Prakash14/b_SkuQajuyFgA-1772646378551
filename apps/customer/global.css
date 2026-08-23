@@ -1,3 +1,86 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ============================================================================
+ * Theme tokens.
+ *
+ * Same system as the website (apps/web/app/globals.css): every colour is a
+ * token, so a component never branches on the theme — `bg-card` is correct in
+ * both. Values are space-separated RGB channels rather than hex so Tailwind's
+ * <alpha-value> works (bg-brand/20, border-white/10 and so on).
+ *
+ * Dark is not an inversion: the teal lifts to hold contrast on a dark ground,
+ * and the amber stays put because it already reads on both.
+ * ========================================================================= */
+
+@layer base {
+  :root {
+    --background: 251 250 247; /* #FBFAF7 warm off-white */
+    --foreground: 18 33 42; /* #12212A */
+    --card: 255 255 255;
+    --card-foreground: 18 33 42;
+
+    --primary: 14 90 99; /* #0E5A63 deep teal */
+    --primary-foreground: 255 255 255;
+
+    --secondary: 237 243 242; /* #EDF3F2 tint */
+    --secondary-foreground: 14 90 99;
+    --muted: 237 243 242;
+    --muted-foreground: 95 107 112; /* #5F6B70 */
+    --accent: 237 243 242;
+    --accent-foreground: 14 90 99;
+
+    --brand: 232 163 61; /* #E8A33D amber */
+    --brand-foreground: 18 33 42;
+
+    --ink: 18 33 42; /* dark bands */
+    --ink-foreground: 251 250 247;
+
+    --destructive: 192 85 63; /* #C0553F */
+    --destructive-foreground: 255 255 255;
+    --success: 31 138 76;
+    --success-foreground: 255 255 255;
+    --warning: 180 83 9;
+    --warning-foreground: 255 255 255;
+
+    --border: 231 227 219; /* #E7E3DB */
+    --input: 231 227 219;
+    --ring: 14 90 99;
+  }
+
+  .dark:root {
+    --background: 13 26 33; /* #0D1A21 */
+    --foreground: 244 242 237; /* #F4F2ED */
+    --card: 18 33 42; /* #12212A */
+    --card-foreground: 244 242 237;
+
+    --primary: 78 163 172; /* teal lifted for contrast on dark */
+    --primary-foreground: 6 23 27;
+
+    --secondary: 27 47 56; /* #1B2F38 */
+    --secondary-foreground: 207 228 226;
+    --muted: 27 47 56;
+    --muted-foreground: 154 171 176; /* #9AABB0 */
+    --accent: 27 47 56;
+    --accent-foreground: 207 228 226;
+
+    --brand: 232 163 61; /* unchanged — already reads on both grounds */
+    --brand-foreground: 18 33 42;
+
+    /* On a dark ground the "dark band" has to go darker still to read as one. */
+    --ink: 10 21 27;
+    --ink-foreground: 244 242 237;
+
+    --destructive: 229 100 91;
+    --destructive-foreground: 26 11 10;
+    --success: 92 203 135;
+    --success-foreground: 6 23 27;
+    --warning: 217 146 47;
+    --warning-foreground: 26 16 8;
+
+    --border: 42 57 66;
+    --input: 46 61 71;
+    --ring: 78 163 172;
+  }
+}

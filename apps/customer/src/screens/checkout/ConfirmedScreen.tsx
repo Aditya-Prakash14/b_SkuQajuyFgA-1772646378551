@@ -2,14 +2,16 @@ import { View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { Button, Card, Eyebrow, Muted, Text } from '../../components/ui'
+import { useColors } from '../../lib/theme'
 import type { HomeStackProps } from '../../navigation/types'
 
 /** Screen 20. Teal success screen with the receipt reference. */
 export function ConfirmedScreen({ route, navigation }: HomeStackProps<'Confirmed'>) {
+  const colors = useColors()
   const { reference } = route.params
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} className="flex-1" style={{ backgroundColor: '#0E5A63' }}>
+    <SafeAreaView edges={['top', 'bottom']} className="flex-1" style={{ backgroundColor: colors.deep }}>
       <View className="flex-1 items-center justify-center gap-6 px-[22px]">
         <View className="h-20 w-20 items-center justify-center rounded-pill bg-white/15">
           <Text className="font-black text-[34px] text-white">✓</Text>
@@ -24,7 +26,7 @@ export function ConfirmedScreen({ route, navigation }: HomeStackProps<'Confirmed
           </Text>
         </View>
 
-        <Card className="w-full border-0 bg-white">
+        <Card className="w-full border-0">
           <Eyebrow>Booking reference</Eyebrow>
           <Text className="mt-1 font-mono text-[20px] text-foreground">{reference}</Text>
           <Muted className="mt-2 text-[12px]">

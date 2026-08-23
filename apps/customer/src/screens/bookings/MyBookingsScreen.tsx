@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Pressable, RefreshControl, ScrollView, View } from 'react-native'
+import { Pressable, ScrollView, View } from 'react-native'
 
-import { Badge, Card, Eyebrow, H1, Muted, Screen, Text } from '../../components/ui'
+import { Badge, Card, Eyebrow, H1, Muted, Refresher, Screen, Text } from '../../components/ui'
 import { fetchBookings, isUpcoming } from '../../lib/bookings'
 import { formatDay, formatINR } from '../../lib/format'
 import { errorMessage } from '../../lib/supabase'
@@ -39,7 +39,7 @@ export function MyBookingsScreen({ navigation }: BookingsStackProps<'MyBookings'
     <Screen>
       <ScrollView
         contentContainerStyle={{ padding: 22, paddingBottom: 32, gap: 16 }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={load} />}
+        refreshControl={<Refresher refreshing={refreshing} onRefresh={load} />}
       >
         <H1>My bookings</H1>
 

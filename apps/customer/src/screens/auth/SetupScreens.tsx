@@ -18,7 +18,7 @@ import { saveMyAddress, saveNotificationPrefs, upsertMyProfile } from '../../lib
 import { fetchCities } from '../../lib/catalog'
 import { useSession } from '../../lib/session'
 import { errorMessage } from '../../lib/supabase'
-import { colors } from '../../lib/theme'
+import { useColors } from '../../lib/theme'
 import type { AddressLabel } from '../../lib/types'
 
 /** Back out of a setup step. Step 1 has nowhere to go but out, so it signs out. */
@@ -216,6 +216,7 @@ export function AddressSetupScreen() {
 /* ── 9 · Notifications ────────────────────────────────────────────────────── */
 
 export function NotificationsSetupScreen() {
+  const colors = useColors()
   const { markSetupStep, goToStep } = useSession()
   const [bookingUpdates, setBookingUpdates] = useState(true)
   const [enRoute, setEnRoute] = useState(true)
