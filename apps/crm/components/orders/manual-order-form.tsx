@@ -26,6 +26,14 @@ interface SvcOpt {
   label: string
 }
 
+/**
+ * Nobody books 110 deep cleans. A mistyped quantity here once produced a
+ * ₹659,890 order that was marked paid and skewed revenue, so the value is
+ * clamped rather than merely floored at 1.
+ */
+const MAX_QTY = 20
+const clampQty = (n: number) => Math.min(Math.max(Number.isFinite(n) ? n : 1, 1), MAX_QTY)
+
 export function ManualOrderForm({ services, cities }: { services: SvcOpt[]; cities: string[] }) {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
@@ -40,7 +48,7 @@ export function ManualOrderForm({ services, cities }: { services: SvcOpt[]; citi
   const [submitting, setSubmitting] = useState(false)
 
   const priceOf = (id: string) => services.find((s) => s.id === id)?.price ?? 0
-  const subtotal = items.reduce((sum, it) => sum + priceOf(it.service_id) * Math.max(it.qty, 1), 0)
+  const subtotal = items.reduce((sum, it) => sum + priceOf(it.service_id) * clampQty(it.qty), 0)
 
   function addItem() {
     if (services.length) setItems((p) => [...p, { service_id: services[0].id, qty: 1 }])
@@ -166,12 +174,13 @@ export function ManualOrderForm({ services, cities }: { services: SvcOpt[]; citi
                   <Input
                     type="number"
                     min={1}
+                    max={MAX_QTY}
                     value={it.qty}
-                    onChange={(e) => patchItem(i, { qty: Number(e.target.value) })}
+                    onChange={(e) => patchItem(i, { qty: clampQty(Number(e.target.value)) })}
                     className="w-20"
                   />
                   <span className="w-24 text-right text-sm font-medium tabular-nums">
-                    {formatINR(priceOf(it.service_id) * Math.max(it.qty, 1))}
+                    {formatINR(priceOf(it.service_id) * clampQty(it.qty))}
                   </span>
                   <Button type="button" variant="ghost" size="icon" onClick={() => removeItem(i)}>
                     <Trash2 className="h-4 w-4" />
@@ -198,10 +207,10 @@ export function ManualOrderForm({ services, cities }: { services: SvcOpt[]; citi
                 return (
                   <div key={i} className="flex justify-between text-sm">
                     <span className="mr-2 truncate text-muted-foreground">
-                      {s.name} × {Math.max(it.qty, 1)}
+                      {s.name} × {clampQty(it.qty)}
                     </span>
                     <span className="whitespace-nowrap font-medium">
-                      {formatINR(s.price * Math.max(it.qty, 1))}
+                      {formatINR(s.price * clampQty(it.qty))}
                     </span>
                   </div>
                 )

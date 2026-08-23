@@ -60,7 +60,12 @@ export async function createManualOrder(input: ManualOrderInput): Promise<Result
   for (const it of items) {
     const s = map.get(it.service_id)
     if (!s) continue
+    // Server-side guard, not just the input's max: a mistyped 110 here once
+    // produced a ₹659,890 order that was marked paid and skewed revenue.
     const qty = Math.max(Math.trunc(it.qty) || 1, 1)
+    if (qty > 20) {
+      return { error: `Quantity ${qty} for ${s.name} looks like a typo — 20 is the maximum per line.` }
+    }
     const lineTotal = Number(s.price) * qty
     gross += lineTotal
     lines.push({ service_id: s.id, service_name: s.name, unit_price: Number(s.price), qty, line_total: lineTotal })
