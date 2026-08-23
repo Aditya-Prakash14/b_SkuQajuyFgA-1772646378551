@@ -28,7 +28,7 @@ The phases below were then executed against this prompt. Every item was typechec
 These held for the whole project and still hold. Breaking any of them has already cost a day at least once.
 
 1. **Never push without the owner's approval.** Commit freely on `feat/customer-app`; ask before `git push`.
-2. **Database changes are a migration file in `supabase/migrations/NNNN_*.sql` AND applied live.** Apply with the Supabase MCP `apply_migration` (same SQL), then verify with a query. The next number is `0029`.
+2. **Database changes are a migration file in `supabase/migrations/NNNN_*.sql` AND applied live.** Apply with the Supabase MCP `apply_migration` (same SQL), then verify with a query. The next number is `0033`.
 3. **Changing a function's signature means `drop function` first, then `create`.** `create or replace` with an added parameter creates a *second overload* and every existing caller dies with `PGRST203 Could not choose the best candidate function`. This happened in 0022 and again nearly in 0026.
 4. **Every RPC a customer calls is `SECURITY DEFINER`, `set search_path = public, pg_temp`, `revoke … from public, anon`, `grant … to authenticated`** unless anon access is the point (Prime Now intake).
 5. **`supabase.realtime.setAuth(token)` on every auth state change** — already wired in `src/lib/supabase.ts`. Without it channels subscribe and deliver nothing.
