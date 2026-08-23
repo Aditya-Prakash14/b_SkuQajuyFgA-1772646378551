@@ -12,6 +12,7 @@ import {
   Manrope_800ExtraBold,
   useFonts,
 } from '@expo-google-fonts/manrope'
+import { Ionicons } from '@expo/vector-icons'
 import { NavigationContainer, type Theme } from '@react-navigation/native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
@@ -122,24 +123,49 @@ function BookingsNavigator() {
   )
 }
 
-/** Text-label tab bar — the spec asks for no icon soup. */
-function TabLabel({ label, focused, badge }: { label: string; focused: boolean; badge?: number }) {
+/**
+ * Tab bar item. The spec's "no icon soup" is about decorating content, not
+ * about navigation chrome — a bottom bar without icons does not read as one,
+ * so each tab gets a single outline/filled pair and its label.
+ */
+type TabIcon = keyof typeof Ionicons.glyphMap
+
+function TabItem({
+  label,
+  icon,
+  focused,
+  badge,
+}: {
+  label: string
+  icon: TabIcon
+  focused: boolean
+  badge?: number
+}) {
+  const tint = focused ? colors.primary : colors.muted
   return (
-    <View className="flex-row items-center gap-1.5">
+    <View style={{ alignItems: 'center', gap: 3, width: 72 }}>
+      <View>
+        <Ionicons name={icon} size={22} color={tint} />
+        {badge ? (
+          <View
+            className="absolute -right-2.5 -top-1 min-w-[16px] items-center rounded-pill bg-brand px-1"
+            // Sits over the icon, so it must not stretch the row.
+            style={{ paddingVertical: 1 }}
+          >
+            <Text className="font-bold text-[10px] text-brand-foreground">{badge > 9 ? '9+' : badge}</Text>
+          </View>
+        ) : null}
+      </View>
       <RNText
+        numberOfLines={1}
         style={{
           fontFamily: focused ? 'Manrope_700Bold' : 'Manrope_500Medium',
-          fontSize: 12,
-          color: focused ? colors.primary : colors.muted,
+          fontSize: 11,
+          color: tint,
         }}
       >
         {label}
       </RNText>
-      {badge ? (
-        <View className="min-w-[16px] items-center rounded-pill bg-brand px-1">
-          <Text className="font-bold text-[10px] text-brand-foreground">{badge}</Text>
-        </View>
-      ) : null}
     </View>
   )
 }
@@ -153,33 +179,73 @@ function MainTabs() {
         tabBarStyle: {
           backgroundColor: colors.card,
           borderTopColor: colors.border,
-          height: 62,
+          borderTopWidth: 1,
+          height: 64,
           paddingTop: 8,
+          paddingBottom: 8,
         },
-        tabBarIconStyle: { display: 'none' },
+        // The whole item is drawn in tabBarIcon, so the default label and icon
+        // slots are switched off rather than fought with.
+        tabBarShowLabel: false,
+        tabBarItemStyle: { paddingVertical: 0 },
       }}
     >
       <Tabs.Screen
         name="HomeTab"
         component={HomeNavigator}
         options={{
-          tabBarLabel: ({ focused }) => <TabLabel label="Home" focused={focused} badge={count} />,
+          tabBarAccessibilityLabel: 'Home',
+          tabBarIcon: ({ focused }) => (
+            <TabItem
+              label="Home"
+              icon={focused ? 'home' : 'home-outline'}
+              focused={focused}
+              badge={count}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="BookingsTab"
         component={BookingsNavigator}
-        options={{ tabBarLabel: ({ focused }) => <TabLabel label="Bookings" focused={focused} /> }}
+        options={{
+          tabBarAccessibilityLabel: 'Bookings',
+          tabBarIcon: ({ focused }) => (
+            <TabItem
+              label="Bookings"
+              icon={focused ? 'calendar' : 'calendar-outline'}
+              focused={focused}
+            />
+          ),
+        }}
       />
       <Tabs.Screen
         name="HelpTab"
         component={HelpScreen}
-        options={{ tabBarLabel: ({ focused }) => <TabLabel label="Help" focused={focused} /> }}
+        options={{
+          tabBarAccessibilityLabel: 'Help',
+          tabBarIcon: ({ focused }) => (
+            <TabItem
+              label="Help"
+              icon={focused ? 'help-circle' : 'help-circle-outline'}
+              focused={focused}
+            />
+          ),
+        }}
       />
       <Tabs.Screen
         name="AccountTab"
         component={AccountScreen}
-        options={{ tabBarLabel: ({ focused }) => <TabLabel label="Account" focused={focused} /> }}
+        options={{
+          tabBarAccessibilityLabel: 'Account',
+          tabBarIcon: ({ focused }) => (
+            <TabItem
+              label="Account"
+              icon={focused ? 'person' : 'person-outline'}
+              focused={focused}
+            />
+          ),
+        }}
       />
     </Tabs.Navigator>
   )

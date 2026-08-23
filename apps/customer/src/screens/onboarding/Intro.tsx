@@ -56,14 +56,33 @@ export function IntroScreen({ onDone }: { onDone: () => void }) {
       className={slide.dark ? 'flex-1 bg-ink' : 'flex-1 bg-background'}
     >
       <View className="flex-1 px-[22px] pt-2">
-        <View className="h-11 flex-row items-center justify-end">
+        <View className="h-11 flex-row items-center justify-between">
+          {/* Back is available from slide 2 onward — the spec's pager has no
+              way back otherwise, which reads as a dead end. */}
+          {index > 0 ? (
+            <Pressable
+              onPress={() => setIndex((i) => i - 1)}
+              hitSlop={12}
+              accessibilityRole="button"
+              accessibilityLabel="Back"
+              className="px-2 py-2"
+            >
+              <Text className={slide.dark ? 'font-bold text-[15px] text-ink-foreground/70' : 'font-bold text-[15px] text-muted-foreground'}>
+                ‹ Back
+              </Text>
+            </Pressable>
+          ) : (
+            <View />
+          )}
           {!last ? (
             <Pressable onPress={onDone} hitSlop={12} accessibilityRole="button" className="px-2 py-2">
               <Text className={slide.dark ? 'font-bold text-[14px] text-ink-foreground/70' : 'font-bold text-[14px] text-muted-foreground'}>
                 Skip
               </Text>
             </Pressable>
-          ) : null}
+          ) : (
+            <View />
+          )}
         </View>
 
         {/* Photography carries the weight; a tinted panel stands in until the

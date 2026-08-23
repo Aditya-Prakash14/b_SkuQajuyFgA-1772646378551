@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Switch, View } from 'react-native'
+import { Pressable, Switch, View } from 'react-native'
 
 import {
   Banner,
@@ -14,12 +14,21 @@ import {
   Screen,
   Text,
 } from '../../components/ui'
-import { saveNotificationPrefs } from '../../lib/bookings'
+import { saveMyAddress, saveNotificationPrefs, upsertMyProfile } from '../../lib/bookings'
 import { fetchCities } from '../../lib/catalog'
 import { useSession } from '../../lib/session'
-import { errorMessage, supabase } from '../../lib/supabase'
+import { errorMessage } from '../../lib/supabase'
 import { colors } from '../../lib/theme'
 import type { AddressLabel } from '../../lib/types'
+
+/** Back out of a setup step. Step 1 has nowhere to go but out, so it signs out. */
+function StepBack({ onPress, label = 'Back' }: { onPress: () => void; label?: string }) {
+  return (
+    <Pressable onPress={onPress} hitSlop={12} accessibilityRole="button" className="min-h-[44px] justify-center">
+      <Text className="font-bold text-[15px] text-primary">‹ {label}</Text>
+    </Pressable>
+  )
+}
 
 /** Shared 3-step progress bar. */
 function Progress({ step }: { step: 1 | 2 | 3 }) {
@@ -38,26 +47,44 @@ function Progress({ step }: { step: 1 | 2 | 3 }) {
 /* ── 7 · Complete profile ─────────────────────────────────────────────────── */
 
 export function ProfileSetupScreen() {
-  const { session, draft, setDraft, markSetupStep } = useSession()
+  const { session, draft, setDraft, markSetupStep, refresh, signOut } = useSession()
   const [name, setName] = useState(draft.name)
   const [email, setEmail] = useState(draft.email || (session?.user.email ?? ''))
+  const [phone, setPhone] = useState('')
+  const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  function next() {
+  async function next() {
     if (name.trim().length < 2) {
       setError('Please tell us your name.')
       return
     }
-    // Held locally: a customers row is only created on the first booking, so
-    // there is nothing to write to yet.
-    setDraft({ name: name.trim(), email: email.trim() })
-    markSetupStep('profile')
+    setBusy(true)
+    setError(null)
+    try {
+      // Write the customers row now rather than deferring to the first booking:
+      // the address step needs current_customer_id() to resolve, and without a
+      // row it is NULL and the insert fails RLS.
+      await upsertMyProfile({
+        name: name.trim(),
+        email: email.trim() || null,
+        phone: phone.replace(/\D/g, '') || null,
+      })
+      setDraft({ name: name.trim(), email: email.trim() })
+      await refresh()
+      markSetupStep('profile')
+    } catch (err) {
+      setError(errorMessage(err, 'Could not save your details.'))
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (
     <Screen>
       <Body>
-        <View className="pt-4 gap-5">
+        <StepBack onPress={signOut} label="Sign out" />
+        <View className="pt-1 gap-5">
           <Progress step={1} />
           <H1>What should we call you?</H1>
           <Muted>This is the name your helper will ask for at the door.</Muted>
@@ -75,8 +102,16 @@ export function ProfileSetupScreen() {
           autoCapitalize="none"
           hint="Receipts and booking confirmations go here."
         />
+        <Field
+          label="Mobile number"
+          value={phone}
+          onChangeText={(t) => setPhone(t.replace(/\D/g, '').slice(0, 10))}
+          placeholder="10-digit mobile"
+          keyboardType="number-pad"
+          hint="Your helper calls this number on the day."
+        />
 
-        <Button label="Continue" onPress={next} />
+        <Button label="Continue" onPress={next} loading={busy} />
       </Body>
     </Screen>
   )
@@ -87,7 +122,7 @@ export function ProfileSetupScreen() {
 const LABELS: AddressLabel[] = ['Home', 'Work', 'Other']
 
 export function AddressSetupScreen() {
-  const { refresh, markSetupStep } = useSession()
+  const { refresh, markSetupStep, profile, draft, goToStep } = useSession()
   const [label, setLabel] = useState<AddressLabel>('Home')
   const [line, setLine] = useState('')
   const [city, setCity] = useState('')
@@ -116,12 +151,16 @@ export function AddressSetupScreen() {
     setBusy(true)
     setError(null)
     try {
-      // First address becomes the default; a partial unique index keeps only
-      // one default per customer, so this is safe to set unconditionally here.
-      const { error: insErr } = await supabase
-        .from('addresses')
-        .insert({ label, full_address: line.trim(), city, is_default: true })
-      if (insErr) throw insErr
+      // Goes through an RPC, not a direct insert: addresses are scoped by
+      // customer_id = current_customer_id(), and the client neither knows that
+      // id nor should be trusted to supply it.
+      await saveMyAddress({
+        label,
+        fullAddress: line.trim(),
+        city,
+        isDefault: true,
+        name: profile?.name || draft.name || null,
+      })
       await refresh()
       markSetupStep('address')
     } catch (err) {
@@ -134,7 +173,8 @@ export function AddressSetupScreen() {
   return (
     <Screen>
       <Body>
-        <View className="pt-4 gap-5">
+        <StepBack onPress={() => goToStep('profile')} />
+        <View className="pt-1 gap-5">
           <Progress step={2} />
           <H1>Where should we come?</H1>
           <Muted>We only serve the cities listed here today.</Muted>
@@ -176,7 +216,7 @@ export function AddressSetupScreen() {
 /* ── 9 · Notifications ────────────────────────────────────────────────────── */
 
 export function NotificationsSetupScreen() {
-  const { markSetupStep } = useSession()
+  const { markSetupStep, goToStep } = useSession()
   const [bookingUpdates, setBookingUpdates] = useState(true)
   const [enRoute, setEnRoute] = useState(true)
   const [marketing, setMarketing] = useState(false)
@@ -223,7 +263,8 @@ export function NotificationsSetupScreen() {
   return (
     <Screen>
       <Body>
-        <View className="pt-4 gap-5">
+        <StepBack onPress={() => goToStep('address')} />
+        <View className="pt-1 gap-5">
           <Progress step={3} />
           <H1>Stay in the loop</H1>
           <Muted>You can change any of this later from your account.</Muted>

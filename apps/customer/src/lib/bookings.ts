@@ -221,3 +221,50 @@ export async function submitRating(input: {
   })
   if (error) throw error
 }
+
+/* ── Profile & address setup ──────────────────────────────────────────────── */
+
+/**
+ * Create or update the caller's customers row.
+ *
+ * A customers row previously only appeared on the first booking, which left
+ * current_customer_id() NULL during setup and made an address insert fail RLS.
+ * This RPC is SECURITY DEFINER because `customers` deliberately has no INSERT
+ * policy — clients must not be able to invent rows.
+ */
+export async function upsertMyProfile(input: {
+  name: string
+  email?: string | null
+  phone?: string | null
+  city?: string | null
+}): Promise<string> {
+  const { data, error } = await supabase.rpc('upsert_my_profile', {
+    p_name: input.name,
+    p_email: input.email ?? undefined,
+    p_phone: input.phone ?? undefined,
+    p_city: input.city ?? undefined,
+  })
+  if (error) throw error
+  return data as unknown as string
+}
+
+/** Save an address, creating the profile row first if setup has not yet. */
+export async function saveMyAddress(input: {
+  label: string
+  fullAddress: string
+  city: string
+  isDefault?: boolean
+  name?: string | null
+  phone?: string | null
+}): Promise<string> {
+  const { data, error } = await supabase.rpc('save_my_address', {
+    p_label: input.label,
+    p_full_address: input.fullAddress,
+    p_city: input.city,
+    p_is_default: input.isDefault ?? true,
+    p_name: input.name ?? undefined,
+    p_phone: input.phone ?? undefined,
+  })
+  if (error) throw error
+  return data as unknown as string
+}

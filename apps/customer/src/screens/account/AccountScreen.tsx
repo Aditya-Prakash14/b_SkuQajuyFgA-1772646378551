@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Linking, Pressable, ScrollView, Switch, View } from 'react-native'
 
-import { Button, Card, Divider, Eyebrow, H1, Muted, Screen, Text } from '../../components/ui'
-import { fetchNotificationPrefs, saveNotificationPrefs } from '../../lib/bookings'
+import { Button, Card, Divider, Eyebrow, Field, H1, Muted, Screen, Text } from '../../components/ui'
+import { fetchNotificationPrefs, saveNotificationPrefs, upsertMyProfile } from '../../lib/bookings'
 import { useSession } from '../../lib/session'
+import { errorMessage } from '../../lib/supabase'
 import { colors } from '../../lib/theme'
 import type { NotificationPrefs } from '../../lib/types'
 
@@ -12,8 +13,40 @@ const SUPPORT_EMAIL = 'support@myprimecompany.in'
 
 /** Screen 24. Profile, membership, settings, sign out. */
 export function AccountScreen() {
-  const { profile, draft, addresses, defaultAddress, signOut } = useSession()
+  const { profile, draft, addresses, defaultAddress, signOut, refresh } = useSession()
   const [prefs, setPrefs] = useState<NotificationPrefs | null>(null)
+  const [editing, setEditing] = useState(false)
+  const [editName, setEditName] = useState('')
+  const [editEmail, setEditEmail] = useState('')
+  const [editPhone, setEditPhone] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+
+  // A Google sign-up has no phone yet, so one is stored as 'pending:<uid>'.
+  // That is plumbing, never something to show a customer.
+  const displayPhone = profile?.phone && !profile.phone.startsWith('pending:') ? profile.phone : null
+
+  async function saveProfile() {
+    if (editName.trim().length < 2) {
+      setSaveError('Please enter your name.')
+      return
+    }
+    setSaving(true)
+    setSaveError(null)
+    try {
+      await upsertMyProfile({
+        name: editName.trim(),
+        email: editEmail.trim() || null,
+        phone: editPhone || null,
+      })
+      await refresh()
+      setEditing(false)
+    } catch (err) {
+      setSaveError(errorMessage(err, 'Could not save your profile.'))
+    } finally {
+      setSaving(false)
+    }
+  }
 
   useEffect(() => {
     fetchNotificationPrefs()
@@ -35,16 +68,63 @@ export function AccountScreen() {
         <H1>Account</H1>
 
         <Card>
-          <View className="flex-row items-center gap-3">
-            <View className="h-14 w-14 items-center justify-center rounded-pill bg-secondary">
-              <Text className="font-black text-[20px] text-primary">{name.charAt(0).toUpperCase()}</Text>
+          {editing ? (
+            <View className="gap-3">
+              <Eyebrow>Edit profile</Eyebrow>
+              {saveError ? <Muted className="text-destructive">{saveError}</Muted> : null}
+              <Field label="Full name" value={editName} onChangeText={setEditName} autoCapitalize="words" />
+              <Field
+                label="Email"
+                value={editEmail}
+                onChangeText={setEditEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+              <Field
+                label="Mobile number"
+                value={editPhone}
+                onChangeText={(t) => setEditPhone(t.replace(/\D/g, '').slice(0, 10))}
+                keyboardType="number-pad"
+                placeholder="10-digit mobile"
+              />
+              <View className="flex-row gap-2">
+                <Button label="Save" onPress={saveProfile} loading={saving} className="flex-1" />
+                <Button
+                  label="Cancel"
+                  variant="outline"
+                  onPress={() => {
+                    setEditing(false)
+                    setSaveError(null)
+                  }}
+                  className="flex-1"
+                />
+              </View>
             </View>
-            <View className="flex-1">
-              <Text className="font-bold text-[17px] text-foreground">{name}</Text>
-              {profile?.phone ? <Muted className="text-[13px]">{profile.phone}</Muted> : null}
-              {email ? <Muted className="text-[13px]">{email}</Muted> : null}
-            </View>
-          </View>
+          ) : (
+            // Tappable: the profile card is the obvious place to change these
+            // details, so it behaves like a control rather than a label.
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Edit profile"
+              onPress={() => {
+                setEditName(profile?.name ?? draft.name ?? '')
+                setEditEmail(profile?.email ?? draft.email ?? '')
+                setEditPhone(displayPhone ?? '')
+                setEditing(true)
+              }}
+              className="flex-row items-center gap-3 active:opacity-80"
+            >
+              <View className="h-14 w-14 items-center justify-center rounded-pill bg-secondary">
+                <Text className="font-black text-[20px] text-primary">{name.charAt(0).toUpperCase()}</Text>
+              </View>
+              <View className="flex-1">
+                <Text className="font-bold text-[17px] text-foreground">{name}</Text>
+                {displayPhone ? <Muted className="text-[13px]">{displayPhone}</Muted> : null}
+                {email ? <Muted className="text-[13px]">{email}</Muted> : null}
+              </View>
+              <Text className="font-bold text-[13px] text-primary">Edit</Text>
+            </Pressable>
+          )}
         </Card>
 
         {/* Prime Care is listed in §12 of the spec as an open business

@@ -87,6 +87,15 @@ export async function createSessionFromUrl(incoming: string): Promise<boolean> {
 }
 
 /**
+ * Shown when the browser comes back without a session. Almost always one cause:
+ * the redirect is not on Supabase's allow-list, so GoTrue substituted the Site
+ * URL and the browser landed on the website instead of returning here.
+ */
+const REDIRECT_HELP =
+  'If you were sent to the website instead, this device’s redirect URL is not allow-listed in Supabase ' +
+  '(Authentication → URL Configuration → Redirect URLs). Check the Metro logs for the exact URL to add.'
+
+/**
  * Google sign-in.
  *
  * `skipBrowserRedirect` keeps supabase-js from trying to navigate (meaningless
@@ -95,6 +104,11 @@ export async function createSessionFromUrl(incoming: string): Promise<boolean> {
  */
 export async function signInWithGoogle(): Promise<void> {
   const redirectTo = authRedirectUrl()
+  // This value changes with the runtime (Expo Go uses exp://<lan-ip>:<port>/--/…,
+  // a build uses myprimecompany://…) and it must be on the Supabase redirect
+  // allow-list or GoTrue silently substitutes the Site URL — which is why a
+  // misconfigured project opens the website instead of coming back here.
+  if (__DEV__) console.log('[auth] add this to Supabase → URL Configuration → Redirect URLs:', redirectTo)
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: { redirectTo, skipBrowserRedirect: true },
@@ -104,13 +118,51 @@ export async function signInWithGoogle(): Promise<void> {
 
   const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo)
   if (result.type === 'success' && result.url) {
-    await createSessionFromUrl(result.url)
+    const ok = await createSessionFromUrl(result.url)
+    if (!ok) throw new Error(REDIRECT_HELP)
     return
   }
+
+  // A dismissed browser is ambiguous: the customer may have backed out, or the
+  // redirect was not allow-listed so GoTrue sent them to the website and the
+  // browser simply never closed. Check for a session before blaming the user —
+  // and if there is none, name the real cause instead of 'cancelled'.
   if (result.type === 'cancel' || result.type === 'dismiss') {
-    throw new Error('Sign-in cancelled.')
+    const { data: after } = await supabase.auth.getSession()
+    if (after.session) return
+    throw new Error(`Sign-in cancelled.\n\n${REDIRECT_HELP}`)
   }
   throw new Error('Sign-in did not complete. Please try again.')
+}
+
+/**
+ * Email + password. No redirect, no provider setup, no allow-list — which is
+ * why it is the path that works everywhere.
+ *
+ * One call does both jobs: sign in, or create the account if the email is new.
+ * Instant sign-up needs "Confirm email" OFF in Supabase (Authentication →
+ * Providers → Email); with it on, sign-up returns no session and we say so
+ * rather than leaving the customer on a spinner.
+ */
+export async function signInWithEmail(email: string, password: string): Promise<void> {
+  const signIn = await supabase.auth.signInWithPassword({ email, password })
+  if (!signIn.error) return
+
+  // Anything other than "wrong credentials" is a real failure — surface it.
+  if (!/invalid login credentials/i.test(signIn.error.message)) throw signIn.error
+
+  const signUp = await supabase.auth.signUp({ email, password })
+  if (signUp.error) throw signUp.error
+  if (signUp.data.session) return
+
+  // Supabase returns an "obfuscated" user with no identities when the email
+  // already exists — meaning the password above was simply wrong.
+  const exists = signUp.data.user && (signUp.data.user.identities?.length ?? 0) === 0
+  throw new Error(
+    exists
+      ? 'Wrong password for this email. Try again.'
+      : 'Account created, but email confirmation is switched on in Supabase, so it cannot sign you in yet.',
+  )
 }
 
 /**

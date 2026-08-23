@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { Animated, Easing, View } from 'react-native'
+import { Animated, Easing, Image, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { Text } from '../../components/ui'
@@ -27,10 +27,13 @@ export function SplashScreen() {
   return (
     <SafeAreaView edges={['top', 'bottom']} className="flex-1" style={{ backgroundColor: '#0E5A63' }}>
       <View className="flex-1 items-center justify-center gap-6">
-        <View className="h-20 w-20 items-center justify-center rounded-lg bg-white">
-          <Text className="font-black text-[26px]" style={{ color: '#0E5A63' }}>
-            PC
-          </Text>
+        <View className="h-24 w-24 items-center justify-center rounded-lg bg-white p-4">
+          <Image
+            source={require('../../../assets/logo.png')}
+            resizeMode="contain"
+            className="h-full w-full"
+            accessibilityLabel="MyPrimeCompany"
+          />
         </View>
         <Text className="font-black text-[22px] text-white" style={{ letterSpacing: -0.6 }}>
           MyPrimeCompany

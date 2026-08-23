@@ -32,6 +32,8 @@ interface SessionValue {
   setDraft: (d: { name: string; email: string }) => void
   setupStep: SetupStep
   markSetupStep: (s: SetupStep) => void
+  /** Explicit back-navigation through setup, which is otherwise derived from data. */
+  goToStep: (s: SetupStep | null) => void
   refresh: () => Promise<void>
   signOut: () => Promise<void>
 }
@@ -45,6 +47,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [addresses, setAddresses] = useState<Address[]>([])
   const [draft, setDraft] = useState({ name: '', email: '' })
   const [stepDone, setStepDone] = useState<SetupStep | null>(null)
+  const [override, setOverride] = useState<SetupStep | null>(null)
 
   const refresh = useCallback(async () => {
     const [p, a] = await Promise.all([
@@ -95,6 +98,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       if (!hasName) setupStep = 'profile'
       else if (!defaultAddress) setupStep = 'address'
       else if (stepDone !== 'notifications' && stepDone !== 'done') setupStep = 'notifications'
+      // An explicit Back wins over what the data implies — otherwise a saved
+      // name would bounce the customer straight forward again.
+      if (override) setupStep = override
     }
 
     return {
@@ -106,13 +112,17 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       draft,
       setDraft,
       setupStep,
-      markSetupStep: setStepDone,
+      markSetupStep: (s: SetupStep) => {
+        setOverride(null) // moving forward clears any Back the customer took
+        setStepDone(s)
+      },
+      goToStep: setOverride,
       refresh,
       signOut: async () => {
         await supabase.auth.signOut()
       },
     }
-  }, [session, booting, profile, addresses, draft, stepDone, refresh])
+  }, [session, booting, profile, addresses, draft, stepDone, override, refresh])
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }

@@ -4,6 +4,19 @@ import type { Category, Service } from './types'
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 /**
+ * The catalogue stores hero images as site-relative paths ('/fan cleaning.jpg')
+ * because the website resolves them against its own origin. React Native has no
+ * origin, so a relative path renders nothing — every image has to be absolute.
+ */
+const SITE_ORIGIN = 'https://www.myprimecompany.com'
+
+export function imageUrl(path: string | null | undefined): string | null {
+  if (!path) return null
+  if (/^https?:\/\//i.test(path)) return path
+  return SITE_ORIGIN + (path.startsWith('/') ? path : '/' + path)
+}
+
+/**
  * Catalogue reads. All public (anon-readable, active rows only) — the same
  * data the website renders, so a price can never differ between the two.
  */
@@ -24,7 +37,7 @@ function mapService(row: any): Service {
     priceUnit: (row.price_unit ?? 'fixed') as Service['priceUnit'],
     priceLabel: row.display_price_label ?? '',
     duration: row.duration ?? '',
-    image: row.hero_img ?? null,
+    image: imageUrl(row.hero_img),
     // The spec asks for six "What's included" items.
     includes: Array.isArray(row.whats_included) ? row.whats_included.slice(0, 6) : [],
     rating: Number(row.rating ?? 0),
@@ -53,7 +66,7 @@ export async function fetchCategories(): Promise<Category[]> {
         name: cat.name,
         serviceCount: 1,
         fromPriceLabel: row.display_price_label ?? '',
-        image: row.hero_img ?? null,
+        image: imageUrl(row.hero_img),
         _sort: cat.sort_order ?? 99,
         _min: price,
       })
@@ -63,7 +76,7 @@ export async function fetchCategories(): Promise<Category[]> {
     if (price < existing._min) {
       existing._min = price
       existing.fromPriceLabel = row.display_price_label ?? ''
-      existing.image = row.hero_img || existing.image
+      existing.image = imageUrl(row.hero_img) || existing.image
     }
   }
 
