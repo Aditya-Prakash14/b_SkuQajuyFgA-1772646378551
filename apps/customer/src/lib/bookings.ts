@@ -11,8 +11,13 @@ import type {
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-/** Applied once per booking. Confirm with the business before launch. */
-export const VISIT_CHARGE = 50
+/**
+ * Applied once per booking. Zero until the business decides (open decision in
+ * the product spec): create_booking() charges nothing beyond the catalogue
+ * price, so showing ₹50 here was a line the bill never contained. When it is
+ * agreed, add it server-side first and set it here second.
+ */
+export const VISIT_CHARGE = 0
 
 /* ── Profile & addresses ──────────────────────────────────────────────────── */
 
@@ -97,9 +102,22 @@ export async function createBooking(input: CheckoutInput): Promise<{ order_numbe
 
 /* ── Reading bookings ─────────────────────────────────────────────────────── */
 
-const OPEN: BookingStatus[] = ['pending', 'confirmed', 'vendor_assigned', 'in_progress']
+/** Deep Cleaning and Prime Now use different vocabularies for "still live". */
+const OPEN_DEEP: BookingStatus[] = ['pending', 'confirmed', 'vendor_assigned', 'in_progress']
+const OPEN_NOW: BookingStatus[] = ['new', 'dispatched', 'in_progress']
 
-export const isUpcoming = (b: Booking) => OPEN.includes(b.status as BookingStatus)
+export const isUpcoming = (b: Booking) => (b.kind === 'now' ? OPEN_NOW : OPEN_DEEP).includes(b.status)
+
+/**
+ * Whether the customer may still cancel from the app. Mirrors the server
+ * rules exactly — cancel_booking() accepts pending/confirmed only, and
+ * cancel_prime_now_request() accepts new/dispatched — so the button is never
+ * shown for a booking the RPC would refuse.
+ */
+export const canCancel = (b: Pick<Booking, 'kind' | 'status'>) =>
+  b.kind === 'now'
+    ? ['new', 'dispatched'].includes(b.status)
+    : ['pending', 'confirmed'].includes(b.status)
 
 /**
  * Everything the customer has booked, across both domains, newest first.
@@ -191,6 +209,12 @@ export async function fetchBookingEvents(orderId: string): Promise<BookingEvent[
 
 export async function cancelBooking(orderId: string) {
   const { error } = await supabase.rpc('cancel_booking', { p_order_id: orderId })
+  if (error) throw error
+}
+
+/** Cancel a Prime Now request. Open partner offers are superseded server-side. */
+export async function cancelPrimeNowRequest(requestId: string) {
+  const { error } = await supabase.rpc('cancel_prime_now_request', { p_request_id: requestId })
   if (error) throw error
 }
 

@@ -8,6 +8,8 @@ import type { HomeStackProps } from '../../navigation/types'
 /** Screen 18. Line items, itemised bill, sticky total. */
 export function CartScreen({ navigation }: HomeStackProps<'Cart'>) {
   const { lines, remove, setQty, subtotal, visitCharge, total } = useCart()
+  // Area-based lines are quoted, not fixed, so the bill is an estimate.
+  const hasPerUnit = lines.some((l) => l.priceUnit !== 'fixed')
 
   if (lines.length === 0) {
     return (
@@ -103,14 +105,15 @@ export function CartScreen({ navigation }: HomeStackProps<'Cart'>) {
         <Card className="gap-2.5">
           <Eyebrow>Bill</Eyebrow>
           <Row label="Services" value={formatINR(subtotal)} />
-          <Row label="Visit charge" value={formatINR(visitCharge)} />
+          {visitCharge > 0 ? <Row label="Visit charge" value={formatINR(visitCharge)} /> : null}
           <Divider className="my-1" />
           <View className="flex-row items-baseline justify-between">
-            <Text className="font-bold text-[15px] text-foreground">Estimated total</Text>
+            <Text className="font-bold text-[15px] text-foreground">{hasPerUnit ? 'Estimated total' : 'Total'}</Text>
             <Text className="font-black text-[19px] text-foreground">{formatINR(total)}</Text>
           </View>
           <Muted className="text-[11px]">
-            Confirmed from the live price list when you book. Area-based services are measured on site.
+            Inclusive of 18% GST. Confirmed from the live price list when you book
+            {hasPerUnit ? '; area-based services are measured on site' : ''}.
           </Muted>
         </Card>
       </ScrollView>

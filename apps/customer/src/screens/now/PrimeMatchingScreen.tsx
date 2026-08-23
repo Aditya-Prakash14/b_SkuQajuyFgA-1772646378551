@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { ActivityIndicator, Animated, Easing, Pressable, View } from 'react-native'
+import { ActivityIndicator, Alert, Animated, Easing, Pressable, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { Button, Text } from '../../components/ui'
+import { cancelPrimeNowRequest } from '../../lib/bookings'
 import { fetchDispatchState } from '../../lib/prime-now'
+import { errorMessage } from '../../lib/supabase'
 import { useColors } from '../../lib/theme'
 import type { HomeStackProps } from '../../navigation/types'
 
@@ -30,7 +32,37 @@ export function PrimeMatchingScreen({ route, navigation }: HomeStackProps<'Prime
   const [step, setStep] = useState(0)
   const [matched, setMatched] = useState(false)
   const [elapsed, setElapsed] = useState(0)
+  const [cancelling, setCancelling] = useState(false)
+  const [cancelledByOps, setCancelledByOps] = useState(false)
+  const [cancelError, setCancelError] = useState<string | null>(null)
   const pulse = useRef(new Animated.Value(0)).current
+
+  function confirmCancel() {
+    Alert.alert('Cancel this request?', 'Helpers will stop being offered the job.', [
+      { text: 'Keep looking', style: 'cancel' },
+      { text: 'Cancel request', style: 'destructive', onPress: doCancel },
+    ])
+  }
+
+  async function doCancel() {
+    setCancelling(true)
+    setCancelError(null)
+    try {
+      // A request keeps dispatching until the server is told otherwise —
+      // leaving this screen is not a cancel.
+      await cancelPrimeNowRequest(requestId)
+      navigation.popToTop()
+    } catch (err) {
+      setCancelError(errorMessage(err, 'Could not cancel the request. Please call us.'))
+    } finally {
+      setCancelling(false)
+    }
+  }
+
+  function track() {
+    navigation.popToTop()
+    navigation.getParent()?.navigate('BookingsTab' as never)
+  }
 
   useEffect(() => {
     const loop = Animated.loop(
@@ -60,7 +92,10 @@ export function PrimeMatchingScreen({ route, navigation }: HomeStackProps<'Prime
       try {
         const state = await fetchDispatchState(requestId)
         if (cancelled || !state) return
-        if (state.assigned) {
+        if (state.status === 'cancelled') {
+          setCancelledByOps(true)
+          clearInterval(poll)
+        } else if (state.assigned) {
           setMatched(true)
           clearInterval(poll)
         }
@@ -103,10 +138,12 @@ export function PrimeMatchingScreen({ route, navigation }: HomeStackProps<'Prime
             {reference}
           </Text>
           <Text className="text-center font-black text-[26px] text-ink-foreground" style={{ letterSpacing: -0.7 }}>
-            {matched ? 'Helper found' : slow ? 'Still looking' : 'Finding you a helper'}
+            {cancelledByOps ? 'Request cancelled' : matched ? 'Helper found' : slow ? 'Still looking' : 'Finding you a helper'}
           </Text>
           <Text className="text-center font-sans text-[14px] leading-[21px] text-ink-foreground/70">
-            {matched
+            {cancelledByOps
+              ? 'Our team cancelled this request. Please call us if that was not expected.'
+              : matched
               ? 'A verified helper has accepted your request. We will call to confirm the arrival time.'
               : slow
                 ? 'Helpers near you are busy. We are still trying, and our team will call you shortly.'
@@ -114,7 +151,7 @@ export function PrimeMatchingScreen({ route, navigation }: HomeStackProps<'Prime
           </Text>
         </View>
 
-        {!matched ? (
+        {!matched && !cancelledByOps ? (
           <View className="w-full gap-2.5">
             {STEPS.map((s, i) => {
               const done = i < step
@@ -145,15 +182,23 @@ export function PrimeMatchingScreen({ route, navigation }: HomeStackProps<'Prime
       </View>
 
       <View className="gap-2 px-[22px] pb-2">
-        {matched ? (
-          <Button label="Track my booking" variant="brand" onPress={() => navigation.popToTop()} />
+        {cancelError ? (
+          <Text className="text-center font-medium text-[13px] text-brand">{cancelError}</Text>
+        ) : null}
+        {cancelledByOps ? (
+          <Button label="Back to home" variant="brand" onPress={() => navigation.popToTop()} />
+        ) : matched ? (
+          <Button label="Track my booking" variant="brand" onPress={track} />
         ) : (
           <Pressable
             accessibilityRole="button"
-            onPress={() => navigation.popToTop()}
+            onPress={confirmCancel}
+            disabled={cancelling}
             className="min-h-[44px] items-center justify-center"
           >
-            <Text className="font-bold text-[14px] text-ink-foreground/70">Cancel request</Text>
+            <Text className="font-bold text-[14px] text-ink-foreground/70">
+              {cancelling ? 'Cancelling…' : 'Cancel request'}
+            </Text>
           </Pressable>
         )}
       </View>

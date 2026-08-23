@@ -121,7 +121,13 @@ export function MyBookingsScreen({ navigation }: BookingsStackProps<'MyBookings'
                   </View>
 
                   <Text className="mt-2 font-bold text-[13px] text-primary">
-                    {b.status === 'completed' ? 'Rate your helper ›' : 'Track booking ›'}
+                    {/* Only Deep Cleaning can be rated: submit_review is keyed
+                        to an order line, and Prime Now has no order. */}
+                    {b.status === 'completed' && b.kind === 'deep'
+                      ? 'Rate your helper ›'
+                      : isUpcoming(b)
+                        ? 'Track booking ›'
+                        : 'View details ›'}
                   </Text>
                 </Card>
               </Pressable>

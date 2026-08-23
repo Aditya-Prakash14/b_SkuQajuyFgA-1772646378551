@@ -14,6 +14,15 @@ export function formatINR(n: number) {
   return `₹${whole < 0 ? '-' : ''}${rest},${last3}`
 }
 
+/**
+ * Like formatINR but keeps the paise: 1270.34 → ₹1,270.34. For tax lines,
+ * where rounding each row would make them stop adding up to the total.
+ */
+export function formatINRPaise(n: number) {
+  const [whole, frac] = Math.abs(n).toFixed(2).split('.')
+  return `₹${n < 0 ? '-' : ''}${formatINR(Number(whole)).slice(1)}.${frac}`
+}
+
 /** "₹5 / sq. ft." → { amount: "₹5", unit: "sq. ft." } so a card can stack them. */
 export function splitPriceLabel(label: string): { amount: string; unit: string | null } {
   const [amount, unit] = label.split(' / ')

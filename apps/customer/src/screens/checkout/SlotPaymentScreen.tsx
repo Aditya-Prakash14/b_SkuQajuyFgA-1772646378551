@@ -32,6 +32,7 @@ const WINDOWS = ['Morning · 8 AM – 12 PM', 'Afternoon · 12 PM – 4 PM', 'Ev
  */
 export function SlotPaymentScreen({ navigation }: HomeStackProps<'SlotPayment'>) {
   const { lines, total, clear } = useCart()
+  const hasPerUnit = lines.some((l) => l.priceUnit !== 'fixed')
   const { defaultAddress, profile, draft } = useSession()
 
   const days = useMemo(() => upcomingDays(14), [])
@@ -199,7 +200,7 @@ export function SlotPaymentScreen({ navigation }: HomeStackProps<'SlotPayment'>)
       <StickyBar>
         <View>
           <Text className="font-black text-[20px] text-foreground">{formatINR(total)}</Text>
-          <Eyebrow>Estimated</Eyebrow>
+          <Eyebrow>{hasPerUnit ? 'Estimated · incl. GST' : 'Incl. 18% GST'}</Eyebrow>
         </View>
         <Button label="Confirm booking" onPress={confirm} loading={busy} className="flex-1" />
       </StickyBar>

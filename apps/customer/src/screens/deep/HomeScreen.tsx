@@ -69,7 +69,7 @@ export function HomeScreen({ navigation }: HomeStackProps<'Home'>) {
             <Card className="border-primary">
               <View className="flex-row items-center justify-between gap-3">
                 <View className="flex-1">
-                  <Eyebrow className="text-primary">In progress</Eyebrow>
+                  <Eyebrow className="text-primary">{live.kind === 'now' ? 'Prime Now' : 'Upcoming'}</Eyebrow>
                   <Text className="mt-1 font-bold text-[15px] text-foreground" numberOfLines={1}>
                     {live.items[0]?.service_name ?? 'Booking'}
                   </Text>

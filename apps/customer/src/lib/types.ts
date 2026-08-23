@@ -65,6 +65,10 @@ export type BookingStatus =
   | 'in_progress'
   | 'completed'
   | 'cancelled'
+  // Prime Now (prime_now_requests.status). in_progress / completed / cancelled
+  // are shared with the order vocabulary above.
+  | 'new'
+  | 'dispatched'
 
 export interface BookingItem {
   service_name: string
@@ -148,5 +152,13 @@ export const TIMELINE_STEPS: { status: string; label: string; blurb: string }[] 
   { status: 'confirmed', label: 'Confirmed', blurb: 'Your slot is held.' },
   { status: 'vendor_assigned', label: 'Helper assigned', blurb: 'A verified helper is on the job.' },
   { status: 'in_progress', label: 'In progress', blurb: 'Work has started.' },
+  { status: 'completed', label: 'Completed', blurb: 'Thank you for choosing us.' },
+]
+
+/** Prime Now has no events table; its timeline is derived from the status. */
+export const PRIME_TIMELINE_STEPS: { status: string; label: string; blurb: string }[] = [
+  { status: 'new', label: 'Request sent', blurb: 'Offered to verified helpers near you.' },
+  { status: 'dispatched', label: 'Helper accepted', blurb: 'We call to confirm the arrival time.' },
+  { status: 'in_progress', label: 'Work started', blurb: 'Your helper is on the job.' },
   { status: 'completed', label: 'Completed', blurb: 'Thank you for choosing us.' },
 ]
