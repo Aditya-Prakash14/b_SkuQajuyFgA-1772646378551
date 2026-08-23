@@ -34,6 +34,8 @@ export async function fetchMyStats(): Promise<VendorStats | null> {
     all_time_payout: Number(row.all_time_payout ?? 0),
     rating_avg: row.rating_avg === null || row.rating_avg === undefined ? null : Number(row.rating_avg),
     rating_count: Number(row.rating_count ?? 0),
+    month_tips: Number(row.month_tips ?? 0),
+    all_time_tips: Number(row.all_time_tips ?? 0),
   }
 }
 

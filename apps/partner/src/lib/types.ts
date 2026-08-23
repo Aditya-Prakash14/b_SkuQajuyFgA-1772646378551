@@ -142,6 +142,9 @@ export interface VendorStats {
   all_time_payout: number
   rating_avg: number | null
   rating_count: number
+  /** Customer tips, already included in the payouts above (0029). */
+  month_tips: number
+  all_time_tips: number
 }
 
 // ── Offers (auto-dispatch) — mirrors my_offers() in 0019 ────────────────────

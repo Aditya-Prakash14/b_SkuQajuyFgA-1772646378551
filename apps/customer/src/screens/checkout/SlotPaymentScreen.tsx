@@ -17,6 +17,7 @@ import { track } from '../../lib/analytics'
 import { createBooking } from '../../lib/bookings'
 import { useCart } from '../../lib/cart'
 import { dateKey, dateParts, formatINR, upcomingDays } from '../../lib/format'
+import { ONLINE_PAYMENTS_ENABLED } from '../../lib/payments'
 import { useSession } from '../../lib/session'
 import { errorMessage } from '../../lib/supabase'
 import { ANY_TIME_WINDOW, TIME_WINDOWS } from '../../lib/types'
@@ -24,6 +25,15 @@ import type { HomeStackProps } from '../../navigation/types'
 
 /** The same windows the website offers, plus its "any time" option. */
 const WINDOWS = [...TIME_WINDOWS, ANY_TIME_WINDOW]
+
+/** Pay now appears only once Razorpay is configured; paying after the work is always there. */
+const PAYMENT_OPTIONS: { id: 'online' | 'upi' | 'cash'; label: string; sub: string }[] = [
+  ...(ONLINE_PAYMENTS_ENABLED
+    ? [{ id: 'online' as const, label: 'Pay now by UPI or card', sub: 'Secure payment through Razorpay. Refunded in full if we cancel.' }]
+    : []),
+  { id: 'upi', label: 'UPI on completion', sub: 'Pay the helper by UPI once the work is done.' },
+  { id: 'cash', label: 'Cash on completion', sub: 'Pay in cash after the job.' },
+]
 
 /**
  * Screen 19. Date strip, arrival window, address, payment method.
@@ -40,7 +50,7 @@ export function SlotPaymentScreen({ route, navigation }: HomeStackProps<'SlotPay
   const days = useMemo(() => upcomingDays(14), [])
   const [day, setDay] = useState<Date>(days[0])
   const [window, setWindow] = useState<string>(WINDOWS[0])
-  const [method, setMethod] = useState<'upi' | 'cash'>('upi')
+  const [method, setMethod] = useState<'online' | 'upi' | 'cash'>(ONLINE_PAYMENTS_ENABLED ? 'online' : 'upi')
   const [addressId, setAddressId] = useState<string | null>(defaultAddress?.id ?? null)
   const [phone, setPhone] = useState(profile?.phone && !profile.phone.startsWith('pending:') ? profile.phone : '')
   const [notes, setNotes] = useState('')
@@ -88,9 +98,12 @@ export function SlotPaymentScreen({ route, navigation }: HomeStackProps<'SlotPay
         notes: notes.trim() || null,
         lines,
       })
-      track('booking_confirmed', { order_number: res.order_number, items: lines.length })
+      track('booking_confirmed', { order_number: res.order_number, items: lines.length, method })
       clear()
-      navigation.replace('Confirmed', { reference: res.order_number })
+      navigation.replace('Confirmed', {
+        reference: res.order_number,
+        payNow: method === 'online' ? { kind: 'deep', id: res.order_id } : undefined,
+      })
     } catch (err) {
       setError(errorMessage(err, 'Could not confirm the booking.'))
     } finally {
@@ -169,12 +182,7 @@ export function SlotPaymentScreen({ route, navigation }: HomeStackProps<'SlotPay
 
         <View className="gap-2">
           <Eyebrow>Payment</Eyebrow>
-          {(
-            [
-              { id: 'upi', label: 'UPI on completion', sub: 'Pay the helper by UPI once the work is done.' },
-              { id: 'cash', label: 'Cash on completion', sub: 'Pay in cash after the job.' },
-            ] as const
-          ).map((m) => {
+          {PAYMENT_OPTIONS.map((m) => {
             const active = method === m.id
             return (
               <Pressable
@@ -193,7 +201,7 @@ export function SlotPaymentScreen({ route, navigation }: HomeStackProps<'SlotPay
               </Pressable>
             )
           })}
-          <Muted className="text-[11px]">Online payment is coming soon.</Muted>
+          {!ONLINE_PAYMENTS_ENABLED ? <Muted className="text-[11px]">Online payment is coming soon.</Muted> : null}
         </View>
 
         <Field

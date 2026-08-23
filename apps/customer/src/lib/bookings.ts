@@ -107,7 +107,7 @@ export interface CheckoutInput {
  * the totals shown in the cart are an estimate until it returns — a tampered
  * client cannot buy a ₹5,999 villa clean for ₹1.
  */
-export async function createBooking(input: CheckoutInput): Promise<{ order_number: string }> {
+export async function createBooking(input: CheckoutInput): Promise<{ order_id: string; order_number: string }> {
   const { data, error } = await supabase.rpc('create_booking', {
     p_name: input.name,
     p_phone: input.phone,
@@ -125,7 +125,30 @@ export async function createBooking(input: CheckoutInput): Promise<{ order_numbe
     p_source: 'app',
   })
   if (error) throw error
-  return data as unknown as { order_number: string }
+  return data as unknown as { order_id: string; order_number: string }
+}
+
+/**
+ * The payment fields of one booking, fresh. The list's snapshot goes stale
+ * the moment a webhook or the partner's cash checkbox lands.
+ */
+export async function fetchPaymentState(
+  kind: 'deep' | 'now',
+  id: string,
+): Promise<{ paymentStatus: string; paymentMethod: string | null; paidAt: string | null } | null> {
+  const { data, error } = await supabase
+    .from(kind === 'deep' ? 'orders' : 'prime_now_requests')
+    .select('payment_status,payment_method,paid_at')
+    .eq('id', id)
+    .maybeSingle()
+  if (error) throw error
+  if (!data) return null
+  const row = data as { payment_status: string | null; payment_method: string | null; paid_at: string | null }
+  return {
+    paymentStatus: row.payment_status ?? 'unpaid',
+    paymentMethod: row.payment_method ?? null,
+    paidAt: row.paid_at ?? null,
+  }
 }
 
 /* ── Reading bookings ─────────────────────────────────────────────────────── */
@@ -344,6 +367,22 @@ export async function submitRating(input: {
   const { error } = await supabase.rpc('submit_review', {
     p_order_id: input.orderId,
     p_service_id: input.serviceId,
+    p_rating: input.stars,
+    p_comment: input.comment ?? undefined,
+    p_tip_amount: input.tip,
+  })
+  if (error) throw error
+}
+
+/** Rate a completed Prime Now request (0033). One review per request, updatable. */
+export async function submitRequestRating(input: {
+  requestId: string
+  stars: number
+  comment: string | null
+  tip: number
+}) {
+  const { error } = await supabase.rpc('submit_request_review', {
+    p_request_id: input.requestId,
     p_rating: input.stars,
     p_comment: input.comment ?? undefined,
     p_tip_amount: input.tip,

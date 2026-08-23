@@ -10,11 +10,13 @@ import {
   cancelPrimeNowRequest,
   fetchBookingEvents,
   fetchBookingHelper,
+  fetchPaymentState,
   rebookLines,
   rescheduleBooking,
 } from '../../lib/bookings'
 import { useCart } from '../../lib/cart'
 import { dateKey, dateParts, formatDay, formatINR, formatINRPaise, formatStamp, upcomingDays } from '../../lib/format'
+import { ONLINE_PAYMENTS_ENABLED, startOnlinePayment } from '../../lib/payments'
 import { TASK_LABEL, fetchDispatchState } from '../../lib/prime-now'
 import { errorMessage, supabase } from '../../lib/supabase'
 import {
@@ -58,8 +60,14 @@ export function TrackingScreen({ route, navigation }: BookingsStackProps<'Tracki
   const [status, setStatus] = useState<BookingStatus>(booking.status)
   const [scheduled, setScheduled] = useState({ date: booking.scheduledDate, slot: booking.scheduledSlot })
   const [helper, setHelper] = useState<Helper | null>(null)
+  const [payment, setPayment] = useState({
+    paymentStatus: booking.paymentStatus,
+    paymentMethod: booking.paymentMethod,
+    paidAt: booking.paidAt,
+  })
   const [cancelling, setCancelling] = useState(false)
   const [rebooking, setRebooking] = useState(false)
+  const [paying, setPaying] = useState(false)
 
   // Reschedule panel
   const days = useMemo(() => upcomingDays(14), [])
@@ -78,6 +86,11 @@ export function TrackingScreen({ route, navigation }: BookingsStackProps<'Tracki
       } else {
         setEvents(await fetchBookingEvents(booking.id))
       }
+      // Paid state can change underneath the list's snapshot (cash checkbox,
+      // CRM, webhook); never block the timeline on it.
+      fetchPaymentState(booking.kind, booking.id)
+        .then((p) => p && setPayment(p))
+        .catch(() => {})
       setError(null)
     } catch (err) {
       setError(errorMessage(err, 'Could not load the latest status.'))
@@ -175,6 +188,30 @@ export function TrackingScreen({ route, navigation }: BookingsStackProps<'Tracki
       setError(errorMessage(err, 'Could not change the date.'))
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function payNow() {
+    setPaying(true)
+    setError(null)
+    try {
+      const outcome = await startOnlinePayment(booking.kind, booking.id)
+      if (outcome === 'success') {
+        track('payment_success', { reference: booking.reference })
+        // The webhook marks it paid a moment after the browser returns.
+        for (let i = 0; i < 4; i++) {
+          await new Promise((r) => setTimeout(r, 1500))
+          const p = await fetchPaymentState(booking.kind, booking.id).catch(() => null)
+          if (p) setPayment(p)
+          if (p?.paymentStatus === 'paid') break
+        }
+      } else if (outcome === 'failed') {
+        setError('The payment did not go through. Nothing was charged.')
+      }
+    } catch (err) {
+      setError(errorMessage(err, 'Could not start the payment.'))
+    } finally {
+      setPaying(false)
     }
   }
 
@@ -397,9 +434,11 @@ export function TrackingScreen({ route, navigation }: BookingsStackProps<'Tracki
           </View>
           <Muted className="text-[11px]">
             {isNow ? 'Flat price for the slot. No travel charge.' : 'Inclusive of 18% GST.'}
-            {booking.paymentStatus === 'paid'
-              ? ` Paid${booking.paymentMethod ? ` by ${booking.paymentMethod}` : ''}${booking.paidAt ? ` on ${formatStamp(booking.paidAt)}` : ''}.`
-              : ' Pay after the work is done, by cash or UPI.'}
+            {payment.paymentStatus === 'paid'
+              ? ` Paid${payment.paymentMethod ? ` by ${payment.paymentMethod}` : ''}${payment.paidAt ? ` on ${formatStamp(payment.paidAt)}` : ''}.`
+              : payment.paymentStatus === 'refunded'
+                ? ' Refunded.'
+                : ' Pay after the work is done, by cash or UPI.'}
           </Muted>
           <Muted className="text-[12px]">
             {booking.address}
@@ -414,13 +453,19 @@ export function TrackingScreen({ route, navigation }: BookingsStackProps<'Tracki
           onPress={() => Linking.openURL(`tel:+${SUPPORT_PHONE}`)}
         />
 
-        {status === 'completed' || booking.paymentStatus === 'paid' ? (
-          <Button label="View receipt" variant="outline" onPress={() => navigation.navigate('Receipt', { booking })} />
+        {ONLINE_PAYMENTS_ENABLED && payment.paymentStatus === 'unpaid' && !cancelled ? (
+          <Button label="Pay now by UPI or card" variant="brand" onPress={payNow} loading={paying} />
         ) : null}
 
-        {/* Only Deep Cleaning can be rated: submit_review is keyed to an
-            order line, and a Prime Now request has no order. */}
-        {status === 'completed' && !isNow ? (
+        {status === 'completed' || payment.paymentStatus === 'paid' ? (
+          <Button
+            label="View receipt"
+            variant="outline"
+            onPress={() => navigation.navigate('Receipt', { booking: { ...booking, ...payment } })}
+          />
+        ) : null}
+
+        {status === 'completed' ? (
           <Button label="Rate your helper" onPress={() => navigation.navigate('RateTip', { booking })} />
         ) : null}
 

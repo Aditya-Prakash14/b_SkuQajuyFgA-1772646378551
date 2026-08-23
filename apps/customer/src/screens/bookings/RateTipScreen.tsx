@@ -3,7 +3,7 @@ import { Pressable, View } from 'react-native'
 
 import { Banner, Body, Button, Card, Eyebrow, Field, H1, Muted, Screen, Text } from '../../components/ui'
 import { track } from '../../lib/analytics'
-import { submitRating } from '../../lib/bookings'
+import { submitRating, submitRequestRating } from '../../lib/bookings'
 import { formatINR } from '../../lib/format'
 import { errorMessage, supabase } from '../../lib/supabase'
 import type { BookingsStackProps } from '../../navigation/types'
@@ -34,27 +34,32 @@ export function RateTipScreen({ route, navigation }: BookingsStackProps<'RateTip
     setBusy(true)
     setError(null)
     try {
-      // A rating attaches to a service line, so resolve the booking's first
-      // service id rather than trusting anything passed through navigation.
-      const { data, error: qErr } = await supabase
-        .from('order_items')
-        .select('service_id')
-        .eq('order_id', booking.id)
-        .not('service_id', 'is', null)
-        .limit(1)
-        .maybeSingle()
-      if (qErr) throw qErr
-      const serviceId = (data as { service_id: string } | null)?.service_id
-      if (!serviceId) throw new Error('This booking has no service to rate.')
+      if (booking.kind === 'now') {
+        // A Prime Now request is rated as a whole (0033).
+        await submitRequestRating({ requestId: booking.id, stars, comment: comment.trim() || null, tip })
+      } else {
+        // A Deep Cleaning rating attaches to a service line, so resolve the
+        // booking's first service id rather than trusting navigation params.
+        const { data, error: qErr } = await supabase
+          .from('order_items')
+          .select('service_id')
+          .eq('order_id', booking.id)
+          .not('service_id', 'is', null)
+          .limit(1)
+          .maybeSingle()
+        if (qErr) throw qErr
+        const serviceId = (data as { service_id: string } | null)?.service_id
+        if (!serviceId) throw new Error('This booking has no service to rate.')
 
-      await submitRating({
-        orderId: booking.id,
-        serviceId,
-        stars,
-        comment: comment.trim() || null,
-        tip,
-      })
-      track('submit_review', { stars, tip })
+        await submitRating({
+          orderId: booking.id,
+          serviceId,
+          stars,
+          comment: comment.trim() || null,
+          tip,
+        })
+      }
+      track('submit_review', { stars, tip, kind: booking.kind })
       setDone(true)
     } catch (err) {
       setError(errorMessage(err, 'Could not save your rating.'))

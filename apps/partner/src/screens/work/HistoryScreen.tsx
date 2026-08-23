@@ -40,6 +40,9 @@ export function HistoryScreen({
           Your payout · {currentMonthName()}
         </Text>
         <Text className="mt-1 text-3xl font-bold text-foreground">{formatINR(stats?.month_payout ?? 0)}</Text>
+        {stats && stats.month_tips > 0 ? (
+          <Text className="mt-1 text-xs text-muted-foreground">Includes {formatINR(stats.month_tips)} in customer tips</Text>
+        ) : null}
         <Text className="mt-0.5 text-sm text-muted-foreground">
           {stats && stats.month_jobs > 0
             ? `${stats.month_jobs} job${stats.month_jobs === 1 ? '' : 's'} completed · customers paid ${formatINR(stats.month_gross)}`

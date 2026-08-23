@@ -22,7 +22,7 @@ export type HomeStackParams = AddressRoutes & {
   ServiceDetail: { serviceId: string }
   Cart: undefined
   SlotPayment: { addressId?: string } | undefined
-  Confirmed: { reference: string }
+  Confirmed: { reference: string; payNow?: { kind: 'deep' | 'now'; id: string } }
   // Prime Now
   PrimeSlot: undefined
   PrimeDescribe: { slot: string }
