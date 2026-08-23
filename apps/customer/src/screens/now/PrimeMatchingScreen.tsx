@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ActivityIndicator, Alert, Animated, Easing, Pressable, View } from 'react-native'
+import { AccessibilityInfo, ActivityIndicator, Alert, Animated, Easing, Pressable, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { Button, Text } from '../../components/ui'
@@ -65,14 +65,20 @@ export function PrimeMatchingScreen({ route, navigation }: HomeStackProps<'Prime
   }
 
   useEffect(() => {
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulse, { toValue: 1, duration: 900, easing: Easing.out(Easing.ease), useNativeDriver: true }),
-        Animated.timing(pulse, { toValue: 0, duration: 900, easing: Easing.in(Easing.ease), useNativeDriver: true }),
-      ]),
-    )
-    loop.start()
-    return () => loop.stop()
+    let loop: Animated.CompositeAnimation | null = null
+    AccessibilityInfo.isReduceMotionEnabled()
+      .catch(() => false)
+      .then((reduce) => {
+        if (reduce) return
+        loop = Animated.loop(
+          Animated.sequence([
+            Animated.timing(pulse, { toValue: 1, duration: 900, easing: Easing.out(Easing.ease), useNativeDriver: true }),
+            Animated.timing(pulse, { toValue: 0, duration: 900, easing: Easing.in(Easing.ease), useNativeDriver: true }),
+          ]),
+        )
+        loop.start()
+      })
+    return () => loop?.stop()
   }, [pulse])
 
   useEffect(() => {

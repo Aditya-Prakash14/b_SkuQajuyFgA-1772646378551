@@ -15,6 +15,7 @@ import { SafeAreaView, type Edge } from 'react-native-safe-area-context'
 
 import { useColorScheme } from 'nativewind'
 
+import { useOffline } from '../lib/offline'
 import { useColors, type Palette } from '../lib/theme'
 
 /**
@@ -45,8 +46,14 @@ export function Screen({
   edges?: Edge[]
   className?: string
 }) {
+  const offline = useOffline()
   return (
     <SafeAreaView edges={edges} className={['flex-1 bg-background', className].filter(Boolean).join(' ')}>
+      {offline ? (
+        <View className="bg-warning/15 px-[22px] py-2" accessibilityLiveRegion="polite">
+          <Text className="font-medium text-[12px] text-warning">You are offline. Showing saved information.</Text>
+        </View>
+      ) : null}
       {children}
     </SafeAreaView>
   )

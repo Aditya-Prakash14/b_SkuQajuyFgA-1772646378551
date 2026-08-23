@@ -10,7 +10,7 @@
 
 // ── Catalogue ───────────────────────────────────────────────────────────────
 
-export type PriceUnit = 'fixed' | 'per_sqft' | 'per_panel'
+export type PriceUnit = 'fixed' | 'per_sqft' | 'per_panel' | 'per_seat'
 
 export interface Category {
   id: string
@@ -20,6 +20,17 @@ export interface Category {
   /** Cheapest service's own label, so "₹5 / sq. ft." never flattens to "₹5". */
   fromPriceLabel: string
   image: string | null
+}
+
+export interface HowItWorksStep {
+  step: number | string
+  title: string
+  desc: string
+}
+
+export interface Faq {
+  q: string
+  a: string
 }
 
 export interface Service {
@@ -36,9 +47,23 @@ export interface Service {
   priceLabel: string
   duration: string
   image: string | null
+  gallery: string[]
   includes: string[]
+  whatWeClean: string[]
+  howItWorks: HowItWorksStep[]
+  notIncluded: string[]
+  faqs: Faq[]
   rating: number
   reviewsCount: number
+}
+
+/** A row of the public_reviews view — display columns only, never the reviewer's id. */
+export interface Review {
+  id: string
+  rating: number
+  comment: string | null
+  created_at: string
+  reviewer: string
 }
 
 // ── Cart ────────────────────────────────────────────────────────────────────
@@ -71,6 +96,8 @@ export type BookingStatus =
   | 'dispatched'
 
 export interface BookingItem {
+  /** Null when the service was deleted from the catalogue after booking. */
+  service_id: string | null
   service_name: string
   qty: number
   units: number
@@ -104,6 +131,15 @@ export interface BookingEvent {
   status: string
   note: string | null
   created_at: string
+}
+
+/** What my_booking_helper() lets a customer know about the partner on their job. */
+export interface Helper {
+  name: string
+  rating: number | null
+  ratingCount: number
+  /** Only while the job is live; null otherwise. */
+  phone: string | null
 }
 
 // ── Addresses & profile ─────────────────────────────────────────────────────
@@ -162,3 +198,7 @@ export const PRIME_TIMELINE_STEPS: { status: string; label: string; blurb: strin
   { status: 'in_progress', label: 'Work started', blurb: 'Your helper is on the job.' },
   { status: 'completed', label: 'Completed', blurb: 'Thank you for choosing us.' },
 ]
+
+/** Arrival windows — byte-identical to apps/web/lib/slots.ts, plus the site's "any time" option. */
+export const TIME_WINDOWS = ['Morning · 8 AM – 12 PM', 'Afternoon · 12 PM – 4 PM', 'Evening · 4 PM – 8 PM'] as const
+export const ANY_TIME_WINDOW = "Any time — we'll confirm on call"

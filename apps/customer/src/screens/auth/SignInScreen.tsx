@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { View } from 'react-native'
+import { Linking, View } from 'react-native'
+
+import { PRIVACY_URL, TERMS_URL } from '../account/HelpScreen'
 
 import { Banner, Body, Button, Divider, Eyebrow, Field, H1, Muted, Screen, Text } from '../../components/ui'
 import {
@@ -139,7 +141,15 @@ export function SignInScreen({ onCodeSent }: { onCodeSent: (phone: string) => vo
         />
 
         <Muted className="pt-2 text-center text-[12px]">
-          By continuing you agree to our Terms of Service and Privacy Policy.
+          By continuing you agree to our{' '}
+          <Text className="text-[12px] text-primary" onPress={() => Linking.openURL(TERMS_URL)} accessibilityRole="link">
+            Terms of Service
+          </Text>{' '}
+          and{' '}
+          <Text className="text-[12px] text-primary" onPress={() => Linking.openURL(PRIVACY_URL)} accessibilityRole="link">
+            Privacy Policy
+          </Text>
+          .
         </Muted>
 
         <View className="items-center pt-6">

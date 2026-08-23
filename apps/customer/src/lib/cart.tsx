@@ -19,6 +19,7 @@ const STORAGE_KEY = 'mpc_customer_cart_v1'
 interface CartValue {
   lines: CartLine[]
   add: (service: Service, units?: number) => void
+  addLines: (lines: CartLine[]) => void
   remove: (serviceId: string) => void
   setQty: (serviceId: string, qty: number) => void
   setUnits: (serviceId: string, units: number) => void
@@ -81,6 +82,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
+  /** Book again: merge whole lines in, replacing any existing line for the same service. */
+  const addLines = useCallback((incoming: CartLine[]) => {
+    setLines((prev) => {
+      const ids = new Set(incoming.map((l) => l.serviceId))
+      return [...prev.filter((l) => !ids.has(l.serviceId)), ...incoming]
+    })
+  }, [])
+
   const remove = useCallback((serviceId: string) => {
     setLines((prev) => prev.filter((l) => l.serviceId !== serviceId))
   }, [])
@@ -108,6 +117,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return {
       lines,
       add,
+      addLines,
       remove,
       setQty,
       setUnits,
@@ -118,7 +128,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       total: subtotal + visitCharge,
       hydrated,
     }
-  }, [lines, add, remove, setQty, setUnits, clear, hydrated])
+  }, [lines, add, addLines, remove, setQty, setUnits, clear, hydrated])
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>
 }

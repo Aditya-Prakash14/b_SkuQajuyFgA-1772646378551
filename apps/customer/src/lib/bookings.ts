@@ -1,3 +1,5 @@
+import { fetchService } from './catalog'
+import { cached } from './offline'
 import { supabase } from './supabase'
 import type {
   Address,
@@ -5,6 +7,7 @@ import type {
   BookingEvent,
   BookingStatus,
   CartLine,
+  Helper,
   NotificationPrefs,
   Profile,
 } from './types'
@@ -21,12 +24,9 @@ export const VISIT_CHARGE = 0
 
 /* ── Profile & addresses ──────────────────────────────────────────────────── */
 
-/** The customer row for the signed-in user, if create_booking has made one yet. */
+/** The customer row for the signed-in user, if setup or a booking has made one yet. */
 export async function fetchProfile(): Promise<Profile | null> {
-  const { data, error } = await supabase
-    .from('customers')
-    .select('id,name,phone,email,city')
-    .maybeSingle()
+  const { data, error } = await supabase.from('customers').select('id,name,phone,email,city').maybeSingle()
   if (error) throw error
   return (data as Profile | null) ?? null
 }
@@ -37,7 +37,32 @@ export async function fetchAddresses(): Promise<Address[]> {
     .select('id,label,full_address,city,is_default')
     .order('is_default', { ascending: false })
   if (error) throw error
-  return ((data as Address[] | null) ?? [])
+  return (data as Address[] | null) ?? []
+}
+
+/**
+ * Address edits go straight to the table: the policy scopes every row to
+ * customer_id = current_customer_id(), and the 0028 index makes a second
+ * default impossible, so demote-then-promote is the whole algorithm.
+ */
+export async function updateAddress(id: string, input: { label: string; fullAddress: string; city: string }) {
+  const { error } = await supabase
+    .from('addresses')
+    .update({ label: input.label, full_address: input.fullAddress.trim(), city: input.city })
+    .eq('id', id)
+  if (error) throw error
+}
+
+export async function deleteAddress(id: string) {
+  const { error } = await supabase.from('addresses').delete().eq('id', id)
+  if (error) throw error
+}
+
+export async function setDefaultAddress(id: string) {
+  const demote = await supabase.from('addresses').update({ is_default: false }).eq('is_default', true)
+  if (demote.error) throw demote.error
+  const promote = await supabase.from('addresses').update({ is_default: true }).eq('id', id)
+  if (promote.error) throw promote.error
 }
 
 export async function fetchNotificationPrefs(): Promise<NotificationPrefs | null> {
@@ -49,6 +74,7 @@ export async function fetchNotificationPrefs(): Promise<NotificationPrefs | null
   return (data as NotificationPrefs | null) ?? null
 }
 
+/** Null leaves a field alone; an empty-string token clears it (0029). */
 export async function saveNotificationPrefs(p: Partial<NotificationPrefs> & { token?: string }) {
   const { error } = await supabase.rpc('save_notification_prefs', {
     p_booking_updates: p.booking_updates ?? null,
@@ -95,6 +121,7 @@ export async function createBooking(input: CheckoutInput): Promise<{ order_numbe
       qty: l.qty,
       units: l.units,
     })),
+    p_source: 'app',
   })
   if (error) throw error
   return data as unknown as { order_number: string }
@@ -115,85 +142,91 @@ export const isUpcoming = (b: Booking) => (b.kind === 'now' ? OPEN_NOW : OPEN_DE
  * shown for a booking the RPC would refuse.
  */
 export const canCancel = (b: Pick<Booking, 'kind' | 'status'>) =>
-  b.kind === 'now'
-    ? ['new', 'dispatched'].includes(b.status)
-    : ['pending', 'confirmed'].includes(b.status)
+  b.kind === 'now' ? ['new', 'dispatched'].includes(b.status) : ['pending', 'confirmed'].includes(b.status)
+
+/** reschedule_booking() has the same window as cancel, for Deep Cleaning only. */
+export const canReschedule = (b: Pick<Booking, 'kind' | 'status'>) =>
+  b.kind === 'deep' && ['pending', 'confirmed'].includes(b.status)
 
 /**
  * Everything the customer has booked, across both domains, newest first.
  * Deep Cleaning lives in `orders`; Prime Now in `prime_now_requests`. The list
  * merges them so "My bookings" is one list, as the spec asks.
  */
-export async function fetchBookings(): Promise<Booking[]> {
-  const [orders, prime] = await Promise.all([
-    supabase
-      .from('orders')
-      .select(
-        'id,order_number,status,scheduled_date,scheduled_slot,city,address,notes,subtotal,tax,total,payment_status,created_at,order_items(service_name,qty,units,unit_price,line_total)',
-      )
-      .order('created_at', { ascending: false }),
-    supabase
-      .from('prime_now_requests')
-      .select(
-        'id,request_number,status,scheduled_for,timing,city,address,notes,price,payment_status,slot_minutes,tasks,created_at',
-      )
-      .order('created_at', { ascending: false }),
-  ])
-  if (orders.error) throw orders.error
-  if (prime.error) throw prime.error
+export function fetchBookings(): Promise<Booking[]> {
+  return cached('bookings', async () => {
+    const [orders, prime] = await Promise.all([
+      supabase
+        .from('orders')
+        .select(
+          'id,order_number,status,scheduled_date,scheduled_slot,city,address,notes,subtotal,tax,total,payment_status,created_at,order_items(service_id,service_name,qty,units,unit_price,line_total)',
+        )
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('prime_now_requests')
+        .select(
+          'id,request_number,status,scheduled_for,timing,city,address,notes,price,payment_status,slot_minutes,tasks,created_at',
+        )
+        .order('created_at', { ascending: false }),
+    ])
+    if (orders.error) throw orders.error
+    if (prime.error) throw prime.error
 
-  const deep: Booking[] = ((orders.data as any[]) ?? []).map((o) => ({
-    id: o.id,
-    reference: o.order_number,
-    status: o.status,
-    scheduledDate: o.scheduled_date,
-    scheduledSlot: o.scheduled_slot,
-    city: o.city,
-    address: o.address,
-    notes: o.notes,
-    subtotal: Number(o.subtotal ?? 0),
-    tax: Number(o.tax ?? 0),
-    total: Number(o.total ?? 0),
-    paymentStatus: o.payment_status ?? 'unpaid',
-    items: ((o.order_items as any[]) ?? []).map((i) => ({
-      service_name: i.service_name,
-      qty: Number(i.qty ?? 1),
-      units: Number(i.units ?? 1),
-      unit_price: Number(i.unit_price ?? 0),
-      line_total: Number(i.line_total ?? 0),
-    })),
-    createdAt: o.created_at,
-    kind: 'deep' as const,
-  }))
+    const deep: Booking[] = ((orders.data as any[]) ?? []).map((o) => ({
+      id: o.id,
+      reference: o.order_number,
+      status: o.status,
+      scheduledDate: o.scheduled_date,
+      scheduledSlot: o.scheduled_slot,
+      city: o.city,
+      address: o.address,
+      notes: o.notes,
+      subtotal: Number(o.subtotal ?? 0),
+      tax: Number(o.tax ?? 0),
+      total: Number(o.total ?? 0),
+      paymentStatus: o.payment_status ?? 'unpaid',
+      items: ((o.order_items as any[]) ?? []).map((i) => ({
+        service_id: i.service_id ?? null,
+        service_name: i.service_name,
+        qty: Number(i.qty ?? 1),
+        units: Number(i.units ?? 1),
+        unit_price: Number(i.unit_price ?? 0),
+        line_total: Number(i.line_total ?? 0),
+      })),
+      createdAt: o.created_at,
+      kind: 'deep' as const,
+    }))
 
-  const now: Booking[] = ((prime.data as any[]) ?? []).map((r) => ({
-    id: r.id,
-    reference: r.request_number,
-    status: r.status,
-    scheduledDate: r.timing === 'scheduled' && r.scheduled_for ? String(r.scheduled_for).slice(0, 10) : null,
-    scheduledSlot: r.timing === 'now' ? 'Within the hour' : null,
-    city: r.city,
-    address: r.address,
-    notes: r.notes,
-    subtotal: Number(r.price ?? 0),
-    tax: 0,
-    total: Number(r.price ?? 0),
-    paymentStatus: r.payment_status ?? 'unpaid',
-    items: [
-      {
-        service_name: `Prime Now · ${r.slot_minutes} min help`,
-        qty: 1,
-        units: 1,
-        unit_price: Number(r.price ?? 0),
-        line_total: Number(r.price ?? 0),
-      },
-    ],
-    createdAt: r.created_at,
-    kind: 'now' as const,
-    tasks: r.tasks ?? [],
-  }))
+    const now: Booking[] = ((prime.data as any[]) ?? []).map((r) => ({
+      id: r.id,
+      reference: r.request_number,
+      status: r.status,
+      scheduledDate: r.timing === 'scheduled' && r.scheduled_for ? String(r.scheduled_for).slice(0, 10) : null,
+      scheduledSlot: r.timing === 'now' ? 'Within the hour' : null,
+      city: r.city,
+      address: r.address,
+      notes: r.notes,
+      subtotal: Number(r.price ?? 0),
+      tax: 0,
+      total: Number(r.price ?? 0),
+      paymentStatus: r.payment_status ?? 'unpaid',
+      items: [
+        {
+          service_id: null,
+          service_name: `Prime Now · ${r.slot_minutes} min help`,
+          qty: 1,
+          units: 1,
+          unit_price: Number(r.price ?? 0),
+          line_total: Number(r.price ?? 0),
+        },
+      ],
+      createdAt: r.created_at,
+      kind: 'now' as const,
+      tasks: r.tasks ?? [],
+    }))
 
-  return [...deep, ...now].sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    return [...deep, ...now].sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+  })
 }
 
 /** The tracking timeline — a projection of booking_events, never client state. */
@@ -204,7 +237,21 @@ export async function fetchBookingEvents(orderId: string): Promise<BookingEvent[
     .eq('order_id', orderId)
     .order('created_at')
   if (error) throw error
-  return ((data as BookingEvent[] | null) ?? [])
+  return (data as BookingEvent[] | null) ?? []
+}
+
+/** Who is coming. Null until a partner is assigned. */
+export async function fetchBookingHelper(kind: 'deep' | 'now', id: string): Promise<Helper | null> {
+  const { data, error } = await supabase.rpc('my_booking_helper', { p_kind: kind, p_id: id })
+  if (error) throw error
+  const row = ((data as any[]) ?? [])[0]
+  if (!row) return null
+  return {
+    name: row.name,
+    rating: row.rating === null || row.rating === undefined ? null : Number(row.rating),
+    ratingCount: Number(row.rating_count ?? 0),
+    phone: row.phone ?? null,
+  }
 }
 
 export async function cancelBooking(orderId: string) {
@@ -225,6 +272,34 @@ export async function rescheduleBooking(orderId: string, date: string, slot: str
     p_slot: slot ?? undefined,
   })
   if (error) throw error
+}
+
+/**
+ * Book again: the still-active services of a past booking as cart lines, at
+ * today's prices. Per-unit lines carry their area; anything delisted since is
+ * skipped and reported so the screen can say so.
+ */
+export async function rebookLines(booking: Booking): Promise<{ lines: CartLine[]; skipped: string[] }> {
+  const lines: CartLine[] = []
+  const skipped: string[] = []
+  for (const item of booking.items) {
+    const service = item.service_id ? await fetchService(item.service_id).catch(() => null) : null
+    if (!service) {
+      skipped.push(item.service_name)
+      continue
+    }
+    lines.push({
+      serviceId: service.id,
+      name: service.name,
+      image: service.image,
+      rate: service.rate,
+      priceLabel: service.priceLabel,
+      priceUnit: service.priceUnit,
+      qty: Math.max(1, item.qty),
+      units: service.priceUnit === 'fixed' ? 1 : Math.max(1, item.units),
+    })
+  }
+  return { lines, skipped }
 }
 
 /* ── Rating ───────────────────────────────────────────────────────────────── */

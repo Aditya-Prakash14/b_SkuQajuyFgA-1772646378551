@@ -48,6 +48,9 @@ export const TASKS: { id: string; label: string }[] = [
 
 export const TASK_LABEL: Record<string, string> = Object.fromEntries(TASKS.map((t) => [t.id, t.label]))
 
+/** Hours a scheduled visit can start at, on the hour, 8 AM to 8 PM. */
+export const SCHEDULE_HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+
 export const GUARANTEES = [
   'Background-verified helper',
   'Flat hourly price, no surge',
@@ -92,6 +95,7 @@ export async function createPrimeNowRequest(input: PrimeNowInput): Promise<Prime
     p_notes: input.notes ?? '',
     p_timing: input.timing,
     p_scheduled_for: input.scheduledFor ?? undefined,
+    p_source: 'app',
   })
   if (error) throw error
   return data as unknown as PrimeNowResult

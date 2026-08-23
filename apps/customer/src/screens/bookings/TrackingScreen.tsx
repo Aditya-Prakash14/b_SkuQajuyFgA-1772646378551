@@ -1,44 +1,71 @@
-import { useCallback, useEffect, useState } from 'react'
-import { Alert, Linking, ScrollView, View } from 'react-native'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Alert, Linking, Pressable, ScrollView, View } from 'react-native'
 
 import { Badge, Button, Card, Divider, Eyebrow, H1, Muted, Refresher, Screen, Text } from '../../components/ui'
-import { canCancel, cancelBooking, cancelPrimeNowRequest, fetchBookingEvents } from '../../lib/bookings'
-import { formatDay, formatINR, formatINRPaise, formatStamp } from '../../lib/format'
+import {
+  canCancel,
+  canReschedule,
+  cancelBooking,
+  cancelPrimeNowRequest,
+  fetchBookingEvents,
+  fetchBookingHelper,
+  rebookLines,
+  rescheduleBooking,
+} from '../../lib/bookings'
+import { useCart } from '../../lib/cart'
+import { dateKey, dateParts, formatDay, formatINR, formatINRPaise, formatStamp, upcomingDays } from '../../lib/format'
 import { TASK_LABEL, fetchDispatchState } from '../../lib/prime-now'
 import { errorMessage, supabase } from '../../lib/supabase'
 import {
+  ANY_TIME_WINDOW,
   PRIME_TIMELINE_STEPS,
   STATUS_LABEL,
   TIMELINE_STEPS,
+  TIME_WINDOWS,
   type BookingEvent,
   type BookingStatus,
+  type Helper,
 } from '../../lib/types'
 import type { BookingsStackProps } from '../../navigation/types'
 
 const SUPPORT_PHONE = '917349603429'
+const HELPER_VISIBLE: BookingStatus[] = ['vendor_assigned', 'dispatched', 'in_progress', 'completed']
 
 /**
- * Screen 21. Status timeline, booking detail, and the actions that apply.
+ * Screen 21. Status timeline, who is coming, the booking, and the actions that
+ * apply to its current state.
  *
  * Deep Cleaning: the timeline is a projection of `booking_events` — written by
  * a trigger on every status change from any source — so it can never disagree
- * with the booking's real state the way client-side guessing would.
+ * with the booking's real state. A reschedule also lands there (0029), as a
+ * note rather than a step.
  *
  * Prime Now: there is no events table, so the four steps are derived from the
  * request's status, which is watched live.
  *
- * No helper card or live map yet: a customer has no RLS path to `vendors`, and
- * nothing reports helper GPS. Both need a booking-scoped RPC and partner-side
- * location before they would show anything true.
+ * The helper card comes from my_booking_helper(): name and rating once a
+ * partner is assigned, their phone only while the job is live. No map and no
+ * ETA — nothing reports helper GPS yet.
  */
 export function TrackingScreen({ route, navigation }: BookingsStackProps<'Tracking'>) {
   const { booking } = route.params
   const isNow = booking.kind === 'now'
+  const { addLines } = useCart()
   const [events, setEvents] = useState<BookingEvent[]>([])
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [status, setStatus] = useState<BookingStatus>(booking.status)
+  const [scheduled, setScheduled] = useState({ date: booking.scheduledDate, slot: booking.scheduledSlot })
+  const [helper, setHelper] = useState<Helper | null>(null)
   const [cancelling, setCancelling] = useState(false)
+  const [rebooking, setRebooking] = useState(false)
+
+  // Reschedule panel
+  const days = useMemo(() => upcomingDays(14), [])
+  const [editing, setEditing] = useState(false)
+  const [newDay, setNewDay] = useState<Date>(days[0])
+  const [newWindow, setNewWindow] = useState<string | 'keep'>('keep')
+  const [saving, setSaving] = useState(false)
 
   const load = useCallback(async () => {
     setRefreshing(true)
@@ -85,12 +112,28 @@ export function TrackingScreen({ route, navigation }: BookingsStackProps<'Tracki
     if (latest) setStatus(latest.status as BookingStatus)
   }, [events])
 
+  // Who is coming — only meaningful once someone has been assigned.
+  useEffect(() => {
+    if (!HELPER_VISIBLE.includes(status)) {
+      setHelper(null)
+      return
+    }
+    fetchBookingHelper(booking.kind, booking.id)
+      .then(setHelper)
+      .catch(() => {})
+  }, [booking.id, booking.kind, status])
+
   const steps = isNow ? PRIME_TIMELINE_STEPS : TIMELINE_STEPS
-  const reachedAt = new Map(events.map((e) => [e.status, e.created_at]))
+  // First time each status was reached; a reschedule re-records the current
+  // status with a note and must not move the step's timestamp.
+  const reachedAt = new Map<string, string>()
+  for (const e of events) if (!reachedAt.has(e.status)) reachedAt.set(e.status, e.created_at)
   if (isNow) reachedAt.set('new', booking.createdAt)
+  const lastReschedule = [...events].reverse().find((e) => e.note?.startsWith('Rescheduled'))
   const currentIndex = steps.findIndex((s) => s.status === status)
   const cancelled = status === 'cancelled'
   const cancellable = canCancel({ kind: booking.kind, status })
+  const reschedulable = canReschedule({ kind: booking.kind, status })
   const live = !cancelled && status !== 'completed'
 
   function confirmCancel() {
@@ -115,6 +158,40 @@ export function TrackingScreen({ route, navigation }: BookingsStackProps<'Tracki
     }
   }
 
+  async function saveReschedule() {
+    setSaving(true)
+    setError(null)
+    try {
+      const slot = newWindow === 'keep' ? null : newWindow === ANY_TIME_WINDOW ? null : newWindow
+      await rescheduleBooking(booking.id, dateKey(newDay), slot)
+      setScheduled({ date: dateKey(newDay), slot: newWindow === 'keep' ? scheduled.slot : slot })
+      setEditing(false)
+      await load()
+    } catch (err) {
+      setError(errorMessage(err, 'Could not change the date.'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function rebook() {
+    setRebooking(true)
+    setError(null)
+    try {
+      const { lines } = await rebookLines(booking)
+      if (lines.length === 0) {
+        setError('These services are no longer offered. Browse the catalogue for what replaced them.')
+        return
+      }
+      addLines(lines)
+      navigation.getParent()?.navigate({ name: 'HomeTab', params: { screen: 'Cart' } } as never)
+    } catch (err) {
+      setError(errorMessage(err, 'Could not rebuild that booking.'))
+    } finally {
+      setRebooking(false)
+    }
+  }
+
   // GST is contained in the price, never added on top. The split is shown so
   // the bill here matches the invoice line for line; the SGST half takes the
   // rounding remainder so the two always add back to the tax exactly.
@@ -130,19 +207,94 @@ export function TrackingScreen({ route, navigation }: BookingsStackProps<'Tracki
         <View className="gap-2">
           <Eyebrow className="text-primary">{booking.reference}</Eyebrow>
           <H1>{booking.items[0]?.service_name ?? 'Booking'}</H1>
-          <View className="flex-row items-center gap-2">
+          <View className="flex-row flex-wrap items-center gap-2">
             <Badge
               label={STATUS_LABEL[status] ?? status}
               tone={cancelled ? 'destructive' : status === 'completed' ? 'success' : 'default'}
             />
             <Muted className="text-[12px]">
-              {formatDay(booking.scheduledDate)}
-              {booking.scheduledSlot ? ` · ${booking.scheduledSlot}` : ''}
+              {formatDay(scheduled.date)}
+              {scheduled.slot ? ` · ${scheduled.slot}` : ''}
             </Muted>
           </View>
+          {lastReschedule ? (
+            <Muted className="text-[12px]">
+              {lastReschedule.note} · {formatStamp(lastReschedule.created_at)}
+            </Muted>
+          ) : null}
         </View>
 
         {error ? <Muted className="text-destructive">{error}</Muted> : null}
+
+        {reschedulable && !editing ? (
+          <Pressable accessibilityRole="button" onPress={() => setEditing(true)} className="min-h-[44px] justify-center">
+            <Text className="font-bold text-[14px] text-primary">Change the date or window ›</Text>
+          </Pressable>
+        ) : null}
+
+        {editing ? (
+          <Card className="gap-4">
+            <Eyebrow>New date</Eyebrow>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+              {days.map((d) => {
+                const p = dateParts(d)
+                const active = newDay.toDateString() === d.toDateString()
+                return (
+                  <Pressable
+                    key={d.toISOString()}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: active }}
+                    onPress={() => setNewDay(new Date(d))}
+                    className={
+                      active
+                        ? 'min-h-[74px] w-[62px] items-center justify-center rounded-md bg-ink'
+                        : 'min-h-[74px] w-[62px] items-center justify-center rounded-md border border-border bg-card'
+                    }
+                  >
+                    <Text className={active ? 'font-mono text-[11px] text-ink-foreground/70' : 'font-mono text-[11px] text-muted-foreground'}>
+                      {p.dow}
+                    </Text>
+                    <Text className={active ? 'font-black text-[18px] text-ink-foreground' : 'font-black text-[18px] text-foreground'}>
+                      {p.day}
+                    </Text>
+                    <Text className={active ? 'font-mono text-[11px] text-ink-foreground/70' : 'font-mono text-[11px] text-muted-foreground'}>
+                      {p.month}
+                    </Text>
+                  </Pressable>
+                )
+              })}
+            </ScrollView>
+
+            <View className="gap-2">
+              <Eyebrow>Arrival window</Eyebrow>
+              {(['keep', ...TIME_WINDOWS, ANY_TIME_WINDOW] as const).map((w) => {
+                const active = newWindow === w
+                return (
+                  <Pressable
+                    key={w}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: active }}
+                    onPress={() => setNewWindow(w)}
+                    className={
+                      active
+                        ? 'min-h-[48px] justify-center rounded-md border-2 border-primary bg-secondary px-4'
+                        : 'min-h-[48px] justify-center rounded-md border border-border bg-card px-4'
+                    }
+                  >
+                    <Text className="font-medium text-[14px] text-foreground">
+                      {w === 'keep' ? `Keep current${scheduled.slot ? ` (${scheduled.slot})` : ''}` : w}
+                    </Text>
+                  </Pressable>
+                )
+              })}
+            </View>
+
+            <View className="flex-row gap-2">
+              <Button label="Save" onPress={saveReschedule} loading={saving} className="flex-1" />
+              <Button label="Discard" variant="outline" onPress={() => setEditing(false)} className="flex-1" />
+            </View>
+          </Card>
+        ) : null}
 
         {cancelled ? (
           <Card className="bg-secondary">
@@ -186,6 +338,32 @@ export function TrackingScreen({ route, navigation }: BookingsStackProps<'Tracki
           </Card>
         )}
 
+        {helper ? (
+          <Card className="gap-3">
+            <Eyebrow>Your helper</Eyebrow>
+            <View className="flex-row items-center gap-3">
+              <View className="h-12 w-12 items-center justify-center rounded-pill bg-secondary">
+                <Text className="font-black text-[18px] text-primary">{helper.name.charAt(0).toUpperCase()}</Text>
+              </View>
+              <View className="flex-1">
+                <Text className="font-bold text-[15px] text-foreground">{helper.name}</Text>
+                <Muted className="text-[12px]">
+                  {helper.rating !== null && helper.ratingCount > 0
+                    ? `★ ${helper.rating.toFixed(1)} · ${helper.ratingCount} ${helper.ratingCount === 1 ? 'review' : 'reviews'}`
+                    : 'Verified helper'}
+                </Muted>
+              </View>
+            </View>
+            {helper.phone ? (
+              <Button
+                label="Call helper"
+                variant="outline"
+                onPress={() => Linking.openURL(`tel:+91${helper.phone!.replace(/\D/g, '').slice(-10)}`)}
+              />
+            ) : null}
+          </Card>
+        ) : null}
+
         <Card className="gap-2.5">
           <Eyebrow>Booking</Eyebrow>
           {booking.items.map((i, n) => (
@@ -221,6 +399,7 @@ export function TrackingScreen({ route, navigation }: BookingsStackProps<'Tracki
             {booking.address}
             {booking.city ? `, ${booking.city}` : ''}
           </Muted>
+          {booking.notes ? <Muted className="text-[12px]">Notes: {booking.notes}</Muted> : null}
         </Card>
 
         <Button
@@ -233,6 +412,10 @@ export function TrackingScreen({ route, navigation }: BookingsStackProps<'Tracki
             order line, and a Prime Now request has no order. */}
         {status === 'completed' && !isNow ? (
           <Button label="Rate your helper" onPress={() => navigation.navigate('RateTip', { booking })} />
+        ) : null}
+
+        {!isNow && (status === 'completed' || cancelled) ? (
+          <Button label="Book again" variant="dark" onPress={rebook} loading={rebooking} />
         ) : null}
 
         {cancellable ? (

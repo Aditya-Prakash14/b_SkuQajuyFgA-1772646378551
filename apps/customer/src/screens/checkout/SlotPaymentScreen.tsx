@@ -1,10 +1,10 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Pressable, ScrollView, View } from 'react-native'
 
+import { AddressPicker } from '../../components/address-picker'
 import {
   Banner,
   Button,
-  Card,
   Eyebrow,
   Field,
   H1,
@@ -18,34 +18,48 @@ import { useCart } from '../../lib/cart'
 import { dateKey, dateParts, formatINR, upcomingDays } from '../../lib/format'
 import { useSession } from '../../lib/session'
 import { errorMessage } from '../../lib/supabase'
+import { ANY_TIME_WINDOW, TIME_WINDOWS } from '../../lib/types'
 import type { HomeStackProps } from '../../navigation/types'
 
-/** Arrival windows — the same three the website offers. */
-const WINDOWS = ['Morning · 8 AM – 12 PM', 'Afternoon · 12 PM – 4 PM', 'Evening · 4 PM – 8 PM']
+/** The same windows the website offers, plus its "any time" option. */
+const WINDOWS = [...TIME_WINDOWS, ANY_TIME_WINDOW]
 
 /**
- * Screen 19. Date strip, time window, payment method.
+ * Screen 19. Date strip, arrival window, address, payment method.
  *
  * Payment is cash or UPI on completion: there is no online payment gateway
  * wired up, so offering "Pay now" would be a button that cannot charge. When
  * Razorpay exists this is where it slots in.
  */
-export function SlotPaymentScreen({ navigation }: HomeStackProps<'SlotPayment'>) {
+export function SlotPaymentScreen({ route, navigation }: HomeStackProps<'SlotPayment'>) {
   const { lines, total, clear } = useCart()
   const hasPerUnit = lines.some((l) => l.priceUnit !== 'fixed')
-  const { defaultAddress, profile, draft } = useSession()
+  const { addresses, defaultAddress, profile, draft } = useSession()
 
   const days = useMemo(() => upcomingDays(14), [])
   const [day, setDay] = useState<Date>(days[0])
   const [window, setWindow] = useState<string>(WINDOWS[0])
   const [method, setMethod] = useState<'upi' | 'cash'>('upi')
-  const [phone, setPhone] = useState(profile?.phone ?? '')
+  const [addressId, setAddressId] = useState<string | null>(defaultAddress?.id ?? null)
+  const [phone, setPhone] = useState(profile?.phone && !profile.phone.startsWith('pending:') ? profile.phone : '')
   const [notes, setNotes] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // An address added from here comes back as a param; otherwise fall back to
+  // the default when the chosen one disappears.
+  useEffect(() => {
+    const returned = route.params?.addressId
+    if (returned) setAddressId(returned)
+  }, [route.params?.addressId])
+  useEffect(() => {
+    if (!addresses.some((a) => a.id === addressId)) setAddressId(defaultAddress?.id ?? null)
+  }, [addresses, addressId, defaultAddress])
+
+  const address = addresses.find((a) => a.id === addressId) ?? defaultAddress
+
   async function confirm() {
-    if (!defaultAddress) {
+    if (!address) {
       setError('Add an address before booking.')
       return
     }
@@ -60,10 +74,10 @@ export function SlotPaymentScreen({ navigation }: HomeStackProps<'SlotPayment'>)
         name: profile?.name || draft.name || 'Customer',
         phone: phone.replace(/\D/g, ''),
         email: profile?.email || draft.email || '',
-        city: defaultAddress.city,
-        address: defaultAddress.full_address,
+        city: address.city,
+        address: address.full_address,
         date: dateKey(day),
-        slot: window,
+        slot: window === ANY_TIME_WINDOW ? null : window,
         notes: notes.trim() || null,
         lines,
       })
@@ -78,7 +92,7 @@ export function SlotPaymentScreen({ navigation }: HomeStackProps<'SlotPayment'>)
 
   return (
     <Screen edges={[]}>
-      <ScrollView contentContainerStyle={{ padding: 22, paddingBottom: 32, gap: 16 }}>
+      <ScrollView contentContainerStyle={{ padding: 22, paddingBottom: 32, gap: 16 }} keyboardShouldPersistTaps="handled">
         <H1>When suits you?</H1>
 
         {error ? <Banner>{error}</Banner> : null}
@@ -138,6 +152,13 @@ export function SlotPaymentScreen({ navigation }: HomeStackProps<'SlotPayment'>)
           })}
         </View>
 
+        <AddressPicker
+          addresses={addresses}
+          selectedId={address?.id ?? null}
+          onSelect={setAddressId}
+          onAdd={() => navigation.navigate('AddressForm', { returnTo: 'SlotPayment' })}
+        />
+
         <View className="gap-2">
           <Eyebrow>Payment</Eyebrow>
           {(
@@ -166,17 +187,6 @@ export function SlotPaymentScreen({ navigation }: HomeStackProps<'SlotPayment'>)
           })}
           <Muted className="text-[11px]">Online payment is coming soon.</Muted>
         </View>
-
-        <Card>
-          <Eyebrow>Address</Eyebrow>
-          {defaultAddress ? (
-            <Muted className="mt-1.5 text-[13px]">
-              {defaultAddress.full_address}, {defaultAddress.city}
-            </Muted>
-          ) : (
-            <Muted className="mt-1.5">No address saved yet.</Muted>
-          )}
-        </Card>
 
         <Field
           label="Phone number"

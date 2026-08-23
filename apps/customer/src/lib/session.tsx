@@ -3,6 +3,7 @@ import * as Linking from 'expo-linking'
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 
 import { fetchAddresses, fetchProfile } from './bookings'
+import { clearCache } from './offline'
 import { createSessionFromUrl, supabase } from './supabase'
 import type { Address, Profile } from './types'
 
@@ -120,6 +121,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       refresh,
       signOut: async () => {
         await supabase.auth.signOut()
+        // The next account on this phone must not find the last one's bookings.
+        await clearCache()
       },
     }
   }, [session, booting, profile, addresses, draft, stepDone, override, refresh])

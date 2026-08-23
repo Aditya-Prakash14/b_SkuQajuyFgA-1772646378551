@@ -28,8 +28,10 @@ import { CartProvider, useCart } from './src/lib/cart'
 import { SessionProvider, useSession } from './src/lib/session'
 import { useColors } from './src/lib/theme'
 import { PHONE_OTP_ENABLED } from './src/lib/supabase'
-import type { BookingsStackParams, HomeStackParams } from './src/navigation/types'
+import type { AccountStackParams, BookingsStackParams, HomeStackParams } from './src/navigation/types'
 import { AccountScreen } from './src/screens/account/AccountScreen'
+import { AddressFormScreen } from './src/screens/account/AddressFormScreen'
+import { AddressesScreen } from './src/screens/account/AddressesScreen'
 import { HelpScreen } from './src/screens/account/HelpScreen'
 import { SignInScreen } from './src/screens/auth/SignInScreen'
 import {
@@ -57,6 +59,7 @@ import { SplashScreen } from './src/screens/onboarding/SplashScreen'
 
 const HomeStack = createNativeStackNavigator<HomeStackParams>()
 const BookingsStack = createNativeStackNavigator<BookingsStackParams>()
+const AccountStack = createNativeStackNavigator<AccountStackParams>()
 const Tabs = createBottomTabNavigator()
 
 const NAV_FONTS = {
@@ -126,6 +129,10 @@ function HomeNavigator() {
         component={PrimeMatchingScreen}
         options={{ headerShown: false, gestureEnabled: false }}
       />
+      {/* The address book is reachable from checkout too, so it lives in this
+          stack as well as in Account. */}
+      <HomeStack.Screen name="Addresses" component={AddressesScreen} options={{ title: 'Addresses' }} />
+      <HomeStack.Screen name="AddressForm" component={AddressFormScreen} options={{ title: 'Address' }} />
     </HomeStack.Navigator>
   )
 }
@@ -138,6 +145,17 @@ function BookingsNavigator() {
       <BookingsStack.Screen name="Tracking" component={TrackingScreen} options={{ title: 'Booking' }} />
       <BookingsStack.Screen name="RateTip" component={RateTipScreen} options={{ title: 'Rate' }} />
     </BookingsStack.Navigator>
+  )
+}
+
+function AccountNavigator() {
+  const stackOptions = useStackOptions()
+  return (
+    <AccountStack.Navigator screenOptions={stackOptions}>
+      <AccountStack.Screen name="AccountHome" component={AccountScreen} options={{ headerShown: false }} />
+      <AccountStack.Screen name="Addresses" component={AddressesScreen} options={{ title: 'Addresses' }} />
+      <AccountStack.Screen name="AddressForm" component={AddressFormScreen} options={{ title: 'Address' }} />
+    </AccountStack.Navigator>
   )
 }
 
@@ -255,7 +273,7 @@ function MainTabs() {
       />
       <Tabs.Screen
         name="AccountTab"
-        component={AccountScreen}
+        component={AccountNavigator}
         options={{
           tabBarAccessibilityLabel: 'Account',
           tabBarIcon: ({ focused }) => (

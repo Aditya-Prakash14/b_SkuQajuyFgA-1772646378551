@@ -8,6 +8,8 @@ import { useSession } from '../../lib/session'
 import { errorMessage } from '../../lib/supabase'
 import { useColors } from '../../lib/theme'
 import type { NotificationPrefs } from '../../lib/types'
+import type { AccountStackProps } from '../../navigation/types'
+import { PRIVACY_URL, TERMS_URL } from './HelpScreen'
 
 const SUPPORT_PHONE = '917349603429'
 const SUPPORT_EMAIL = 'support@myprimecompany.in'
@@ -18,8 +20,8 @@ const THEME_OPTIONS: { value: ThemePref; label: string }[] = [
   { value: 'dark', label: 'Dark' },
 ]
 
-/** Screen 24. Profile, membership, settings, sign out. */
-export function AccountScreen() {
+/** Screen 24. Profile, membership, addresses, settings, sign out. */
+export function AccountScreen({ navigation }: AccountStackProps<'AccountHome'>) {
   const { profile, draft, addresses, defaultAddress, signOut, refresh } = useSession()
   const { pref, setPref } = useAppearance()
   const colors = useColors()
@@ -136,7 +138,7 @@ export function AccountScreen() {
           )}
         </Card>
 
-        {/* Prime Care is listed in §12 of the spec as an open business
+        {/* Prime Care is listed in §11 of the product spec as an open business
             decision, so it is presented as an interest banner rather than
             something a customer can buy today. */}
         <View className="gap-2 rounded-lg bg-ink p-4">
@@ -151,26 +153,31 @@ export function AccountScreen() {
           </Text>
         </View>
 
-        <Card className="gap-3">
-          <Eyebrow>Addresses</Eyebrow>
-          {addresses.length === 0 ? (
-            <Muted className="text-[13px]">No address saved yet.</Muted>
-          ) : (
-            addresses.map((a) => (
-              <View key={a.id} className="flex-row items-start justify-between gap-3">
-                <View className="flex-1">
-                  <Text className="font-bold text-[14px] text-foreground">
-                    {a.label ?? 'Address'}
-                    {a.id === defaultAddress?.id ? ' · default' : ''}
-                  </Text>
-                  <Muted className="text-[12px]">
-                    {a.full_address}, {a.city}
-                  </Muted>
+        <Pressable accessibilityRole="button" onPress={() => navigation.navigate('Addresses')}>
+          <Card className="gap-3">
+            <View className="flex-row items-center justify-between">
+              <Eyebrow>Addresses</Eyebrow>
+              <Text className="font-bold text-[13px] text-primary">Manage ›</Text>
+            </View>
+            {addresses.length === 0 ? (
+              <Muted className="text-[13px]">No address saved yet.</Muted>
+            ) : (
+              addresses.map((a) => (
+                <View key={a.id} className="flex-row items-start justify-between gap-3">
+                  <View className="flex-1">
+                    <Text className="font-bold text-[14px] text-foreground">
+                      {a.label ?? 'Address'}
+                      {a.id === defaultAddress?.id ? ' · default' : ''}
+                    </Text>
+                    <Muted className="text-[12px]">
+                      {a.full_address}, {a.city}
+                    </Muted>
+                  </View>
                 </View>
-              </View>
-            ))
-          )}
-        </Card>
+              ))
+            )}
+          </Card>
+        </Pressable>
 
         <Card className="gap-3">
           <Eyebrow>Notifications</Eyebrow>
@@ -232,11 +239,11 @@ export function AccountScreen() {
           <Divider />
           <Row label="Email" value={SUPPORT_EMAIL} onPress={() => Linking.openURL(`mailto:${SUPPORT_EMAIL}`)} />
           <Divider />
-          <Row
-            label="WhatsApp"
-            value="Chat with us"
-            onPress={() => Linking.openURL(`https://wa.me/${SUPPORT_PHONE}`)}
-          />
+          <Row label="WhatsApp" value="Chat with us" onPress={() => Linking.openURL(`https://wa.me/${SUPPORT_PHONE}`)} />
+          <Divider />
+          <Row label="Terms of service" value="Read" onPress={() => Linking.openURL(TERMS_URL)} />
+          <Divider />
+          <Row label="Privacy policy" value="Read" onPress={() => Linking.openURL(PRIVACY_URL)} />
         </Card>
 
         <Card>

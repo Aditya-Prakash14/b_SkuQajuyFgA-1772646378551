@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { Animated, Easing, Image, View } from 'react-native'
+import { AccessibilityInfo, Animated, Easing, Image, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { Text } from '../../components/ui'
@@ -14,14 +14,26 @@ export function SplashScreen() {
   const progress = useRef(new Animated.Value(0)).current
 
   useEffect(() => {
-    Animated.loop(
-      Animated.timing(progress, {
-        toValue: 1,
-        duration: 1200,
-        easing: Easing.inOut(Easing.ease),
-        useNativeDriver: false,
-      }),
-    ).start()
+    let loop: Animated.CompositeAnimation | null = null
+    // A looping bar is exactly what "reduce motion" asks us not to do.
+    AccessibilityInfo.isReduceMotionEnabled()
+      .catch(() => false)
+      .then((reduce) => {
+        if (reduce) {
+          progress.setValue(1)
+          return
+        }
+        loop = Animated.loop(
+          Animated.timing(progress, {
+            toValue: 1,
+            duration: 1200,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: false,
+          }),
+        )
+        loop.start()
+      })
+    return () => loop?.stop()
   }, [progress])
 
   const width = progress.interpolate({ inputRange: [0, 1], outputRange: ['12%', '100%'] })

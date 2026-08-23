@@ -61,6 +61,12 @@ export function formatStamp(iso: string) {
   return `${d.getDate()} ${MONTHS[d.getMonth()]}, ${h}:${mins} ${ampm}`
 }
 
+/** 8 → '8 AM', 12 → '12 PM', 15 → '3 PM'. */
+export function hourLabel(h: number) {
+  const ampm = h >= 12 ? 'PM' : 'AM'
+  return `${h % 12 || 12} ${ampm}`
+}
+
 /** The next N bookable days, starting tomorrow — same rule as the website. */
 export function upcomingDays(count = 14): Date[] {
   const out: Date[] = []
