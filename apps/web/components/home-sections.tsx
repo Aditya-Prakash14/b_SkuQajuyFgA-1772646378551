@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight, Check, MessageCircle, Minus, Plus, Search, Star } from 'lucide-react'
+import { usePathname } from 'next/navigation'
 import { useCity } from '@/lib/city-context'
 
 const WHATSAPP = 'https://wa.me/917349603429'
@@ -430,6 +431,12 @@ export function CtaBanner() {
 /* ── 14. Floating WhatsApp ────────────────────────────────────────────────── */
 
 export function FloatingButtons() {
+  const pathname = usePathname()
+  // Hidden on Prime Now: booking there goes through the form so every job lands
+  // in the CRM queue. A WhatsApp shortcut on that page would be a way to book
+  // instant help that ops never sees.
+  if (pathname?.startsWith('/prime-now')) return null
+
   return (
     <a
       href={WHATSAPP}

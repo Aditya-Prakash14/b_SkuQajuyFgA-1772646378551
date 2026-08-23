@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useEffect, useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { Clock, MapPin, MessageCircle, Phone, Zap } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatINR } from '@prime/shared'
@@ -99,19 +100,45 @@ export function PrimeNowRequestsTable({
   rows: PrimeNowRow[]
   vendors: { id: string; name: string; city: string | null }[]
 }) {
-  const [items, setItems] = useState(rows)
+  const router = useRouter()
   const [, start] = useTransition()
 
+  // Optimistic edits are overlays on the server rows, never a copy of them —
+  // so a refresh can never be masked by stale local state.
+  const [patches, setPatches] = useState<Record<string, Partial<PrimeNowRow>>>({})
+
+  // Booking no longer hands off to WhatsApp, so this queue is the only place a
+  // Prime Now job exists — ops should not have to refresh to see one arrive.
+  useEffect(() => {
+    const t = setInterval(() => router.refresh(), 20000)
+    return () => clearInterval(t)
+  }, [router])
+
+  // Adjusting state during render (React's documented alternative to a
+  // prop-sync effect): once the server sends different rows, drop the overlays.
+  const rowsKey = rows.map((r) => `${r.id}:${r.status}:${r.assigned_vendor_id ?? ''}`).join('|')
+  const [seenKey, setSeenKey] = useState(rowsKey)
+  if (rowsKey !== seenKey) {
+    setSeenKey(rowsKey)
+    setPatches({})
+  }
+
+  const items = rows.map((r) => (patches[r.id] ? { ...r, ...patches[r.id] } : r))
+
   function run(id: string, patch: Partial<PrimeNowRow>, fn: () => Promise<{ error: string } | { ok: true }>, ok: string) {
-    const prev = items
-    setItems((list) => list.map((r) => (r.id === id ? { ...r, ...patch } : r)))
+    setPatches((p) => ({ ...p, [id]: { ...p[id], ...patch } }))
     start(async () => {
       const res = await fn()
       if ('error' in res) {
         toast.error(res.error)
-        setItems(prev)
+        setPatches((p) => {
+          const next = { ...p }
+          delete next[id]
+          return next
+        })
       } else {
         toast.success(ok)
+        router.refresh()
       }
     })
   }
