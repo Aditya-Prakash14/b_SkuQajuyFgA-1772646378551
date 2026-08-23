@@ -1,8 +1,9 @@
 packages:
   - "apps/*"
   # Expo/Metro resolves modules by walking real directories, which pnpm's
-  # symlinked store breaks. apps/partner is a standalone npm project instead —
-  # run npm commands from inside apps/partner, not pnpm from the root.
+  # symlinked store breaks. apps/partner and apps/customer are standalone npm projects instead —
+  # run npm commands from inside those directories, not pnpm from the root.
   - "!apps/partner"
+  - "!apps/customer"
   - "packages/*"
   - "supabase/seed"
