@@ -4,7 +4,22 @@ Finish the **MyPrimeCompany customer app** (`apps/customer`, Expo SDK 54 / React
 
 This is a *completion* prompt, not a greenfield one. The 24-screen app from the v1 prompt is built and runs on the live database. Everything below was written after reading every file in the monorepo and checking the live schema, so the "what exists" sections are facts, not assumptions. Where the v1 prompt described things that do not exist (Clerk, a `payments` table, `helper_locations`, `en_route` status), this prompt replaces them with what is actually there.
 
-Written 23 Aug 2026 against branch `feat/customer-app` at commit `01bf0cf`, Supabase project `wsdmfleivhzyeqsmojgm`, migration `0028`.
+Written 23 Aug 2026 against branch `feat/customer-app` at commit `01bf0cf`, Supabase project `wsdmfleivhzyeqsmojgm`, migration `0028`. **Executed the same day through Phase 4 — see "Progress" below; the database is now at migration `0032`.**
+
+---
+
+## Progress (23 Aug 2026, same day)
+
+The phases below were then executed against this prompt. Every item was typechecked, bundled and, where it touches the database, verified live. Branch `feat/customer-app`, **still unpushed**.
+
+| Phase | Status | Where | What landed |
+| --- | --- | --- | --- |
+| 0 | done | `01bf0cf`, 0028 | §3 |
+| 1 | **done** | `d566671`, 0029 | Reschedule with a timeline entry · address book (add / edit / delete / default) with pickers in checkout and Prime Now · helper card via `my_booking_helper()` (name, rating, call while live) · service detail renders gallery, what we clean, how it works, not included, FAQs, reviews via `public_reviews` · book again at today's prices · the website's "Any time — we'll confirm on call" window · Prime Now asks for an hour · `p_source = 'app'` on both intake RPCs · home search · `per_seat` · seven FAQs with the §11 defaults, Terms / Privacy links · offline cache + banner, cleared on sign-out · reduce-motion, labels · hardening: qty cap 20, `dispatch_*` refuse non-admin callers, `customers` direct UPDATE limited to name / email / city, push token clearable and validated, `reviews` hides `customer_id` / `order_id` / `tip_amount` from anon, `my_stats()` pays tips out |
+| 2 | **done, except `eas init`** | `bb4984f`, 0030 | `en_route_at` on both tables, `mark_en_route()`, partner "On my way" button, `my_jobs()` returns it · `notify-customer` edge function (deployed v1) fed by `pg_net` from triggers on `booking_events` and `prime_now_requests`; the shared secret lives in Vault and is compared through `notify_secret()` (service role only) · app registers for push only after a tap, saves the token, clears it on sign-out, a tapped push opens the booking · "Helper on the way" step in both timelines. Verified end to end: test event → trigger → function → `200 {"sent":false,"reason":"silent-event"}`. **Until `eas init` runs in both apps no device can get a token — that is the owner's Expo account.** |
+| 3 | **groundwork done** | `c54d43f`, 0031 | `payments` ledger, written by a trigger whenever `payment_status` flips to paid (cash checkbox, CRM mark-paid, future webhook) · `paid_at`, `cancelled_at` / `cancelled_by` / `cancellation_reason`; both cancel RPCs record the customer · `invoices` own-row SELECT + private `invoices` bucket with per-customer folders · Receipt screen (GST split, share, opens the CRM invoice PDF by signed URL). **Needs Razorpay keys:** `razorpay-create-order`, `razorpay-webhook`, "Pay now", tips charged online, refunds through the API. |
+| 4 | **partly done** | `db7f005`, 0032 | `delete_my_account()` + `delete-account` edge function (deployed, JWT-verified) + Account "Delete account" with two confirmations · `eas.json` · app / universal link config, `OpenBooking` / `OpenOrder` routes and the navigator's `linking` · `track()` with the event names below, wired at 13 points, console in dev, `setAnalyticsProvider()` for the real one · Apple sign-in written behind `APPLE_SIGN_IN_ENABLED = false` · release-safe sign-in error copy. **Needs the owner's accounts:** `eas init` and builds; Apple provider in Supabase, then flip the flag; an SMS provider, then `PHONE_OTP_ENABLED`; a PostHog / Amplitude project; Sentry; EAS Update; the website's `.well-known/assetlinks.json` and `apple-app-site-association`; store assets. Deliberately skipped: the i18n string extraction — a large mechanical refactor with no user value until Hindi is decided (§11). |
+| 5 | not started | — | Waits on §11. |
 
 ---
 
@@ -159,7 +174,7 @@ Listed so the next session does not re-diagnose them.
 
 Each item says what to build, where, and when it is done. Phases are sequenced by dependency: Phase 1 needs no new accounts or decisions; Phase 2 needs an EAS project id; Phase 3 needs Razorpay; Phase 4 is release mechanics; Phase 5 waits on §11.
 
-### Phase 1 — Truthful and complete (no new services required)
+### Phase 1 — Truthful and complete (no new services required) — DONE (`d566671`)
 
 **1.1 Reschedule.** Tracking → "Change date" on `pending`/`confirmed` Deep Cleaning bookings: the same 14-day strip and three windows as checkout, plus "Keep current". Calls `reschedule_booking`. *Migration 0029:* make `reschedule_booking` insert a `booking_events` row (`status = current status`, `note = 'Rescheduled to <date> · <slot>'`) so the timeline records it. Done when: rescheduling from the app shows the new date on the CRM order and a timeline entry in the app.
 
@@ -195,7 +210,7 @@ Each item says what to build, where, and when it is done. Phases are sequenced b
 
 **1.15 Accessibility.** `accessibilityLabel` on every image and icon-only control, 4.5:1 contrast checked in both themes, `reduceMotion` respected on the splash bar and matching pulse.
 
-### Phase 2 — Customer notifications (needs: `eas init` → project id)
+### Phase 2 — Customer notifications — DONE except `eas init` (`bb4984f`)
 
 Today nothing reaches a customer automatically — no push, email, SMS or WhatsApp. `notification_prefs.expo_push_token` is a column nothing reads.
 
@@ -209,7 +224,7 @@ Today nothing reaches a customer automatically — no push, email, SMS or WhatsA
 
 **2.5 Also unblock partner push** — `eas init` in `apps/partner` too; without it Phase 2's Prime Now promise ("a helper is on the way") has no partner to receive the job fast.
 
-### Phase 3 — Payments and receipts (needs: Razorpay account, key id + secret, webhook secret)
+### Phase 3 — Payments and receipts — schema, ledger and receipts DONE (`c54d43f`); gateway needs Razorpay keys
 
 **3.1 Schema** (*migration*): `payments` (`id, kind 'deep_clean'|'prime_now', job_id, provider 'razorpay'|'cash'|'upi_manual', method, provider_order_id, provider_payment_id, amount numeric(10,2), currency 'INR', status 'created'|'authorized'|'captured'|'failed'|'refunded', raw jsonb, created_at`), RLS: customer reads own, writes only via functions. Add `orders.paid_at`, `prime_now_requests.paid_at`.
 
@@ -223,7 +238,7 @@ Today nothing reaches a customer automatically — no push, email, SMS or WhatsA
 
 **3.6 Refunds.** Cancel after an online payment → Razorpay refund API from an Edge Function → `payments.refunded`, `payment_status = 'refunded'`. Record `cancelled_at`, `cancelled_by`, `cancellation_reason` on both tables (*migration*).
 
-### Phase 4 — Store readiness
+### Phase 4 — Store readiness — code DONE; accounts and builds are the owner's
 
 - **EAS:** copy `apps/partner/eas.json`, `eas init`, put the project id in `app.json` `extra.eas.projectId`; `EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_SUPABASE_ANON_KEY` in each build profile's `env`. Bundle ids are already `in.myprimecompany.app`.
 - **Apple sign-in** — required by App Store guideline 4.8 when Google is offered. `expo-apple-authentication` + Supabase Apple provider; same `createSessionFromUrl` path.
@@ -254,13 +269,15 @@ Today nothing reaches a customer automatically — no push, email, SMS or WhatsA
 
 Numbering continues from 0028. Every file: header comment explaining *why*, idempotent where possible, drop-then-create for signature changes, explicit revoke/grant.
 
-| # | Contents | Phase |
-| --- | --- | --- |
-| 0029 | `reschedule_booking` writes a timeline row · `my_booking_helper()` · `public_reviews` view + revoke anon on `reviews` · `create_booking` `p_source` (drop + create) + qty cap 20 · `prime_now_requests.source` + parameter (drop + create) · `save_notification_prefs` clear/validate token · customers column grants · admin guard on `dispatch_*` | 1 |
-| 0030 | `en_route_at` on both tables · `mark_en_route()` · `pg_net` triggers → `notify-customer` | 2 |
-| 0031 | `payments` · `paid_at` · cancellation columns · `invoices` own-row policy · `invoices` bucket | 3 |
-| 0032 | `delete_my_account()` | 4 |
-| 0033+ | memberships / coupons / service_areas / helper_locations / job-photos as decided | 5 |
+| # | Contents | Phase | Status |
+| --- | --- | --- | --- |
+| 0029 | `reschedule_booking` writes a timeline row · `my_booking_helper()` · `public_reviews` view + anon column grants on `reviews` · `create_booking` `p_source` (drop + create) + qty cap 20 · `prime_now_requests.source` + parameter (drop + create) · `save_notification_prefs` clear/validate token · customers column grants · admin guard on `dispatch_*` · `my_stats()` with tips | 1 | applied |
+| 0030 | `pg_net` · `en_route_at` on both tables · `mark_en_route()` · `my_jobs()` + `en_route_at` · Vault secret · `notify_secret()` · `notify_customer_event()` triggers → `notify-customer` | 2 | applied |
+| 0031 | `payments` + `record_payment()` triggers · `paid_at` · cancellation columns · cancel RPCs record the customer · `invoices` own-row policy · `invoices` bucket + policies | 3 | applied |
+| 0032 | `delete_my_account()` | 4 | applied |
+| 0033+ | Razorpay columns if any (`payments` already covers captures/refunds) · memberships / coupons / service_areas / helper_locations / job-photos as decided | 3, 5 | — |
+
+Edge functions deployed: `notify-customer` (v1, secret-authenticated), `delete-account` (v1, JWT). Sources in `supabase/functions/`. Redeploy with the Supabase MCP `deploy_edge_function` after editing.
 
 After each: regenerate `packages/shared/src/database.types.ts` (it is stale at 0024 today — missing `booking_events`, `notification_prefs`, `reviews.tip_amount`, three RPCs, and `submit_review`'s fifth argument) and mirror the slice into `apps/customer/src/lib/types.ts`.
 
@@ -314,9 +331,9 @@ The database value is fixed. The three apps currently label it three different w
 | `cancelled` | both | Cancelled | Cancelled | Cancelled |
 | `new` | prime_now_requests | Finding a helper | — | New |
 | `dispatched` | prime_now_requests | Helper assigned | — | Dispatched |
-| `en_route` (Phase 2, `booking_events` only) | — | Helper on the way | — | — |
+| `en_route` (0030: `en_route_at` on both tables; a `booking_events` row for orders) | — | Helper on the way | — | — |
 
-Customer may cancel: orders in `pending`/`confirmed`; requests in `new`/`dispatched`. Customer may reschedule: orders in `pending`/`confirmed`. Customer may rate: orders in `completed`. The CRM can move an order backwards; render the timeline from the latest event, never assume monotonic order.
+Customer may cancel: orders in `pending`/`confirmed`; requests in `new`/`dispatched` — the app hides the button once the helper is on the way, though the server would still allow it. Customer may reschedule: orders in `pending`/`confirmed`. Customer may rate: orders in `completed`. The CRM can move an order backwards; render the timeline from the latest event, never assume monotonic order.
 
 ---
 
