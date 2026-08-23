@@ -1,9 +1,10 @@
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import type { Session } from '@supabase/supabase-js'
 import * as Linking from 'expo-linking'
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 
 import { identify, resetAnalytics, track } from './analytics'
-import { fetchAddresses, fetchProfile } from './bookings'
+import { fetchAddresses, fetchNotificationPrefs, fetchProfile } from './bookings'
 import { clearCache } from './offline'
 import { unregisterPush } from './push'
 import { createSessionFromUrl, deleteMyAccount, supabase } from './supabase'
@@ -16,13 +17,16 @@ import type { Address, Profile } from './types'
  * session exists, per the spec: a signed-in user without a default address is
  * routed to the address step rather than the home screen.
  *
- * Note on the data model: a `customers` row is created by create_booking on the
- * first booking, so a brand-new account legitimately has no profile yet. The
- * app therefore treats "profile complete" as *has at least one address*, and
- * carries the name/phone locally until the first booking writes them.
+ * The first two steps are derived from data (a name, an address). The third —
+ * notifications — has no row to derive from when the customer taps "Not now",
+ * so finishing it is remembered on the phone per account; a saved
+ * notification_prefs row counts as finished too, so a reinstall does not
+ * re-ask someone who already answered.
  */
 
 export type SetupStep = 'profile' | 'address' | 'notifications' | 'done'
+
+const setupKey = (uid: string) => `mpc.setupDone.${uid}`
 
 interface SessionValue {
   session: Session | null
@@ -51,16 +55,18 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [addresses, setAddresses] = useState<Address[]>([])
   const [draft, setDraft] = useState({ name: '', email: '' })
-  const [stepDone, setStepDone] = useState<SetupStep | null>(null)
+  const [setupDone, setSetupDone] = useState(false)
   const [override, setOverride] = useState<SetupStep | null>(null)
 
   const refresh = useCallback(async () => {
-    const [p, a] = await Promise.all([
+    const [p, a, prefs] = await Promise.all([
       fetchProfile().catch(() => null),
       fetchAddresses().catch(() => [] as Address[]),
+      fetchNotificationPrefs().catch(() => null),
     ])
     setProfile(p)
     setAddresses(a)
+    if (prefs) setSetupDone(true)
   }, [])
 
   useEffect(() => {
@@ -77,7 +83,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       if (!next) {
         setProfile(null)
         setAddresses([])
-        setStepDone(null)
+        setSetupDone(false)
       }
     })
 
@@ -94,8 +100,19 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  // Whether this account finished setup on this phone is read before the
+  // profile so a returning customer never flashes the setup screens.
   useEffect(() => {
-    if (session) refresh()
+    if (!session) return
+    const uid = session.user.id
+    AsyncStorage.getItem(setupKey(uid))
+      .then((v) => {
+        if (v === '1') setSetupDone(true)
+      })
+      .catch(() => {})
+      .finally(() => {
+        refresh()
+      })
   }, [session, refresh])
 
   const value = useMemo<SessionValue>(() => {
@@ -106,7 +123,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     if (session) {
       if (!hasName) setupStep = 'profile'
       else if (!defaultAddress) setupStep = 'address'
-      else if (stepDone !== 'notifications' && stepDone !== 'done') setupStep = 'notifications'
+      else if (!setupDone) setupStep = 'notifications'
       // An explicit Back wins over what the data implies — otherwise a saved
       // name would bounce the customer straight forward again.
       if (override) setupStep = override
@@ -123,7 +140,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       setupStep,
       markSetupStep: (s: SetupStep) => {
         setOverride(null) // moving forward clears any Back the customer took
-        setStepDone(s)
+        if (s === 'done') {
+          setSetupDone(true)
+          if (session) AsyncStorage.setItem(setupKey(session.user.id), '1').catch(() => {})
+        }
       },
       goToStep: setOverride,
       refresh,
@@ -137,7 +157,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         resetAnalytics()
       },
       deleteAccount: async () => {
+        const uid = session?.user.id
         await deleteMyAccount()
+        if (uid) AsyncStorage.removeItem(setupKey(uid)).catch(() => {})
         // The auth user is gone server-side; the local sign-out may already
         // be moot, so it is never allowed to fail the flow.
         await supabase.auth.signOut().catch(() => {})
@@ -145,7 +167,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         resetAnalytics()
       },
     }
-  }, [session, booting, profile, addresses, draft, stepDone, override, refresh])
+  }, [session, booting, profile, addresses, draft, setupDone, override, refresh])
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
 }

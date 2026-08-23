@@ -7,6 +7,7 @@ import {
   Text as RNText,
   TextInput,
   View,
+  type RefreshControlProps,
   type TextInputProps,
   type TextProps,
   type ViewProps,
@@ -314,11 +315,17 @@ export function Loading({ label }: { label?: string }) {
 /**
  * Pull-to-refresh, themed. The platform default is a light puck with a dark
  * arrow, which sits on a dark screen as a bright white disc.
+ *
+ * Every prop is forwarded, and that is not optional: on Android, ScrollView
+ * clones its `refreshControl` element with the scroll view itself as
+ * `children` (and a `style`). A wrapper that swallowed them rendered the
+ * refresh puck and nothing else — the whole page vanished.
  */
-export function Refresher({ refreshing, onRefresh }: { refreshing: boolean; onRefresh: () => void }) {
+export function Refresher({ refreshing, onRefresh, ...rest }: RefreshControlProps & { onRefresh: () => void }) {
   const colors = useColors()
   return (
     <RefreshControl
+      {...rest}
       refreshing={refreshing}
       onRefresh={onRefresh}
       tintColor={colors.primary}
