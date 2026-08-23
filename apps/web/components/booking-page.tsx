@@ -304,9 +304,9 @@ export function BookingPage() {
             <li className="flex items-start gap-2.5 text-ink-foreground/70">
               <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
               <span>
-                Bharadwaj Park, Balson Chauraha,
+                HSR Layout Sector 4, 17th Main B Cross,
                 <br />
-                Prayagraj, Uttar Pradesh
+                Bangalore, Karnataka 560102
               </span>
             </li>
           </ul>
