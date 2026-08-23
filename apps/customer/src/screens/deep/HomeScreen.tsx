@@ -68,7 +68,7 @@ export function HomeScreen({ navigation }: HomeStackProps<'Home'>) {
         return
       }
       addLines(lines)
-      navigation.navigate('Cart')
+      navigation.getParent()?.navigate('CartTab' as never)
     } catch {
       setNote('Could not rebuild that booking. Please try again.')
     } finally {

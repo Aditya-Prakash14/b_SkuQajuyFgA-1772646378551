@@ -20,14 +20,18 @@ export type HomeStackParams = AddressRoutes & {
   Categories: undefined
   Services: { categoryId: string; categoryName: string }
   ServiceDetail: { serviceId: string }
-  Cart: undefined
-  SlotPayment: { addressId?: string } | undefined
-  Confirmed: { reference: string; payNow?: { kind: 'deep' | 'now'; id: string } }
   // Prime Now
   PrimeSlot: undefined
   PrimeDescribe: { slot: string }
   PrimeWhen: { slot: string; tasks: string[]; notes: string; addressId?: string }
   PrimeMatching: { requestId: string; reference: string }
+}
+
+/** The Cart tab owns the Deep Cleaning checkout; adding a service jumps here. */
+export type CartStackParams = AddressRoutes & {
+  Cart: undefined
+  SlotPayment: { addressId?: string } | undefined
+  Confirmed: { reference: string; payNow?: { kind: 'deep' | 'now'; id: string } }
 }
 
 export type BookingsStackParams = {
@@ -45,6 +49,7 @@ export type AccountStackParams = AddressRoutes & {
 }
 
 export type HomeStackProps<T extends keyof HomeStackParams> = NativeStackScreenProps<HomeStackParams, T>
+export type CartStackProps<T extends keyof CartStackParams> = NativeStackScreenProps<CartStackParams, T>
 export type BookingsStackProps<T extends keyof BookingsStackParams> = NativeStackScreenProps<
   BookingsStackParams,
   T

@@ -21,7 +21,7 @@ import { ONLINE_PAYMENTS_ENABLED } from '../../lib/payments'
 import { useSession } from '../../lib/session'
 import { errorMessage } from '../../lib/supabase'
 import { ANY_TIME_WINDOW, TIME_WINDOWS } from '../../lib/types'
-import type { HomeStackProps } from '../../navigation/types'
+import type { CartStackProps } from '../../navigation/types'
 
 /** The same windows the website offers, plus its "any time" option. */
 const WINDOWS = [...TIME_WINDOWS, ANY_TIME_WINDOW]
@@ -42,7 +42,7 @@ const PAYMENT_OPTIONS: { id: 'online' | 'upi' | 'cash'; label: string; sub: stri
  * wired up, so offering "Pay now" would be a button that cannot charge. When
  * Razorpay exists this is where it slots in.
  */
-export function SlotPaymentScreen({ route, navigation }: HomeStackProps<'SlotPayment'>) {
+export function SlotPaymentScreen({ route, navigation }: CartStackProps<'SlotPayment'>) {
   const { lines, total, clear } = useCart()
   const hasPerUnit = lines.some((l) => l.priceUnit !== 'fixed')
   const { addresses, defaultAddress, profile, draft } = useSession()

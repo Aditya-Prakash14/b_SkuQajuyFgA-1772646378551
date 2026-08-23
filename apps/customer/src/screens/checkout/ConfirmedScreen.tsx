@@ -6,13 +6,13 @@ import { Button, Card, Eyebrow, Muted, Text } from '../../components/ui'
 import { ONLINE_PAYMENTS_ENABLED, startOnlinePayment, type PaymentOutcome } from '../../lib/payments'
 import { errorMessage } from '../../lib/supabase'
 import { useColors } from '../../lib/theme'
-import type { HomeStackProps } from '../../navigation/types'
+import type { CartStackProps } from '../../navigation/types'
 
 /**
  * Screen 20. Teal success screen with the receipt reference — and, when the
  * customer chose to pay now and Razorpay is live, the payment itself.
  */
-export function ConfirmedScreen({ route, navigation }: HomeStackProps<'Confirmed'>) {
+export function ConfirmedScreen({ route, navigation }: CartStackProps<'Confirmed'>) {
   const colors = useColors()
   const { reference, payNow } = route.params
   const [outcome, setOutcome] = useState<PaymentOutcome | null>(null)
@@ -79,7 +79,15 @@ export function ConfirmedScreen({ route, navigation }: HomeStackProps<'Confirmed
           variant={canPay ? 'ghost' : 'brand'}
           onPress={() => navigation.getParent()?.navigate('BookingsTab' as never)}
         />
-        <Button label="Back to home" variant="ghost" onPress={() => navigation.popToTop()} />
+        <Button
+          label="Back to home"
+          variant="ghost"
+          onPress={() => {
+            // Leave the cart tab on its (now empty) root so it never reopens on this screen.
+            navigation.popToTop()
+            navigation.getParent()?.navigate('HomeTab' as never)
+          }}
+        />
       </View>
     </SafeAreaView>
   )

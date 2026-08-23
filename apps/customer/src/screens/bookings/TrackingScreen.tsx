@@ -225,7 +225,7 @@ export function TrackingScreen({ route, navigation }: BookingsStackProps<'Tracki
         return
       }
       addLines(lines)
-      navigation.getParent()?.navigate({ name: 'HomeTab', params: { screen: 'Cart' } } as never)
+      navigation.getParent()?.navigate('CartTab' as never)
     } catch (err) {
       setError(errorMessage(err, 'Could not rebuild that booking.'))
     } finally {

@@ -3,28 +3,34 @@ import { Image, Pressable, ScrollView, View } from 'react-native'
 import { Button, Card, Divider, Eyebrow, H1, Muted, Screen, StickyBar, Text } from '../../components/ui'
 import { lineTotal, useCart } from '../../lib/cart'
 import { formatINR, splitPriceLabel } from '../../lib/format'
-import type { HomeStackProps } from '../../navigation/types'
+import type { CartStackProps } from '../../navigation/types'
 
-/** Screen 18. Line items, itemised bill, sticky total. */
-export function CartScreen({ navigation }: HomeStackProps<'Cart'>) {
+/**
+ * Screen 18 — the Cart tab. Line items, itemised bill, sticky total.
+ * Browsing lives in the Home tab, so "add another" and "change area" hand
+ * over to it; checkout continues in this stack.
+ */
+export function CartScreen({ navigation }: CartStackProps<'Cart'>) {
   const { lines, remove, setQty, subtotal, visitCharge, total } = useCart()
   // Area-based lines are quoted, not fixed, so the bill is an estimate.
   const hasPerUnit = lines.some((l) => l.priceUnit !== 'fixed')
 
+  const browse = () => navigation.getParent()?.navigate({ name: 'HomeTab', params: { screen: 'Categories' } } as never)
+
   if (lines.length === 0) {
     return (
-      <Screen edges={[]}>
+      <Screen>
         <View className="flex-1 items-center justify-center gap-4 p-8">
           <H1>Your cart is empty</H1>
-          <Muted className="text-center">Add a service and it will show up here.</Muted>
-          <Button label="Browse Deep Cleaning" onPress={() => navigation.navigate('Categories')} />
+          <Muted className="text-center">Add a Deep Cleaning service and it will show up here.</Muted>
+          <Button label="Browse Deep Cleaning" onPress={browse} />
         </View>
       </Screen>
     )
   }
 
   return (
-    <Screen edges={[]}>
+    <Screen>
       <ScrollView contentContainerStyle={{ padding: 22, paddingBottom: 32, gap: 16 }}>
         <H1>Your cart</H1>
 
@@ -36,7 +42,15 @@ export function CartScreen({ navigation }: HomeStackProps<'Cart'>) {
               <Card key={l.serviceId}>
                 <View className="flex-row gap-3">
                   <View className="h-14 w-14 overflow-hidden rounded-md bg-secondary">
-                    {l.image ? <Image source={{ uri: l.image }} className="h-full w-full" resizeMode="cover" /> : null}
+                    {l.image ? (
+                      <Image
+                        source={{ uri: l.image }}
+                        className="h-full w-full"
+                        resizeMode="cover"
+                        accessible
+                        accessibilityLabel={l.name}
+                      />
+                    ) : null}
                   </View>
                   <View className="flex-1">
                     <Text className="font-bold text-[15px] leading-5 text-foreground">{l.name}</Text>
@@ -53,7 +67,14 @@ export function CartScreen({ navigation }: HomeStackProps<'Cart'>) {
                   {perUnit ? (
                     <Pressable
                       accessibilityRole="button"
-                      onPress={() => navigation.navigate('ServiceDetail', { serviceId: l.serviceId })}
+                      onPress={() =>
+                        navigation
+                          .getParent()
+                          ?.navigate({
+                            name: 'HomeTab',
+                            params: { screen: 'ServiceDetail', params: { serviceId: l.serviceId } },
+                          } as never)
+                      }
                       className="min-h-[44px] justify-center"
                     >
                       <Text className="font-bold text-[13px] text-primary">Change area</Text>
@@ -94,11 +115,7 @@ export function CartScreen({ navigation }: HomeStackProps<'Cart'>) {
           })}
         </View>
 
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => navigation.navigate('Categories')}
-          className="min-h-[44px] justify-center"
-        >
+        <Pressable accessibilityRole="button" onPress={browse} className="min-h-[44px] justify-center">
           <Text className="font-bold text-[14px] text-primary">+ Add another service</Text>
         </Pressable>
 

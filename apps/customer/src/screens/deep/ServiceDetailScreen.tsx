@@ -79,7 +79,8 @@ export function ServiceDetailScreen({ route, navigation }: HomeStackProps<'Servi
     }
     setError(null)
     add(service as Service, perUnit ? parsed : 1)
-    navigation.navigate('Cart')
+    // The cart is its own tab; the catalogue stays where it was for "add another".
+    navigation.getParent()?.navigate('CartTab' as never)
   }
 
   return (

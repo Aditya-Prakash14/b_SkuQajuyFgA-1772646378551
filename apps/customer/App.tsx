@@ -37,7 +37,7 @@ import { SessionProvider, useSession } from './src/lib/session'
 import { useColors } from './src/lib/theme'
 import { PHONE_OTP_ENABLED } from './src/lib/supabase'
 import { navigationRef } from './src/navigation/ref'
-import type { AccountStackParams, BookingsStackParams, HomeStackParams } from './src/navigation/types'
+import type { AccountStackParams, BookingsStackParams, CartStackParams, HomeStackParams } from './src/navigation/types'
 import { AccountScreen } from './src/screens/account/AccountScreen'
 import { AddressFormScreen } from './src/screens/account/AddressFormScreen'
 import { AddressesScreen } from './src/screens/account/AddressesScreen'
@@ -69,6 +69,7 @@ import { IntroScreen } from './src/screens/onboarding/Intro'
 import { SplashScreen } from './src/screens/onboarding/SplashScreen'
 
 const HomeStack = createNativeStackNavigator<HomeStackParams>()
+const CartStack = createNativeStackNavigator<CartStackParams>()
 const BookingsStack = createNativeStackNavigator<BookingsStackParams>()
 const AccountStack = createNativeStackNavigator<AccountStackParams>()
 const Tabs = createBottomTabNavigator()
@@ -125,13 +126,6 @@ function HomeNavigator() {
         options={({ route }) => ({ title: route.params.categoryName })}
       />
       <HomeStack.Screen name="ServiceDetail" component={ServiceDetailScreen} options={{ title: '' }} />
-      <HomeStack.Screen name="Cart" component={CartScreen} options={{ title: 'Cart' }} />
-      <HomeStack.Screen name="SlotPayment" component={SlotPaymentScreen} options={{ title: 'Slot & payment' }} />
-      <HomeStack.Screen
-        name="Confirmed"
-        component={ConfirmedScreen}
-        options={{ headerShown: false, gestureEnabled: false }}
-      />
       <HomeStack.Screen name="PrimeSlot" component={PrimeSlotScreen} options={{ title: 'Prime Now' }} />
       <HomeStack.Screen name="PrimeDescribe" component={PrimeDescribeScreen} options={{ title: 'Prime Now' }} />
       <HomeStack.Screen name="PrimeWhen" component={PrimeWhenScreen} options={{ title: 'Prime Now' }} />
@@ -145,6 +139,24 @@ function HomeNavigator() {
       <HomeStack.Screen name="Addresses" component={AddressesScreen} options={{ title: 'Addresses' }} />
       <HomeStack.Screen name="AddressForm" component={AddressFormScreen} options={{ title: 'Address' }} />
     </HomeStack.Navigator>
+  )
+}
+
+/** The Cart tab owns checkout: cart → slot & payment → confirmed, plus the address form it may need. */
+function CartNavigator() {
+  const stackOptions = useStackOptions()
+  return (
+    <CartStack.Navigator screenOptions={stackOptions}>
+      <CartStack.Screen name="Cart" component={CartScreen} options={{ headerShown: false }} />
+      <CartStack.Screen name="SlotPayment" component={SlotPaymentScreen} options={{ title: 'Slot & payment' }} />
+      <CartStack.Screen
+        name="Confirmed"
+        component={ConfirmedScreen}
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <CartStack.Screen name="Addresses" component={AddressesScreen} options={{ title: 'Addresses' }} />
+      <CartStack.Screen name="AddressForm" component={AddressFormScreen} options={{ title: 'Address' }} />
+    </CartStack.Navigator>
   )
 }
 
@@ -195,7 +207,7 @@ function TabItem({
   const colors = useColors()
   const tint = focused ? colors.primary : colors.muted
   return (
-    <View style={{ alignItems: 'center', gap: 3, width: 72 }}>
+    <View style={{ alignItems: 'center', gap: 3, width: 64 }}>
       <View>
         <Ionicons name={icon} size={22} color={tint} />
         {badge ? (
@@ -249,12 +261,17 @@ function MainTabs() {
         options={{
           tabBarAccessibilityLabel: 'Home',
           tabBarIcon: ({ focused }) => (
-            <TabItem
-              label="Home"
-              icon={focused ? 'home' : 'home-outline'}
-              focused={focused}
-              badge={count}
-            />
+            <TabItem label="Home" icon={focused ? 'home' : 'home-outline'} focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="CartTab"
+        component={CartNavigator}
+        options={{
+          tabBarAccessibilityLabel: count ? `Cart, ${count} ${count === 1 ? 'item' : 'items'}` : 'Cart',
+          tabBarIcon: ({ focused }) => (
+            <TabItem label="Cart" icon={focused ? 'cart' : 'cart-outline'} focused={focused} badge={count} />
           ),
         }}
       />
@@ -368,6 +385,7 @@ function PushBridge() {
  */
 type RootTabs = {
   HomeTab: NavigatorScreenParams<HomeStackParams>
+  CartTab: NavigatorScreenParams<CartStackParams>
   BookingsTab: NavigatorScreenParams<BookingsStackParams>
   HelpTab: undefined
   AccountTab: NavigatorScreenParams<AccountStackParams>
@@ -389,6 +407,11 @@ const linking: LinkingOptions<RootTabs> = {
           Home: '',
           Categories: 'deep-cleaning',
           PrimeSlot: 'prime-now',
+        },
+      },
+      CartTab: {
+        screens: {
+          Cart: 'cart',
         },
       },
     },
