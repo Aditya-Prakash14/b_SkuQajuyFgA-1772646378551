@@ -26,21 +26,21 @@ const SLIDES: Slide[] = [
     eyebrow: 'Domain 01',
     title: 'Deep cleaning, booked in advance',
     body: 'Homes, offices, marble floors and painting. A flat price agreed up front and a supervisor-led team at your door.',
-    image: null,
+    image: require('../../../assets/intro/deep.jpg'),
     dark: false,
   },
   {
     eyebrow: 'Domain 02',
     title: 'Prime Now — help within the hour',
     body: 'Instant house help by the hour. Tell us what needs doing and a verified helper is on the way. No catalogue to search.',
-    image: null,
+    image: require('../../../assets/intro/now.jpg'),
     dark: true,
   },
   {
     eyebrow: 'Verified people',
     title: 'Every helper is checked and rated',
     body: 'ID-verified, trained, and rated after every job. Not happy? We will come back and re-clean at no extra cost.',
-    image: null,
+    image: require('../../../assets/intro/people.jpg'),
     dark: false,
   },
 ]
@@ -86,17 +86,24 @@ export function IntroScreen({ onDone }: { onDone: () => void }) {
           )}
         </View>
 
-        {/* Photography carries the weight; a tinted panel stands in until the
-            marketing images are bundled. */}
+        {/* Photography carries the weight: the business's own job photos,
+            bundled so the first screens work before there is a connection.
+            overflow-hidden is what makes the rounded corners clip on Android. */}
         <View
           className={
             slide.dark
-              ? 'mt-2 flex-1 items-center justify-center rounded-lg border border-white/10'
-              : 'mt-2 flex-1 items-center justify-center rounded-lg border border-border bg-secondary'
+              ? 'mt-2 flex-1 items-center justify-center overflow-hidden rounded-lg border border-white/10'
+              : 'mt-2 flex-1 items-center justify-center overflow-hidden rounded-lg border border-border bg-secondary'
           }
         >
           {slide.image ? (
-            <Image source={slide.image} resizeMode="cover" className="h-full w-full rounded-lg" />
+            <Image
+              source={slide.image}
+              resizeMode="cover"
+              className="h-full w-full"
+              accessible
+              accessibilityLabel={slide.title}
+            />
           ) : (
             <Text
               className={slide.dark ? 'font-black text-[64px] text-ink-foreground/15' : 'font-black text-[64px] text-primary/15'}
