@@ -342,7 +342,7 @@ Customer may cancel: orders in `pending`/`confirmed`; requests in `new`/`dispatc
 
 Already implemented; do not reinvent. Tokens in `apps/customer/global.css` (light and dark), raw values in `src/lib/theme.ts`, components in `src/components/ui.tsx` (`Screen, Body, Card, H1, H2, Muted, Eyebrow, Button, Field, Chip, Badge, Dots, Loading, Banner, StickyBar, Refresher`).
 
-Palette: primary `#0E5A63` (dark: `#4EA3AC`), background `#FBFAF7` (dark `#0D1A21`), ink `#12212A` (dark `#0A151B`), amber `#E8A33D` on dark grounds only, border `#E7E3DB`, tint `#EDF3F2`, destructive `#C0553F`. Manrope throughout (800 headlines, −0.03em), JetBrains Mono for eyebrows, counts and references. 22 px gutters, 14–18 px radii, 16 px buttons, 999 px chips, 44 px minimum hit target, one shadow (sticky bars), no gradients, no emoji, photography does the work. Selected state is a filled shape, never colour alone. Bottom tabs: Home · Bookings · Help · Account with Ionicons outline/filled pairs.
+Palette: primary `#0E5A63` (dark: `#4EA3AC`), background `#FBFAF7` (dark `#0D1A21`), ink `#12212A` (dark `#0A151B`), amber `#E8A33D` on dark grounds only, border `#E7E3DB`, tint `#EDF3F2`, destructive `#C0553F`. Manrope throughout (800 headlines, −0.03em), JetBrains Mono for eyebrows, counts and references. 22 px gutters, 14–18 px radii, 16 px buttons, 999 px chips, 44 px minimum hit target, one shadow (sticky bars), no gradients, no emoji, photography does the work. Selected state is a filled shape, never colour alone. Bottom tabs: Home · Cart · Bookings · Help · Account with Ionicons outline/filled pairs; the item badge sits on Cart, and the Cart tab owns the Deep Cleaning checkout (cart → slot & payment → confirmed).
 
 ---
 
