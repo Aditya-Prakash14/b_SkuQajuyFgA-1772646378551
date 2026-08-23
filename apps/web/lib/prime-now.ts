@@ -54,7 +54,8 @@ export const GUARANTEES = [
   { title: 'Free re-visit if unhappy', body: 'Not happy? We will come back and re-clean at no extra cost.' },
 ]
 
-export const WHATSAPP_NUMBER = '917349603429'
+/** Shown as a fallback on the confirmation screen; never the booking channel. */
+export const SUPPORT_PHONE = '917349603429'
 
 export interface PrimeNowInput {
   name: string
@@ -76,8 +77,10 @@ export interface PrimeNowResult {
 }
 
 /**
- * Record the request, then hand off to WhatsApp. Recording first means ops has
- * a queue in the CRM even when the customer never sends the chat message.
+ * Record the request. This is the whole booking — there is no chat handoff:
+ * the request lands in the CRM (Prime Now queue) and is dispatched from there,
+ * so every job has one place it is managed and nothing depends on someone
+ * reading a WhatsApp thread.
  */
 export async function submitPrimeNowRequest(input: PrimeNowInput): Promise<PrimeNowResult> {
   const supabase = createPublicClient()
@@ -96,38 +99,4 @@ export async function submitPrimeNowRequest(input: PrimeNowInput): Promise<Prime
   })
   if (error) throw error
   return data as unknown as PrimeNowResult
-}
-
-/** The message the customer sends us, so the chat opens with the full context. */
-export function whatsappMessage(input: PrimeNowInput, requestNumber: string, slot: Slot) {
-  const tasks = input.tasks.length
-    ? input.tasks.map((t) => TASK_LABEL[t] ?? t).join(', ')
-    : 'To be discussed'
-  const when =
-    input.timing === 'now'
-      ? 'Right now — within the hour'
-      : input.scheduledFor
-        ? new Date(input.scheduledFor).toLocaleString('en-IN', {
-            dateStyle: 'medium',
-            timeStyle: 'short',
-          })
-        : 'To be scheduled'
-
-  return [
-    `Prime Now request ${requestNumber}`,
-    '',
-    `Name: ${input.name}`,
-    `Phone: ${input.phone}`,
-    `Address: ${input.address}`,
-    `Slot: ${slot.label} — ₹${slot.price}`,
-    `Tasks: ${tasks}`,
-    input.notes ? `Notes: ${input.notes}` : null,
-    `When: ${when}`,
-  ]
-    .filter(Boolean)
-    .join('\n')
-}
-
-export function whatsappHref(text: string) {
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`
 }

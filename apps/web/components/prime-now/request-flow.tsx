@@ -1,17 +1,15 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Check, Loader2, MessageCircle, Phone } from 'lucide-react'
+import { Check, Loader2, Phone, Send } from 'lucide-react'
 import { formatINR } from '@prime/shared'
 import {
   GUARANTEES,
   SLOTS,
+  SUPPORT_PHONE,
   TASKS,
   TASK_LABEL,
-  WHATSAPP_NUMBER,
   submitPrimeNowRequest,
-  whatsappHref,
-  whatsappMessage,
   type PrimeNowInput,
   type SlotId,
 } from '@/lib/prime-now'
@@ -32,7 +30,7 @@ export function PrimeNowRequestFlow({ cities }: { cities: string[] }) {
   const [city, setCity] = useState(cities[0] ?? '')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [done, setDone] = useState<{ number: string; href: string } | null>(null)
+  const [done, setDone] = useState<{ number: string } | null>(null)
 
   const slot = useMemo(() => SLOTS.find((s) => s.id === slotId)!, [slotId])
   const toggleTask = (id: string) =>
@@ -67,10 +65,9 @@ export function PrimeNowRequestFlow({ cities }: { cities: string[] }) {
     setBusy(true)
     try {
       const res = await submitPrimeNowRequest(input)
-      const href = whatsappHref(whatsappMessage(input, res.request_number, slot))
-      setDone({ number: res.request_number, href })
-      // The request is already saved; WhatsApp is the follow-up, not the record.
-      window.open(href, '_blank', 'noopener,noreferrer')
+      // Booking ends here. The request is in the CRM queue and is dispatched
+      // from there — no chat handoff, so there is exactly one place a job lives.
+      setDone({ number: res.request_number })
     } catch (err) {
       setError(
         err instanceof Error && err.message
@@ -89,27 +86,35 @@ export function PrimeNowRequestFlow({ cities }: { cities: string[] }) {
           <Check className="h-7 w-7" />
         </div>
         <p className="label-mono text-muted-foreground">Request {done.number}</p>
-        <h2 className="mt-3 text-2xl font-extrabold">We have your request</h2>
+        <h2 className="mt-3 text-2xl font-extrabold">Request received</h2>
         <p className="mx-auto mt-3 max-w-md text-muted-foreground">
-          Our team is finding a helper near you. We will call you on{' '}
-          <span className="font-semibold text-foreground">{phone}</span> to confirm.
+          We are finding a verified helper near you now. We will call you on{' '}
+          <span className="font-semibold text-foreground">{phone}</span> to confirm the arrival
+          time — usually within a few minutes.
         </p>
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-          <a
-            href={done.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-2xl bg-primary px-5 py-3 font-semibold text-primary-foreground transition-opacity hover:opacity-90"
-          >
-            <MessageCircle className="h-4 w-4" /> Open WhatsApp
-          </a>
-          <a
-            href={`tel:+${WHATSAPP_NUMBER}`}
-            className="inline-flex items-center gap-2 rounded-2xl border border-border px-5 py-3 font-semibold transition-colors hover:border-primary hover:text-primary"
-          >
-            <Phone className="h-4 w-4" /> Call us
-          </a>
-        </div>
+        <dl className="mx-auto mt-6 max-w-sm space-y-2 rounded-2xl bg-secondary/60 p-4 text-left text-sm">
+          <div className="flex justify-between gap-4">
+            <dt className="text-muted-foreground">Slot</dt>
+            <dd className="font-semibold">{slot.label}</dd>
+          </div>
+          <div className="flex justify-between gap-4">
+            <dt className="text-muted-foreground">Arrival</dt>
+            <dd className="text-right font-semibold">{arrival}</dd>
+          </div>
+          <div className="flex justify-between gap-4">
+            <dt className="text-muted-foreground">Total</dt>
+            <dd className="tabular font-semibold">{formatINR(slot.price)}</dd>
+          </div>
+        </dl>
+        <p className="mt-5 text-xs text-muted-foreground">
+          Quote your request number if you call us about this job.
+        </p>
+        <a
+          href={`tel:+${SUPPORT_PHONE}`}
+          className="mt-4 inline-flex items-center gap-2 rounded-2xl border border-border px-5 py-3 font-semibold transition-colors hover:border-primary hover:text-primary"
+        >
+          <Phone className="h-4 w-4" /> Call us about this request
+        </a>
       </div>
     )
   }
@@ -296,11 +301,11 @@ export function PrimeNowRequestFlow({ cities }: { cities: string[] }) {
             disabled={busy}
             className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-brand px-5 py-3.5 font-bold text-brand-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
           >
-            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageCircle className="h-4 w-4" />}
-            {busy ? 'Sending…' : 'Send request'}
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+            {busy ? 'Sending…' : 'Request a helper'}
           </button>
           <a
-            href={`tel:+${WHATSAPP_NUMBER}`}
+            href={`tel:+${SUPPORT_PHONE}`}
             className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl border border-white/20 px-5 py-3 text-sm font-semibold transition-colors hover:bg-white/5"
           >
             <Phone className="h-4 w-4" /> Or call +91 73496 03429
