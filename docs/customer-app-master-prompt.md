@@ -4,7 +4,7 @@ Finish the **MyPrimeCompany customer app** (`apps/customer`, Expo SDK 54 / React
 
 This is a *completion* prompt, not a greenfield one. The 24-screen app from the v1 prompt is built and runs on the live database. Everything below was written after reading every file in the monorepo and checking the live schema, so the "what exists" sections are facts, not assumptions. Where the v1 prompt described things that do not exist (Clerk, a `payments` table, `helper_locations`, `en_route` status), this prompt replaces them with what is actually there.
 
-Written 23 Aug 2026 against branch `feat/customer-app` at commit `01bf0cf`, Supabase project `wsdmfleivhzyeqsmojgm`, migration `0028`. **Executed the same day through Phase 4 — see "Progress" below; the database is now at migration `0032`.**
+Written 23 Aug 2026 against branch `feat/customer-app` at commit `01bf0cf`, Supabase project `wsdmfleivhzyeqsmojgm`, migration `0028`. **Executed the same day through Phase 4, plus the flag-gated Razorpay gateway and Prime Now rating — see "Progress" below; the database is now at migration `0033`.**
 
 ---
 
