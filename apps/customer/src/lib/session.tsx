@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 
 import { fetchAddresses, fetchProfile } from './bookings'
 import { clearCache } from './offline'
+import { unregisterPush } from './push'
 import { createSessionFromUrl, supabase } from './supabase'
 import type { Address, Profile } from './types'
 
@@ -120,8 +121,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       goToStep: setOverride,
       refresh,
       signOut: async () => {
+        // While the session still exists: stop this phone receiving the
+        // account's pushes. Then the next account must not find the last
+        // one's bookings either.
+        await unregisterPush()
         await supabase.auth.signOut()
-        // The next account on this phone must not find the last one's bookings.
         await clearCache()
       },
     }

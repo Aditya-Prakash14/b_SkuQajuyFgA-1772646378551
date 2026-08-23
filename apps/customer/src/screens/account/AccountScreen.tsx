@@ -4,6 +4,7 @@ import { Linking, Pressable, ScrollView, Switch, View } from 'react-native'
 import { Button, Card, Divider, Eyebrow, Field, H1, Muted, Screen, Text } from '../../components/ui'
 import { useAppearance, type ThemePref } from '../../lib/appearance'
 import { fetchNotificationPrefs, saveNotificationPrefs, upsertMyProfile } from '../../lib/bookings'
+import { registerForPush } from '../../lib/push'
 import { useSession } from '../../lib/session'
 import { errorMessage } from '../../lib/supabase'
 import { useColors } from '../../lib/theme'
@@ -68,6 +69,9 @@ export function AccountScreen({ navigation }: AccountStackProps<'AccountHome'>) 
   function toggle(key: keyof NotificationPrefs, value: boolean) {
     setPrefs((p) => (p ? { ...p, [key]: value } : p))
     saveNotificationPrefs({ [key]: value }).catch(() => {})
+    // Turning a booking preference on is the moment to make sure this phone
+    // can actually receive it.
+    if (value && key !== 'marketing') registerForPush().catch(() => {})
   }
 
   const name = profile?.name || draft.name || 'Guest'

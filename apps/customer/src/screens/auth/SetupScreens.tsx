@@ -16,6 +16,7 @@ import {
 } from '../../components/ui'
 import { saveMyAddress, saveNotificationPrefs, upsertMyProfile } from '../../lib/bookings'
 import { fetchCities } from '../../lib/catalog'
+import { registerForPush } from '../../lib/push'
 import { useSession } from '../../lib/session'
 import { errorMessage } from '../../lib/supabase'
 import { useColors } from '../../lib/theme'
@@ -231,6 +232,8 @@ export function NotificationsSetupScreen() {
         helper_en_route: enRoute,
         marketing,
       })
+      // The OS prompt follows this tap; the token lands on the same row.
+      if (bookingUpdates || enRoute) await registerForPush()
     } catch {
       // Preferences are not worth blocking entry to the app over; the defaults
       // in the table already match what is shown here.

@@ -104,6 +104,8 @@ export async function createPrimeNowRequest(input: PrimeNowInput): Promise<Prime
 export interface DispatchState {
   status: string
   assigned: boolean
+  /** Set when the helper taps "On my way" (0030). */
+  enRouteAt: string | null
 }
 
 /**
@@ -117,11 +119,11 @@ export interface DispatchState {
 export async function fetchDispatchState(requestId: string): Promise<DispatchState | null> {
   const { data, error } = await supabase
     .from('prime_now_requests')
-    .select('status,assigned_vendor_id')
+    .select('status,assigned_vendor_id,en_route_at')
     .eq('id', requestId)
     .maybeSingle()
   if (error) throw error
   if (!data) return null
-  const row = data as { status: string; assigned_vendor_id: string | null }
-  return { status: row.status, assigned: row.assigned_vendor_id !== null }
+  const row = data as { status: string; assigned_vendor_id: string | null; en_route_at: string | null }
+  return { status: row.status, assigned: row.assigned_vendor_id !== null, enRouteAt: row.en_route_at ?? null }
 }

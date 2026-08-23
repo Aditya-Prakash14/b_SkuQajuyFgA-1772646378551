@@ -94,6 +94,9 @@ export type BookingStatus =
   // are shared with the order vocabulary above.
   | 'new'
   | 'dispatched'
+  // Never a table status: the partner's "On my way" writes en_route_at, which
+  // the timeline shows as a step between assigned and in progress.
+  | 'en_route'
 
 export interface BookingItem {
   /** Null when the service was deleted from the catalogue after booking. */
@@ -180,6 +183,7 @@ export const STATUS_LABEL: Record<string, string> = {
   // Prime Now vocabulary, mapped for display.
   new: 'Finding a helper',
   dispatched: 'Helper assigned',
+  en_route: 'Helper on the way',
 }
 
 /** The timeline a customer expects to see, in order. */
@@ -187,6 +191,7 @@ export const TIMELINE_STEPS: { status: string; label: string; blurb: string }[] 
   { status: 'pending', label: 'Booking placed', blurb: 'We have your request.' },
   { status: 'confirmed', label: 'Confirmed', blurb: 'Your slot is held.' },
   { status: 'vendor_assigned', label: 'Helper assigned', blurb: 'A verified helper is on the job.' },
+  { status: 'en_route', label: 'Helper on the way', blurb: 'Your helper tells us when they set out.' },
   { status: 'in_progress', label: 'In progress', blurb: 'Work has started.' },
   { status: 'completed', label: 'Completed', blurb: 'Thank you for choosing us.' },
 ]
@@ -195,6 +200,7 @@ export const TIMELINE_STEPS: { status: string; label: string; blurb: string }[] 
 export const PRIME_TIMELINE_STEPS: { status: string; label: string; blurb: string }[] = [
   { status: 'new', label: 'Request sent', blurb: 'Offered to verified helpers near you.' },
   { status: 'dispatched', label: 'Helper accepted', blurb: 'We call to confirm the arrival time.' },
+  { status: 'en_route', label: 'Helper on the way', blurb: 'Your helper tells us when they set out.' },
   { status: 'in_progress', label: 'Work started', blurb: 'Your helper is on the job.' },
   { status: 'completed', label: 'Completed', blurb: 'Thank you for choosing us.' },
 ]

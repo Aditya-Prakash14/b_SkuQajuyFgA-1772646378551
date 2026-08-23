@@ -29,7 +29,7 @@ import {
 import type { BookingsStackProps } from '../../navigation/types'
 
 const SUPPORT_PHONE = '917349603429'
-const HELPER_VISIBLE: BookingStatus[] = ['vendor_assigned', 'dispatched', 'in_progress', 'completed']
+const HELPER_VISIBLE: BookingStatus[] = ['vendor_assigned', 'dispatched', 'en_route', 'in_progress', 'completed']
 
 /**
  * Screen 21. Status timeline, who is coming, the booking, and the actions that
@@ -72,7 +72,8 @@ export function TrackingScreen({ route, navigation }: BookingsStackProps<'Tracki
     try {
       if (isNow) {
         const state = await fetchDispatchState(booking.id)
-        if (state) setStatus(state.status as BookingStatus)
+        // "On the way" is a timestamp on the request, not a status of its own.
+        if (state) setStatus(state.status === 'dispatched' && state.enRouteAt ? 'en_route' : (state.status as BookingStatus))
       } else {
         setEvents(await fetchBookingEvents(booking.id))
       }

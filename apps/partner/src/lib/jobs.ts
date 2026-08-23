@@ -47,6 +47,15 @@ export async function updateJobStatus(orderId: string, status: JobStatus, cashCo
   if (error) throw error
 }
 
+/**
+ * Tell the customer you have set out. Allowed once, while the job is still
+ * assigned and not started; the customer's timeline and phone get it.
+ */
+export async function markEnRoute(jobId: string) {
+  const { error } = await supabase.rpc('mark_en_route', { p_job_id: jobId })
+  if (error) throw error
+}
+
 export const isOpen = (j: Job) => j.status === 'vendor_assigned' || j.status === 'in_progress'
 
 // ── Formatting helpers (no Intl dependency — Hermes support varies by build) ─

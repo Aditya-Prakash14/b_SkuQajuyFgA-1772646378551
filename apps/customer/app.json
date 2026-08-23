@@ -24,7 +24,15 @@
     },
     "plugins": [
       "expo-web-browser",
-      "expo-font"
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/android-icon-monochrome.png",
+          "color": "#0E5A63",
+          "defaultChannel": "bookings"
+        }
+      ]
     ],
     "scheme": "myprimecompany",
     "backgroundColor": "#FBFAF7",

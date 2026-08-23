@@ -18,16 +18,19 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { StatusBar } from 'expo-status-bar'
 import { useColorScheme } from 'nativewind'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Text as RNText, View } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 import { Text } from './src/components/ui'
 import { AppearanceProvider } from './src/lib/appearance'
+import { fetchBookings } from './src/lib/bookings'
 import { CartProvider, useCart } from './src/lib/cart'
+import { onPush, registerForPush } from './src/lib/push'
 import { SessionProvider, useSession } from './src/lib/session'
 import { useColors } from './src/lib/theme'
 import { PHONE_OTP_ENABLED } from './src/lib/supabase'
+import { navigationRef } from './src/navigation/ref'
 import type { AccountStackParams, BookingsStackParams, HomeStackParams } from './src/navigation/types'
 import { AccountScreen } from './src/screens/account/AccountScreen'
 import { AddressFormScreen } from './src/screens/account/AddressFormScreen'
@@ -316,6 +319,34 @@ function Root() {
   return <MainTabs />
 }
 
+/**
+ * Push plumbing that needs both a session and the navigator: refresh the
+ * token silently when permission is already granted, and open the booking a
+ * tapped notification is about.
+ */
+function PushBridge() {
+  const { session } = useSession()
+  useEffect(() => {
+    if (!session) return
+    registerForPush({ prompt: false }).catch(() => {})
+    return onPush({
+      onTap: async (target) => {
+        if (!target) return
+        try {
+          const all = await fetchBookings()
+          const booking = all.find((b) => b.id === target.id && b.kind === target.kind)
+          if (booking && navigationRef.isReady()) {
+            navigationRef.navigate('BookingsTab', { screen: 'Tracking', params: { booking } })
+          }
+        } catch {
+          // The Bookings tab is one tap away regardless.
+        }
+      },
+    })
+  }, [session])
+  return null
+}
+
 function Shell() {
   const navTheme = useNavTheme()
   const { colorScheme } = useColorScheme()
@@ -323,9 +354,10 @@ function Shell() {
     <>
       {/* Follows the theme, so the clock and battery stay legible on both. */}
       <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-      <NavigationContainer theme={navTheme}>
+      <NavigationContainer ref={navigationRef} theme={navTheme}>
         <SessionProvider>
           <CartProvider>
+            <PushBridge />
             <Root />
           </CartProvider>
         </SessionProvider>

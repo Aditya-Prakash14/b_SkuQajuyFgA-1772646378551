@@ -130,8 +130,8 @@ export async function createBooking(input: CheckoutInput): Promise<{ order_numbe
 /* ── Reading bookings ─────────────────────────────────────────────────────── */
 
 /** Deep Cleaning and Prime Now use different vocabularies for "still live". */
-const OPEN_DEEP: BookingStatus[] = ['pending', 'confirmed', 'vendor_assigned', 'in_progress']
-const OPEN_NOW: BookingStatus[] = ['new', 'dispatched', 'in_progress']
+const OPEN_DEEP: BookingStatus[] = ['pending', 'confirmed', 'vendor_assigned', 'en_route', 'in_progress']
+const OPEN_NOW: BookingStatus[] = ['new', 'dispatched', 'en_route', 'in_progress']
 
 export const isUpcoming = (b: Booking) => (b.kind === 'now' ? OPEN_NOW : OPEN_DEEP).includes(b.status)
 

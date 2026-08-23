@@ -117,6 +117,8 @@ export interface Job {
   items: JobItem[]
   created_at: string
   updated_at: string
+  /** Set once you tap "On my way" (0030); the customer sees the step. */
+  en_route_at: string | null
 }
 
 export const JOB_STATUS_LABELS: Record<JobStatus, string> = {
