@@ -13,6 +13,7 @@ import {
   StickyBar,
   Text,
 } from '../../components/ui'
+import { track } from '../../lib/analytics'
 import { createBooking } from '../../lib/bookings'
 import { useCart } from '../../lib/cart'
 import { dateKey, dateParts, formatINR, upcomingDays } from '../../lib/format'
@@ -45,6 +46,12 @@ export function SlotPaymentScreen({ route, navigation }: HomeStackProps<'SlotPay
   const [notes, setNotes] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    track('begin_checkout', { items: lines.length })
+    // Once, on arrival — not on every cart change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // An address added from here comes back as a param; otherwise fall back to
   // the default when the chosen one disappears.
@@ -81,6 +88,7 @@ export function SlotPaymentScreen({ route, navigation }: HomeStackProps<'SlotPay
         notes: notes.trim() || null,
         lines,
       })
+      track('booking_confirmed', { order_number: res.order_number, items: lines.length })
       clear()
       navigation.replace('Confirmed', { reference: res.order_number })
     } catch (err) {

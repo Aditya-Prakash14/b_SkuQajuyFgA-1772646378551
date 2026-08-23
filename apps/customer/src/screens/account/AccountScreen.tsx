@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Linking, Pressable, ScrollView, Switch, View } from 'react-native'
+import { Alert, Linking, Pressable, ScrollView, Switch, View } from 'react-native'
 
 import { Button, Card, Divider, Eyebrow, Field, H1, Muted, Screen, Text } from '../../components/ui'
 import { useAppearance, type ThemePref } from '../../lib/appearance'
@@ -23,7 +23,7 @@ const THEME_OPTIONS: { value: ThemePref; label: string }[] = [
 
 /** Screen 24. Profile, membership, addresses, settings, sign out. */
 export function AccountScreen({ navigation }: AccountStackProps<'AccountHome'>) {
-  const { profile, draft, addresses, defaultAddress, signOut, refresh } = useSession()
+  const { profile, draft, addresses, defaultAddress, signOut, deleteAccount, refresh } = useSession()
   const { pref, setPref } = useAppearance()
   const colors = useColors()
   const [prefs, setPrefs] = useState<NotificationPrefs | null>(null)
@@ -33,6 +33,42 @@ export function AccountScreen({ navigation }: AccountStackProps<'AccountHome'>) 
   const [editPhone, setEditPhone] = useState('')
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
+  const [accountError, setAccountError] = useState<string | null>(null)
+
+  // Two confirmations: the first explains what goes, the second is the
+  // irreversible one. Stores require the option; nobody should hit it by
+  // accident.
+  function confirmDelete() {
+    Alert.alert(
+      'Delete your account?',
+      'Your profile, addresses and notification settings are removed. Booking records are kept for accounting, without your name or phone.',
+      [
+        { text: 'Keep my account', style: 'cancel' },
+        {
+          text: 'Continue',
+          style: 'destructive',
+          onPress: () =>
+            Alert.alert('This cannot be undone', 'Delete the account now?', [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Delete account', style: 'destructive', onPress: doDelete },
+            ]),
+        },
+      ],
+    )
+  }
+
+  async function doDelete() {
+    setDeleting(true)
+    setAccountError(null)
+    try {
+      await deleteAccount()
+    } catch (err) {
+      setAccountError(errorMessage(err, 'Could not delete the account. Please call us and we will do it for you.'))
+    } finally {
+      setDeleting(false)
+    }
+  }
 
   // A Google sign-up has no phone yet, so one is stored as 'pending:<uid>'.
   // That is plumbing, never something to show a customer.
@@ -258,6 +294,12 @@ export function AccountScreen({ navigation }: AccountStackProps<'AccountHome'>) 
         </Card>
 
         <Button label="Sign out" variant="outline" onPress={signOut} />
+
+        {accountError ? <Muted className="text-center text-destructive">{accountError}</Muted> : null}
+        <Button label="Delete account" variant="ghost" onPress={confirmDelete} loading={deleting} />
+        <Muted className="text-center text-[11px]">
+          Removes your profile, addresses and settings. Booking records are kept for accounting without your name or phone.
+        </Muted>
 
         <View className="items-center pt-2">
           <Eyebrow>Account secured by Supabase Auth</Eyebrow>

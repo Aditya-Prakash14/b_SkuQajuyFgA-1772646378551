@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Pressable, ScrollView, View } from 'react-native'
 
 import { Badge, Card, Eyebrow, Field, H1, H2, Muted, Refresher, Screen, Text } from '../../components/ui'
+import { track } from '../../lib/analytics'
 import { fetchBookings, isUpcoming, rebookLines } from '../../lib/bookings'
 import { useCart } from '../../lib/cart'
 import { fetchAllServices, searchServices } from '../../lib/catalog'
@@ -181,7 +182,13 @@ export function HomeScreen({ navigation }: HomeStackProps<'Home'>) {
           <H2>What do you need?</H2>
 
           {/* Domain 01 — light */}
-          <Pressable accessibilityRole="button" onPress={() => navigation.navigate('Categories')}>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => {
+              track('view_domain', { domain: 'deep' })
+              navigation.navigate('Categories')
+            }}
+          >
             <Card className="gap-5">
               <View>
                 <Eyebrow className="text-primary">Domain 01 · scheduled</Eyebrow>
@@ -203,7 +210,13 @@ export function HomeScreen({ navigation }: HomeStackProps<'Home'>) {
           </Pressable>
 
           {/* Domain 02 — dark */}
-          <Pressable accessibilityRole="button" onPress={() => navigation.navigate('PrimeSlot')}>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => {
+              track('view_domain', { domain: 'now' })
+              navigation.navigate('PrimeSlot')
+            }}
+          >
             <View className="gap-5 rounded-lg bg-ink p-4">
               <View>
                 <Eyebrow className="text-brand">Domain 02 · by the hour</Eyebrow>

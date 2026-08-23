@@ -2,10 +2,11 @@ import type { Session } from '@supabase/supabase-js'
 import * as Linking from 'expo-linking'
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 
+import { identify, resetAnalytics, track } from './analytics'
 import { fetchAddresses, fetchProfile } from './bookings'
 import { clearCache } from './offline'
 import { unregisterPush } from './push'
-import { createSessionFromUrl, supabase } from './supabase'
+import { createSessionFromUrl, deleteMyAccount, supabase } from './supabase'
 import type { Address, Profile } from './types'
 
 /**
@@ -38,6 +39,8 @@ interface SessionValue {
   goToStep: (s: SetupStep | null) => void
   refresh: () => Promise<void>
   signOut: () => Promise<void>
+  /** Anonymise the customer and remove the sign-in. Irreversible. */
+  deleteAccount: () => Promise<void>
 }
 
 const Ctx = createContext<SessionValue | null>(null)
@@ -65,8 +68,12 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       setSession(data.session)
       setBooting(false)
     })
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, next) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, next) => {
       setSession(next)
+      if (event === 'SIGNED_IN' && next) {
+        identify(next.user.id)
+        track('sign_in', { provider: next.user.app_metadata?.provider ?? 'email' })
+      }
       if (!next) {
         setProfile(null)
         setAddresses([])
@@ -127,6 +134,15 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         await unregisterPush()
         await supabase.auth.signOut()
         await clearCache()
+        resetAnalytics()
+      },
+      deleteAccount: async () => {
+        await deleteMyAccount()
+        // The auth user is gone server-side; the local sign-out may already
+        // be moot, so it is never allowed to fail the flow.
+        await supabase.auth.signOut().catch(() => {})
+        await clearCache()
+        resetAnalytics()
       },
     }
   }, [session, booting, profile, addresses, draft, stepDone, override, refresh])

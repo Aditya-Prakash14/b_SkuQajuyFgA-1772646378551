@@ -35,6 +35,9 @@ export type BookingsStackParams = {
   Tracking: { booking: Booking }
   RateTip: { booking: Booking }
   Receipt: { booking: Booking }
+  /** Link targets: myprimecompany://booking/:kind/:id and the website's /account/bookings/:id. */
+  OpenBooking: { kind?: string; id: string }
+  OpenOrder: { kind?: string; id: string }
 }
 
 export type AccountStackParams = AddressRoutes & {

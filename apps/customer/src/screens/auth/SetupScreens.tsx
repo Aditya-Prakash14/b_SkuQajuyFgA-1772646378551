@@ -14,6 +14,7 @@ import {
   Screen,
   Text,
 } from '../../components/ui'
+import { track } from '../../lib/analytics'
 import { saveMyAddress, saveNotificationPrefs, upsertMyProfile } from '../../lib/bookings'
 import { fetchCities } from '../../lib/catalog'
 import { registerForPush } from '../../lib/push'
@@ -239,8 +240,13 @@ export function NotificationsSetupScreen() {
       // in the table already match what is shown here.
     } finally {
       setBusy(false)
-      markSetupStep('done')
+      finish()
     }
+  }
+
+  function finish() {
+    track('setup_complete')
+    markSetupStep('done')
   }
 
   const rows: { label: string; blurb: string; value: boolean; set: (v: boolean) => void }[] = [
@@ -294,7 +300,7 @@ export function NotificationsSetupScreen() {
         </View>
 
         <Button label="Allow notifications" onPress={allow} loading={busy} />
-        <Button label="Not now" variant="ghost" onPress={() => markSetupStep('done')} />
+        <Button label="Not now" variant="ghost" onPress={finish} />
       </Body>
     </Screen>
   )

@@ -15,6 +15,7 @@ import {
   StickyBar,
   Text,
 } from '../../components/ui'
+import { track } from '../../lib/analytics'
 import { dateParts, formatINR, hourLabel, upcomingDays } from '../../lib/format'
 import { SCHEDULE_HOURS, SLOTS, TASK_LABEL, createPrimeNowRequest, type SlotId } from '../../lib/prime-now'
 import { useSession } from '../../lib/session'
@@ -77,6 +78,7 @@ export function PrimeWhenScreen({ route, navigation }: HomeStackProps<'PrimeWhen
         timing,
         scheduledFor: timing === 'scheduled' && when ? when.toISOString() : null,
       })
+      track('prime_now_request_submitted', { request_number: res.request_number, slot, timing })
       navigation.replace('PrimeMatching', { requestId: res.id, reference: res.request_number })
     } catch (err) {
       setError(errorMessage(err, 'Could not send the request.'))

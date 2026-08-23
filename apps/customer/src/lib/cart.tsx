@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 
+import { track } from './analytics'
 import { VISIT_CHARGE } from './bookings'
 import type { CartLine, Service } from './types'
 
@@ -53,6 +54,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [lines, hydrated])
 
   const add = useCallback((service: Service, units = 1) => {
+    track('add_to_cart', { service: service.slug, per_unit: service.priceUnit !== 'fixed' })
     setLines((prev) => {
       const existing = prev.find((l) => l.serviceId === service.id)
       if (existing) {

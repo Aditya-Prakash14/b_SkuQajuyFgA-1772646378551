@@ -91,9 +91,11 @@ export async function createSessionFromUrl(incoming: string): Promise<boolean> {
  * the redirect is not on Supabase's allow-list, so GoTrue substituted the Site
  * URL and the browser landed on the website instead of returning here.
  */
-const REDIRECT_HELP =
-  'If you were sent to the website instead, this device’s redirect URL is not allow-listed in Supabase ' +
-  '(Authentication → URL Configuration → Redirect URLs). Check the Metro logs for the exact URL to add.'
+const REDIRECT_HELP = __DEV__
+  ? 'If you were sent to the website instead, this device’s redirect URL is not allow-listed in Supabase ' +
+    '(Authentication → URL Configuration → Redirect URLs). Check the Metro logs for the exact URL to add.'
+  : // A customer cannot act on configuration advice; a developer can.
+    'Sign-in did not complete. Please try again, or use email and password.'
 
 /**
  * Google sign-in.
@@ -163,6 +165,39 @@ export async function signInWithEmail(email: string, password: string): Promise<
       ? 'Wrong password for this email. Try again.'
       : 'Account created, but email confirmation is switched on in Supabase, so it cannot sign you in yet.',
   )
+}
+
+/**
+ * Apple sign-in. App Store guideline 4.8 requires it on iOS once Google is
+ * offered. Off until the Apple provider is configured in Supabase
+ * (Authentication → Providers → Apple: Services ID, Team ID, key) — the code
+ * is here so turning it on is this one flag. The module is loaded lazily so
+ * Android never touches it.
+ */
+export const APPLE_SIGN_IN_ENABLED = false
+
+export async function signInWithApple(): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const Apple = require('expo-apple-authentication') as typeof import('expo-apple-authentication')
+  const credential = await Apple.signInAsync({
+    requestedScopes: [Apple.AppleAuthenticationScope.FULL_NAME, Apple.AppleAuthenticationScope.EMAIL],
+  })
+  if (!credential.identityToken) throw new Error('Apple did not return a sign-in token. Please try again.')
+  const { error } = await supabase.auth.signInWithIdToken({ provider: 'apple', token: credential.identityToken })
+  if (error) throw error
+}
+
+/**
+ * Delete the account. The edge function anonymises the customer record as
+ * this user, then removes the auth user with the service role; the caller
+ * signs out locally afterwards.
+ */
+export async function deleteMyAccount(): Promise<void> {
+  const { data, error } = await supabase.functions.invoke<{ deleted?: boolean; error?: string }>('delete-account', {
+    method: 'POST',
+  })
+  if (error) throw error
+  if (!data?.deleted) throw new Error(data?.error ?? 'Could not delete the account. Please call us.')
 }
 
 /**

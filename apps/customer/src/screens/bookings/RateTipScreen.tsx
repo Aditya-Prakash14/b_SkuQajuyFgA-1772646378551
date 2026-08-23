@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Pressable, View } from 'react-native'
 
 import { Banner, Body, Button, Card, Eyebrow, Field, H1, Muted, Screen, Text } from '../../components/ui'
+import { track } from '../../lib/analytics'
 import { submitRating } from '../../lib/bookings'
 import { formatINR } from '../../lib/format'
 import { errorMessage, supabase } from '../../lib/supabase'
@@ -53,6 +54,7 @@ export function RateTipScreen({ route, navigation }: BookingsStackProps<'RateTip
         comment: comment.trim() || null,
         tip,
       })
+      track('submit_review', { stars, tip })
       setDone(true)
     } catch (err) {
       setError(errorMessage(err, 'Could not save your rating.'))

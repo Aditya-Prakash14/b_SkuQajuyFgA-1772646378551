@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Pressable, View } from 'react-native'
 
 import { Body, Button, Card, Eyebrow, H1, Muted, Screen, Text } from '../../components/ui'
+import { track } from '../../lib/analytics'
 import { formatINR } from '../../lib/format'
 import { GUARANTEES, SLOTS, type SlotId } from '../../lib/prime-now'
 import type { HomeStackProps } from '../../navigation/types'
@@ -53,7 +54,13 @@ export function PrimeSlotScreen({ navigation }: HomeStackProps<'PrimeSlot'>) {
           ))}
         </Card>
 
-        <Button label="Continue" onPress={() => navigation.navigate('PrimeDescribe', { slot })} />
+        <Button
+          label="Continue"
+          onPress={() => {
+            track('prime_now_slot_selected', { slot })
+            navigation.navigate('PrimeDescribe', { slot })
+          }}
+        />
       </Body>
     </Screen>
   )

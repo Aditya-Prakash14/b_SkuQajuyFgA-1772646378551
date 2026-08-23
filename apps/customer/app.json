@@ -8,7 +8,10 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "in.myprimecompany.app"
+      "bundleIdentifier": "in.myprimecompany.app",
+      "associatedDomains": [
+        "applinks:www.myprimecompany.com"
+      ]
     },
     "android": {
       "adaptiveIcon": {
@@ -17,7 +20,24 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "in.myprimecompany.app"
+      "package": "in.myprimecompany.app",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "www.myprimecompany.com",
+              "pathPrefix": "/account/bookings"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"

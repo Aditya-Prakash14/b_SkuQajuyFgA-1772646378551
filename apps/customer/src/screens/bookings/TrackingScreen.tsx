@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Alert, Linking, Pressable, ScrollView, View } from 'react-native'
 
 import { Badge, Button, Card, Divider, Eyebrow, H1, Muted, Refresher, Screen, Text } from '../../components/ui'
+import { track } from '../../lib/analytics'
 import {
   canCancel,
   canReschedule,
@@ -150,6 +151,7 @@ export function TrackingScreen({ route, navigation }: BookingsStackProps<'Tracki
     try {
       if (isNow) await cancelPrimeNowRequest(booking.id)
       else await cancelBooking(booking.id)
+      track('cancel_booking', { kind: booking.kind, status })
       setStatus('cancelled')
       await load()
     } catch (err) {
@@ -165,6 +167,7 @@ export function TrackingScreen({ route, navigation }: BookingsStackProps<'Tracki
     try {
       const slot = newWindow === 'keep' ? null : newWindow === ANY_TIME_WINDOW ? null : newWindow
       await rescheduleBooking(booking.id, dateKey(newDay), slot)
+      track('reschedule_booking', { reference: booking.reference })
       setScheduled({ date: dateKey(newDay), slot: newWindow === 'keep' ? scheduled.slot : slot })
       setEditing(false)
       await load()

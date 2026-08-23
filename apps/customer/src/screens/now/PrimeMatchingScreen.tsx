@@ -3,6 +3,7 @@ import { AccessibilityInfo, ActivityIndicator, Alert, Animated, Easing, Pressabl
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { Button, Text } from '../../components/ui'
+import { track as trackEvent } from '../../lib/analytics'
 import { cancelPrimeNowRequest } from '../../lib/bookings'
 import { fetchDispatchState } from '../../lib/prime-now'
 import { errorMessage } from '../../lib/supabase'
@@ -103,6 +104,7 @@ export function PrimeMatchingScreen({ route, navigation }: HomeStackProps<'Prime
           clearInterval(poll)
         } else if (state.assigned) {
           setMatched(true)
+          trackEvent('prime_now_matched', { reference })
           clearInterval(poll)
         }
       } catch {

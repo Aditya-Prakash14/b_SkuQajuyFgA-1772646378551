@@ -1,13 +1,15 @@
 import { useState } from 'react'
-import { Linking, View } from 'react-native'
+import { Linking, Platform, View } from 'react-native'
 
 import { PRIVACY_URL, TERMS_URL } from '../account/HelpScreen'
 
 import { Banner, Body, Button, Divider, Eyebrow, Field, H1, Muted, Screen, Text } from '../../components/ui'
 import {
+  APPLE_SIGN_IN_ENABLED,
   PHONE_OTP_ENABLED,
   errorMessage,
   sendPhoneOtp,
+  signInWithApple,
   signInWithEmail,
   signInWithGoogle,
 } from '../../lib/supabase'
@@ -26,7 +28,7 @@ export function SignInScreen({ onCodeSent }: { onCodeSent: (phone: string) => vo
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [phone, setPhone] = useState('')
-  const [busy, setBusy] = useState<'email' | 'google' | 'phone' | null>(null)
+  const [busy, setBusy] = useState<'email' | 'google' | 'apple' | 'phone' | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   async function withEmail() {
@@ -58,6 +60,18 @@ export function SignInScreen({ onCodeSent }: { onCodeSent: (phone: string) => vo
       await signInWithGoogle()
     } catch (err) {
       setError(errorMessage(err, 'Could not sign in with Google.'))
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  async function apple() {
+    setBusy('apple')
+    setError(null)
+    try {
+      await signInWithApple()
+    } catch (err) {
+      setError(errorMessage(err, 'Could not sign in with Apple.'))
     } finally {
       setBusy(null)
     }
@@ -139,6 +153,10 @@ export function SignInScreen({ onCodeSent }: { onCodeSent: (phone: string) => vo
           onPress={google}
           loading={busy === 'google'}
         />
+
+        {Platform.OS === 'ios' && APPLE_SIGN_IN_ENABLED ? (
+          <Button label="Continue with Apple" variant="dark" onPress={apple} loading={busy === 'apple'} />
+        ) : null}
 
         <Muted className="pt-2 text-center text-[12px]">
           By continuing you agree to our{' '}

@@ -13,9 +13,15 @@ import {
   useFonts,
 } from '@expo-google-fonts/manrope'
 import { Ionicons } from '@expo/vector-icons'
-import { NavigationContainer, type Theme } from '@react-navigation/native'
+import {
+  NavigationContainer,
+  type LinkingOptions,
+  type NavigatorScreenParams,
+  type Theme,
+} from '@react-navigation/native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import * as Linking from 'expo-linking'
 import { StatusBar } from 'expo-status-bar'
 import { useColorScheme } from 'nativewind'
 import { useEffect, useState } from 'react'
@@ -44,6 +50,7 @@ import {
 } from './src/screens/auth/SetupScreens'
 import { VerifyCodeScreen } from './src/screens/auth/VerifyCodeScreen'
 import { MyBookingsScreen } from './src/screens/bookings/MyBookingsScreen'
+import { OpenBookingScreen } from './src/screens/bookings/OpenBookingScreen'
 import { RateTipScreen } from './src/screens/bookings/RateTipScreen'
 import { ReceiptScreen } from './src/screens/bookings/ReceiptScreen'
 import { TrackingScreen } from './src/screens/bookings/TrackingScreen'
@@ -149,6 +156,9 @@ function BookingsNavigator() {
       <BookingsStack.Screen name="Tracking" component={TrackingScreen} options={{ title: 'Booking' }} />
       <BookingsStack.Screen name="RateTip" component={RateTipScreen} options={{ title: 'Rate' }} />
       <BookingsStack.Screen name="Receipt" component={ReceiptScreen} options={{ title: 'Receipt' }} />
+      {/* Link landing routes; each swaps itself for Tracking once the booking loads. */}
+      <BookingsStack.Screen name="OpenBooking" component={OpenBookingScreen} options={{ title: 'Booking' }} />
+      <BookingsStack.Screen name="OpenOrder" component={OpenBookingScreen} options={{ title: 'Booking' }} />
     </BookingsStack.Navigator>
   )
 }
@@ -349,6 +359,42 @@ function PushBridge() {
   return null
 }
 
+/**
+ * Links the app answers to. The auth callback (`auth/callback`) matches no
+ * screen here on purpose — session.tsx turns it into a session instead.
+ * The https paths only open the app once the website serves the association
+ * files (assetlinks.json / apple-app-site-association); until then they open
+ * the website, which is the right fallback.
+ */
+type RootTabs = {
+  HomeTab: NavigatorScreenParams<HomeStackParams>
+  BookingsTab: NavigatorScreenParams<BookingsStackParams>
+  HelpTab: undefined
+  AccountTab: NavigatorScreenParams<AccountStackParams>
+}
+
+const linking: LinkingOptions<RootTabs> = {
+  prefixes: [Linking.createURL('/'), 'myprimecompany://', 'https://www.myprimecompany.com'],
+  config: {
+    screens: {
+      BookingsTab: {
+        screens: {
+          OpenBooking: 'booking/:kind/:id',
+          OpenOrder: 'account/bookings/:id',
+          MyBookings: 'account',
+        },
+      },
+      HomeTab: {
+        screens: {
+          Home: '',
+          Categories: 'deep-cleaning',
+          PrimeSlot: 'prime-now',
+        },
+      },
+    },
+  },
+}
+
 function Shell() {
   const navTheme = useNavTheme()
   const { colorScheme } = useColorScheme()
@@ -356,7 +402,7 @@ function Shell() {
     <>
       {/* Follows the theme, so the clock and battery stay legible on both. */}
       <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-      <NavigationContainer ref={navigationRef} theme={navTheme}>
+      <NavigationContainer ref={navigationRef} theme={navTheme} linking={linking}>
         <SessionProvider>
           <CartProvider>
             <PushBridge />
