@@ -46,6 +46,8 @@ export function VendorForm({
   const [commission, setCommission] = useState<number>(Number(initial?.commission_rate ?? 0))
   const [serviceIds, setServiceIds] = useState<string[]>(initial?.services_offered ?? [])
   const [docs, setDocs] = useState<VendorDocument[]>((initial?.documents as VendorDocument[] | null) ?? [])
+  const [deepClean, setDeepClean] = useState<boolean>(initial?.accepts_deep_clean ?? true)
+  const [primeNow, setPrimeNow] = useState<boolean>(initial?.accepts_prime_now ?? true)
   const [submitting, setSubmitting] = useState(false)
 
   const toggleService = (id: string) =>
@@ -67,6 +69,8 @@ export function VendorForm({
       commission_rate: Number(commission) || 0,
       services_offered: serviceIds,
       documents: docs.filter((d) => d.type.trim() || d.url.trim()),
+      accepts_deep_clean: deepClean,
+      accepts_prime_now: primeNow,
     }
     const res = mode === 'create' ? await createVendor(input) : await updateVendor(vendorId!, input)
     if (res && 'error' in res) {
@@ -182,6 +186,30 @@ export function VendorForm({
         </div>
 
         <div>
+          <Card>
+            <CardHeader><CardTitle>Work accepted</CardTitle></CardHeader>
+            <CardContent className="space-y-3">
+              <label className="flex items-start gap-3">
+                <Checkbox checked={deepClean} onCheckedChange={(v) => setDeepClean(v === true)} className="mt-0.5" />
+                <span>
+                  <span className="block text-sm font-medium">Deep Cleaning</span>
+                  <span className="block text-xs text-muted-foreground">
+                    Scheduled, flat-priced jobs. Which ones is set below.
+                  </span>
+                </span>
+              </label>
+              <label className="flex items-start gap-3">
+                <Checkbox checked={primeNow} onCheckedChange={(v) => setPrimeNow(v === true)} className="mt-0.5" />
+                <span>
+                  <span className="block text-sm font-medium">Prime Now</span>
+                  <span className="block text-xs text-muted-foreground">
+                    Instant hourly work. Also needs the partner to be online.
+                  </span>
+                </span>
+              </label>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader><CardTitle>Services offered</CardTitle></CardHeader>
             <CardContent>

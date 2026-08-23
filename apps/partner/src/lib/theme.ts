@@ -1,30 +1,39 @@
 /**
- * Brand tokens mirrored from packages/shared/styles/theme.css, converted from
- * oklch to hex because React Native's StyleSheet has no oklch() support.
- *   --primary oklch(0.36 0.22 264)  →  #2E1BAD
- *   --accent  oklch(0.70 0.18 45)   →  #E8712C
+ * Brand tokens for the few places that need raw values (StyleSheet, the
+ * ActivityIndicator colour). Everything else styles through NativeWind classes
+ * backed by tailwind.config.js.
+ *
+ * Mirrors the website palette in apps/web/app/globals.css:
+ *   --primary    #0E5A63  deep teal
+ *   --background #FBFAF7  warm off-white
+ *   --ink        #12212A  dark bands
+ *   --brand      #E8A33D  amber, on dark grounds and primary CTAs
  */
 export const colors = {
-  primary: '#2E1BAD',
-  primaryDark: '#241589',
-  accent: '#E8712C',
+  primary: '#0E5A63',
+  primaryDark: '#0A464D',
+  accent: '#E8A33D',
 
-  bg: '#F7F8FB',
+  bg: '#FBFAF7',
   card: '#FFFFFF',
-  border: '#E6E8EF',
-  borderFocus: '#2E1BAD',
+  border: '#E7E3DB',
+  borderFocus: '#0E5A63',
 
-  text: '#12131A',
-  muted: '#6B7280',
-  faint: '#9CA3AF',
+  ink: '#12212A',
+  inkForeground: '#FBFAF7',
 
-  success: '#15803D',
-  successBg: '#F0FDF4',
-  danger: '#DC2626',
-  dangerBg: '#FEF2F2',
+  text: '#12212A',
+  muted: '#5F6B70',
+  faint: '#94A0A4',
+
+  success: '#1F8A4C',
+  successBg: '#EFF7F1',
+  danger: '#B3261E',
+  dangerBg: '#FCF1F0',
   warn: '#B45309',
-  warnBg: '#FFFBEB',
+  warnBg: '#FDF6EC',
 } as const
 
-export const radius = { sm: 8, md: 12, lg: 16, xl: 22 } as const
+/** Matches the website's 18–24px radii. */
+export const radius = { sm: 10, md: 14, lg: 20, xl: 24 } as const
 export const space = (n: number) => n * 4

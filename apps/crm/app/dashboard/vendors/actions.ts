@@ -23,6 +23,9 @@ export interface VendorInput {
   commission_rate: number
   services_offered: string[]
   documents: VendorDocument[]
+  /** Which business the partner is in; dispatch honours both. */
+  accepts_deep_clean: boolean
+  accepts_prime_now: boolean
 }
 
 type Result = { error: string } | { ok: true }
@@ -42,6 +45,8 @@ export async function createVendor(input: VendorInput): Promise<Result> {
       commission_rate: input.commission_rate,
       services_offered: input.services_offered,
       documents: input.documents as unknown as Json,
+      accepts_deep_clean: input.accepts_deep_clean,
+      accepts_prime_now: input.accepts_prime_now,
       onboarded_at: isOnboarded(input.status) ? new Date().toISOString() : null,
     })
     .select('id')
@@ -64,6 +69,8 @@ export async function updateVendor(id: string, input: VendorInput): Promise<Resu
     commission_rate: input.commission_rate,
     services_offered: input.services_offered,
     documents: input.documents as unknown as Json,
+    accepts_deep_clean: input.accepts_deep_clean,
+    accepts_prime_now: input.accepts_prime_now,
   }
   if (isOnboarded(input.status) && existing && !existing.onboarded_at) {
     patch.onboarded_at = new Date().toISOString()

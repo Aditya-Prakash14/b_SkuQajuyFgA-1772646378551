@@ -12,12 +12,16 @@ import {
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 export interface CartItem {
-  id: string          // unique key (slug or name-slug)
+  id: string          // services.id — create_booking resolves this
   name: string
   img: string
-  price: number       // numeric for total calculation
-  priceStr: string    // display string e.g. ₹1,499
+  price: number       // rate: the flat price, or the price of one unit
+  priceStr: string    // display string e.g. ₹1,499 or ₹3 / sq. ft.
   qty: number
+  /** Area / panel count for per-unit services; 1 for flat-priced ones. */
+  units?: number
+  /** services.price_unit — 'fixed' | 'per_sqft' | 'per_panel'. */
+  priceUnit?: string
 }
 
 interface CartContextValue {
@@ -63,6 +67,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setCart(prev => {
       const existing = prev.find(c => c.id === item.id)
       if (existing) {
+        // For a per-unit service the customer is restating the area, not
+        // ordering a second one — replace units instead of bumping qty.
+        if (item.units !== undefined) {
+          return prev.map(c => c.id === item.id ? { ...c, units: item.units } : c)
+        }
         return prev.map(c => c.id === item.id ? { ...c, qty: c.qty + 1 } : c)
       }
       return [...prev, { ...item, qty: 1 }]
@@ -85,7 +94,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const clearCart = useCallback(() => setCart([]), [])
 
   const totalItems = cart.reduce((sum, c) => sum + c.qty, 0)
-  const totalPrice = cart.reduce((sum, c) => sum + c.price * c.qty, 0)
+  // A per-unit line is rate × units × qty.
+  const totalPrice = cart.reduce((sum, c) => sum + c.price * (c.units ?? 1) * c.qty, 0)
 
   return (
     <CartContext.Provider value={{

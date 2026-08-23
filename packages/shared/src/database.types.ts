@@ -201,6 +201,50 @@ export type Database = {
           },
         ]
       }
+      job_offers: {
+        Row: {
+          expires_at: string
+          id: string
+          job_id: string
+          kind: string
+          offered_at: string
+          responded_at: string | null
+          status: string
+          vendor_id: string
+          wave: number
+        }
+        Insert: {
+          expires_at: string
+          id?: string
+          job_id: string
+          kind: string
+          offered_at?: string
+          responded_at?: string | null
+          status?: string
+          vendor_id: string
+          wave?: number
+        }
+        Update: {
+          expires_at?: string
+          id?: string
+          job_id?: string
+          kind?: string
+          offered_at?: string
+          responded_at?: string | null
+          status?: string
+          vendor_id?: string
+          wave?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_offers_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           id: string
@@ -210,6 +254,7 @@ export type Database = {
           service_id: string | null
           service_name: string
           unit_price: number
+          units: number
         }
         Insert: {
           id?: string
@@ -219,6 +264,7 @@ export type Database = {
           service_id?: string | null
           service_name: string
           unit_price: number
+          units?: number // defaults to 1 for fixed-price services
         }
         Update: {
           id?: string
@@ -228,6 +274,7 @@ export type Database = {
           service_id?: string | null
           service_name?: string
           unit_price?: number
+          units?: number
         }
         Relationships: [
           {
@@ -365,6 +412,84 @@ export type Database = {
             columns: ["service_id"]
             isOneToOne: false
             referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prime_now_requests: {
+        Row: {
+          address: string
+          assigned_vendor_id: string | null
+          city: string | null
+          created_at: string
+          customer_id: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string
+          price: number
+          request_number: string
+          scheduled_for: string | null
+          slot: string
+          slot_minutes: number
+          status: string
+          tasks: string[]
+          timing: string
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          assigned_vendor_id?: string | null
+          city?: string | null
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone: string
+          price: number
+          request_number?: string // trigger-generated (gen_prime_now_number)
+          scheduled_for?: string | null
+          slot: string
+          slot_minutes: number
+          status?: string
+          tasks?: string[]
+          timing: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          assigned_vendor_id?: string | null
+          city?: string | null
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string
+          price?: number
+          request_number?: string
+          scheduled_for?: string | null
+          slot?: string
+          slot_minutes?: number
+          status?: string
+          tasks?: string[]
+          timing?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prime_now_requests_assigned_vendor_id_fkey"
+            columns: ["assigned_vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prime_now_requests_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
             referencedColumns: ["id"]
           },
         ]
@@ -599,6 +724,10 @@ export type Database = {
           name: string
           onboarded_at: string | null
           onboarding_step: string
+          is_online: boolean
+          accepts_deep_clean: boolean
+          accepts_prime_now: boolean
+          last_online_at: string | null
           phone: string
           push_token_updated_at: string | null
           rating: number | null
@@ -620,6 +749,10 @@ export type Database = {
           name: string
           onboarded_at?: string | null
           onboarding_step?: string
+          is_online?: boolean
+          accepts_deep_clean?: boolean
+          accepts_prime_now?: boolean
+          last_online_at?: string | null
           phone: string
           push_token_updated_at?: string | null
           rating?: number | null
@@ -641,6 +774,10 @@ export type Database = {
           name?: string
           onboarded_at?: string | null
           onboarding_step?: string
+          is_online?: boolean
+          accepts_deep_clean?: boolean
+          accepts_prime_now?: boolean
+          last_online_at?: string | null
           phone?: string
           push_token_updated_at?: string | null
           rating?: number | null
@@ -680,6 +817,42 @@ export type Database = {
         }
         Returns: Json
       }
+      create_prime_now_request: {
+        Args: {
+          p_address: string
+          p_city: string
+          p_name: string
+          p_notes: string
+          p_phone: string
+          p_scheduled_for?: string
+          p_slot: string
+          p_tasks: string[]
+          p_timing: string
+        }
+        Returns: Json
+      }
+      accept_offer: { Args: { p_offer_id: string }; Returns: Json }
+      decline_offer: { Args: { p_offer_id: string }; Returns: undefined }
+      dispatch_order: { Args: { p_order_id: string; p_wave_size?: number }; Returns: number }
+      dispatch_prime_now: { Args: { p_request_id: string; p_wave_size?: number }; Returns: number }
+      escalate_offers: { Args: never; Returns: number }
+      set_my_availability: { Args: { p_online: boolean }; Returns: undefined }
+      my_offers: {
+        Args: never
+        Returns: {
+          address: string
+          city: string
+          expires_at: string
+          job_id: string
+          kind: string
+          notes: string
+          offer_id: string
+          reference: string
+          scheduled_label: string
+          summary: string
+          total: number
+        }[]
+      }
       current_customer_id: { Args: never; Returns: string }
       current_vendor_id: { Args: never; Returns: string }
       is_admin: { Args: never; Returns: boolean }
@@ -687,6 +860,7 @@ export type Database = {
       my_jobs: {
         Args: never
         Returns: {
+          kind: string
           address: string
           city: string
           created_at: string
@@ -705,6 +879,20 @@ export type Database = {
           updated_at: string
         }[]
       }
+      my_stats: {
+        Args: never
+        Returns: {
+          all_time_payout: number
+          commission_rate: number
+          completed_count: number
+          month_gross: number
+          month_jobs: number
+          month_payout: number
+          rating_avg: number
+          rating_count: number
+        }[]
+      }
+      register_push_token: { Args: { p_token: string }; Returns: undefined }
       reschedule_booking: {
         Args: { p_date: string; p_order_id: string; p_slot?: string }
         Returns: undefined
@@ -739,6 +927,8 @@ export type Database = {
       }
       upsert_my_vendor_profile: {
         Args: {
+          p_accepts_deep_clean?: boolean
+          p_accepts_prime_now?: boolean
           p_city: string
           p_email: string
           p_name: string

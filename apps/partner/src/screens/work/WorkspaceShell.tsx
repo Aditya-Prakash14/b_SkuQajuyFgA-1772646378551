@@ -2,10 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { AppState, Pressable, View } from 'react-native'
 
 import { Loading, Text } from '../../components/ui'
-import { fetchMyJobs, fetchMyStats, isOpen } from '../../lib/jobs'
+import { fetchMyJobs, fetchMyOffers, fetchMyStats, isOpen, setAvailability } from '../../lib/jobs'
 import { onPush, registerForPush, unregisterPush } from '../../lib/push'
 import { errorMessage, supabase } from '../../lib/supabase'
-import type { Job, Vendor, VendorStats } from '../../lib/types'
+import type { Job, Offer, Vendor, VendorStats } from '../../lib/types'
 import { ProfileScreen } from '../ProfileScreen'
 import { AccountScreen } from './AccountScreen'
 import { HistoryScreen } from './HistoryScreen'
@@ -24,6 +24,9 @@ export function WorkspaceShell({ vendor, onVendorChanged }: { vendor: Vendor; on
   const [tab, setTab] = useState<Tab>('jobs')
   const [jobs, setJobs] = useState<Job[] | null>(null)
   const [stats, setStats] = useState<VendorStats | null>(null)
+  const [offers, setOffers] = useState<Offer[]>([])
+  const [online, setOnline] = useState(vendor.is_online)
+  const [onlineBusy, setOnlineBusy] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [editing, setEditing] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
@@ -35,10 +38,15 @@ export function WorkspaceShell({ vendor, onVendorChanged }: { vendor: Vendor; on
     inflight.current = true
     setRefreshing(true)
     try {
-      // Stats are secondary: a stats failure must not blank the job list.
-      const [list, s] = await Promise.all([fetchMyJobs(), fetchMyStats().catch(() => null)])
+      // Stats and offers are secondary: neither may blank the job list.
+      const [list, s, o] = await Promise.all([
+        fetchMyJobs(),
+        fetchMyStats().catch(() => null),
+        fetchMyOffers().catch(() => [] as Offer[]),
+      ])
       setJobs(list)
       setStats(s)
+      setOffers(o)
       setError(null)
     } catch (err) {
       setError(errorMessage(err, 'Could not load your jobs.'))
@@ -64,6 +72,16 @@ export function WorkspaceShell({ vendor, onVendorChanged }: { vendor: Vendor; on
         { event: '*', schema: 'public', table: 'orders', filter: `assigned_vendor_id=eq.${vendor.id}` },
         () => load(),
       )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'prime_now_requests',
+          filter: `assigned_vendor_id=eq.${vendor.id}`,
+        },
+        () => load(),
+      )
       .subscribe()
 
     // Push: register this device for assignment alerts (no-op where unsupported,
@@ -86,6 +104,32 @@ export function WorkspaceShell({ vendor, onVendorChanged }: { vendor: Vendor; on
       supabase.removeChannel(channel)
     }
   }, [load, vendor.id])
+
+  // Offers expire in about two minutes and are not delivered over Realtime,
+  // so while online we re-check often enough to actually catch one.
+  useEffect(() => {
+    if (!online || !vendor.accepts_prime_now) return
+    const t = setInterval(() => {
+      fetchMyOffers()
+        .then(setOffers)
+        .catch(() => {})
+    }, 15000)
+    return () => clearInterval(t)
+  }, [online, vendor.accepts_prime_now])
+
+  async function toggleOnline(next: boolean) {
+    setOnlineBusy(true)
+    setOnline(next) // optimistic — the switch must feel instant
+    try {
+      await setAvailability(next)
+      setOffers(next ? await fetchMyOffers().catch(() => []) : [])
+    } catch (err) {
+      setOnline(!next)
+      setError(errorMessage(err, 'Could not change your availability.'))
+    } finally {
+      setOnlineBusy(false)
+    }
+  }
 
   if (jobs === null) return <Loading label="Loading your jobs…" />
 
@@ -124,10 +168,16 @@ export function WorkspaceShell({ vendor, onVendorChanged }: { vendor: Vendor; on
         {tab === 'jobs' ? (
           <JobsScreen
             jobs={jobs}
+            offers={offers}
+            wantsPrimeNow={vendor.accepts_prime_now}
+            online={online}
+            onlineBusy={onlineBusy}
             refreshing={refreshing}
             error={error}
+            onToggleOnline={toggleOnline}
             onRefresh={load}
             onOpen={(j) => setSelectedId(j.id)}
+            onOffersChanged={load}
           />
         ) : tab === 'history' ? (
           <HistoryScreen

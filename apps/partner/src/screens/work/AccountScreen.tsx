@@ -61,6 +61,25 @@ export function AccountScreen({
       </Card>
 
       <Card>
+        <Text className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Work you accept</Text>
+        <View className="mt-2 flex-row flex-wrap gap-2">
+          {vendor.accepts_deep_clean ? (
+            <Badge variant="default">
+              <Text>Deep Cleaning</Text>
+            </Badge>
+          ) : null}
+          {vendor.accepts_prime_now ? (
+            <Badge variant="brand">
+              <Text>Prime Now</Text>
+            </Badge>
+          ) : null}
+          {!vendor.accepts_deep_clean && !vendor.accepts_prime_now ? (
+            <Text className="text-sm text-muted-foreground">None selected — edit your profile.</Text>
+          ) : null}
+        </View>
+      </Card>
+
+      <Card>
         <Text className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Customer rating</Text>
         {stats && stats.rating_count > 0 && stats.rating_avg !== null ? (
           <View className="mt-2 flex-row items-baseline gap-2">
@@ -78,8 +97,11 @@ export function AccountScreen({
         )}
       </Card>
 
+      {vendor.accepts_deep_clean ? (
       <Card>
-        <Text className="text-xs font-bold uppercase tracking-wide text-muted-foreground">Services you offer</Text>
+        <Text className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+          Deep Cleaning services
+        </Text>
         {services === null ? (
           <Text className="mt-2 text-sm text-muted-foreground">Loading…</Text>
         ) : services.length === 0 ? (
@@ -95,9 +117,11 @@ export function AccountScreen({
             ))}
           </View>
         )}
-        <View className="mt-3">
-          <Button label="Edit profile" variant="ghost" onPress={onEdit} />
-        </View>
+      </Card>
+      ) : null}
+
+      <Card>
+        <Button label="Edit profile" variant="ghost" onPress={onEdit} />
       </Card>
 
       <Button label="Sign out" variant="ghost" onPress={onSignOut} />

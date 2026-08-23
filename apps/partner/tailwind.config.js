@@ -5,30 +5,33 @@ module.exports = {
   presets: [require('nativewind/preset')],
   theme: {
     extend: {
-      // Mirrors packages/shared/styles/theme.css, converted from oklch to hex
-      // (RN has no oklch support). Same split as the web apps: `primary` is the
-      // brand blue, `brand` is the orange CTA color, `accent` stays a neutral
-      // hover tint per shadcn convention.
+      // Mirrors the website palette in apps/web/app/globals.css so a partner and
+      // a customer see the same brand: deep teal on a warm off-white ground,
+      // dark bands for emphasis, amber reserved for the primary call to action.
+      // Hex because React Native has no oklch support.
       colors: {
-        border: '#E6E8EF',
-        input: '#E1E3EA',
-        ring: '#2E1BAD',
-        background: '#F7F8FB',
-        foreground: '#12131A',
-        primary: { DEFAULT: '#2E1BAD', foreground: '#FFFFFF' },
-        secondary: { DEFAULT: '#EEF0F6', foreground: '#12131A' },
-        muted: { DEFAULT: '#F1F2F7', foreground: '#6B7280' },
-        accent: { DEFAULT: '#F1F2F7', foreground: '#12131A' },
-        brand: { DEFAULT: '#E8712C', foreground: '#FFFFFF' },
-        destructive: { DEFAULT: '#DC2626', foreground: '#FFFFFF' },
-        success: { DEFAULT: '#15803D', foreground: '#FFFFFF' },
+        border: '#E7E3DB',
+        input: '#E7E3DB',
+        ring: '#0E5A63',
+        background: '#FBFAF7',
+        foreground: '#12212A',
+        primary: { DEFAULT: '#0E5A63', foreground: '#FFFFFF' },
+        secondary: { DEFAULT: '#EDF3F2', foreground: '#0E5A63' },
+        muted: { DEFAULT: '#EDF3F2', foreground: '#5F6B70' },
+        // shadcn convention: `accent` is a neutral hover tint, not the brand.
+        accent: { DEFAULT: '#EDF3F2', foreground: '#0E5A63' },
+        brand: { DEFAULT: '#E8A33D', foreground: '#12212A' },
+        // Dark band, matching the website's ink sections.
+        ink: { DEFAULT: '#12212A', foreground: '#FBFAF7' },
+        destructive: { DEFAULT: '#B3261E', foreground: '#FFFFFF' },
+        success: { DEFAULT: '#1F8A4C', foreground: '#FFFFFF' },
         warning: { DEFAULT: '#B45309', foreground: '#FFFFFF' },
-        card: { DEFAULT: '#FFFFFF', foreground: '#12131A' },
+        card: { DEFAULT: '#FFFFFF', foreground: '#12212A' },
       },
       borderRadius: {
-        lg: '16px',
-        md: '12px',
-        sm: '8px',
+        lg: '20px',
+        md: '14px',
+        sm: '10px',
       },
     },
   },

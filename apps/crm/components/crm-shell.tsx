@@ -5,8 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard, ClipboardList, Users, Truck, Sparkles, FileText, Settings,
-  LogOut, Menu, ChevronRight, ChevronsUpDown, type LucideIcon,
-} from 'lucide-react'
+  LogOut, Menu, ChevronRight, ChevronsUpDown, type LucideIcon, Zap } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { Badge, type BadgeProps } from '@/components/ui/badge'
@@ -42,6 +41,7 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
     label: 'Operations',
     items: [
       { href: '/dashboard/orders', label: 'Orders', icon: ClipboardList, roles: ALL },
+      { href: '/dashboard/prime-now', label: 'Prime Now', icon: Zap, roles: ALL },
       { href: '/dashboard/customers', label: 'Customers', icon: Users, roles: ALL },
       { href: '/dashboard/vendors', label: 'Vendors', icon: Truck, roles: ALL },
     ],

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
 import { SITE_URL } from '@/lib/env'
-import { getAllServiceSlugs } from '@/lib/services-data'
+import { getAllCategorySlugs, getAllServiceSlugs } from '@/lib/services-data'
 import { BLOG_POSTS } from '@/lib/blog-data'
 
 // Regenerate alongside the catalog pages, so a service added in the CRM shows
@@ -9,7 +9,10 @@ export const revalidate = 300
 
 const STATIC_PATHS = [
   '/',
-  '/services',
+  // The two business domains. /services now redirects to /deep-cleaning, so it
+  // is deliberately not listed.
+  '/deep-cleaning',
+  '/prime-now',
   '/about',
   '/contact',
   '/become-partner',
@@ -22,7 +25,7 @@ const STATIC_PATHS = [
 ]
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const slugs = await getAllServiceSlugs()
+  const [slugs, categories] = await Promise.all([getAllServiceSlugs(), getAllCategorySlugs()])
   const now = new Date()
 
   return [
@@ -31,6 +34,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: now,
       changeFrequency: 'weekly' as const,
       priority: path === '/' ? 1 : 0.7,
+    })),
+    ...categories.map((slug) => ({
+      url: `${SITE_URL}/deep-cleaning/${slug}`,
+      lastModified: now,
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
     })),
     ...slugs.map((slug) => ({
       url: `${SITE_URL}/services/${slug}`,
