@@ -195,6 +195,50 @@
   --brand: #f97316; --brand-foreground: #431407;
 }
 
+/* Festive atmosphere: a soft wash of the festival colour bleeding down from
+ * the top of the page, plus the moving parts used by festival-effects.tsx. */
+:root[data-festival] body {
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--primary) 8%, transparent),
+    transparent 360px
+  );
+}
+
+@keyframes festival-fall {
+  0%   { transform: translateY(-8vh) translateX(0) rotate(0deg); }
+  25%  { transform: translateY(22vh) translateX(2.5vw) rotate(40deg); }
+  50%  { transform: translateY(50vh) translateX(-2vw) rotate(-30deg); }
+  75%  { transform: translateY(78vh) translateX(2vw) rotate(25deg); }
+  100% { transform: translateY(108vh) translateX(-1vw) rotate(0deg); }
+}
+@keyframes festival-twinkle {
+  from { opacity: 0.35; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1.15); }
+}
+
+/* String-light bulb under the header (festivals of lights). */
+.festival-bulb {
+  width: 7px;
+  height: 7px;
+  margin-bottom: 3px;
+  border-radius: 9999px;
+  filter: drop-shadow(0 0 4px currentColor) saturate(1.4);
+  animation: festival-twinkle 1.8s ease-in-out infinite alternate;
+}
+/* Triangle bunting flag (everything else). */
+.festival-flag {
+  height: 11px;
+  flex: 1 1 0;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  opacity: 0.9;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .festival-particles { display: none; }
+  .festival-bulb { animation: none; }
+}
+
 @theme inline {
   --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;

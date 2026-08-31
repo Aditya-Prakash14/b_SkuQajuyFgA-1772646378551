@@ -11,6 +11,8 @@ import { useCart } from '@/lib/cart-context'
 import { useCity } from '@/lib/city-context'
 import { useAuth } from '@/lib/auth-context'
 import { LogoFestivalAccessory, FestivalGreeting } from '@/components/festival-decorations'
+import { FestivalBunting } from '@/components/festival-effects'
+import { useFestival } from '@/lib/festival-context'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -44,6 +46,7 @@ export function SiteHeader() {
   const { totalItems, setCartOpen } = useCart()
   const { city, setCity, cities, detectCity, detecting, detectMessage, detectError } = useCity()
   const { user, displayName, signInWithGoogle, signOut } = useAuth()
+  const festival = useFestival()
 
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -178,7 +181,9 @@ export function SiteHeader() {
               onClick={() => setCartOpen(true)}
               className="rounded-xl font-bold shadow-md shadow-brand/30"
             >
-              {totalItems > 0 ? (<><ShoppingBag /> Cart ({totalItems})</>) : 'Book Now'}
+              {totalItems > 0
+                ? (<><ShoppingBag /> Cart ({totalItems})</>)
+                : festival ? `${festival.festival.emoji} Book Now` : 'Book Now'}
             </Button>
 
             <Button
@@ -193,6 +198,8 @@ export function SiteHeader() {
             </Button>
           </div>
         </div>
+
+        <FestivalBunting />
 
         {/* Mobile menu */}
         {mobileOpen && (
