@@ -234,9 +234,41 @@
   opacity: 0.9;
 }
 
+/* Ornament swinging from the festival banner: a thin string with the emoji
+ * at its end, the whole thing rocking around its anchor point. */
+@keyframes festival-sway {
+  from { transform: rotate(-7deg); }
+  to   { transform: rotate(7deg); }
+}
+.festival-hang {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform-origin: top center;
+  animation: festival-sway 2.6s ease-in-out infinite alternate;
+}
+.festival-hang > i {
+  width: 1.5px;
+  background: currentColor;
+  opacity: 0.45;
+}
+
+/* Faint rangoli quarter-circle pinned in a bottom corner. */
+.festival-rangoli {
+  position: absolute;
+  width: 15rem;
+  height: 15rem;
+  border-radius: 9999px;
+  background:
+    radial-gradient(circle, transparent 34%, var(--background) 35% 39%, transparent 40%),
+    repeating-conic-gradient(var(--primary) 0deg 12deg, var(--brand) 12deg 24deg, var(--secondary-foreground) 24deg 36deg);
+  opacity: 0.09;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .festival-particles { display: none; }
-  .festival-bulb { animation: none; }
+  .festival-bulb,
+  .festival-hang { animation: none; }
 }
 
 @theme inline {

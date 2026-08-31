@@ -7,7 +7,7 @@ import { AuthProvider } from '@/lib/auth-context'
 import { CityProvider } from '@/lib/city-context'
 import { CartProvider } from '@/lib/cart-context'
 import { FestivalProvider } from '@/lib/festival-context'
-import { FestivalParticles } from '@/components/festival-effects'
+import { FestivalParticles, FestivalRangoli } from '@/components/festival-effects'
 import CartDrawer from '@/components/cart-drawer'
 // @ts-ignore: CSS module side-effect import (no type declarations in this repo)
 import './globals.css'
@@ -55,6 +55,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 {children}
                 <CartDrawer />
                 <FestivalParticles />
+                <FestivalRangoli />
               </CartProvider>
             </CityProvider>
           </AuthProvider>

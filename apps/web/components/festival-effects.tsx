@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
+import Link from 'next/link'
 import { useFestival } from '@/lib/festival-context'
 import type { FestivalPalette } from '@prime/shared'
 
@@ -30,6 +31,27 @@ const PARTICLES: Record<FestivalPalette, string[]> = {
 
 /** Festivals of lights get bulbs; the rest get bunting flags. */
 const LIGHT_PALETTES: readonly FestivalPalette[] = ['christmas', 'diwali', 'celebration']
+
+/** Ornaments swinging from the festival banner, outermost first. */
+const HANGINGS: Record<FestivalPalette, string[]> = {
+  christmas: ['🔔', '🎁', '🎄', '🎁', '🔔'],
+  diwali: ['🪔', '🏮', '✨', '🏮', '🪔'],
+  holi: ['🎨', '🟣', '🟢', '🟡', '🎨'],
+  tricolor: ['🇮🇳', '🧡', '🤍', '💚', '🇮🇳'],
+  eid: ['🏮', '🌙', '⭐', '🌙', '🏮'],
+  ganesh: ['🌺', '🪔', '🌼', '🪔', '🌺'],
+  harvest: ['🌼', '🌺', '🌸', '🌺', '🌼'],
+  celebration: ['🎊', '🎈', '🎉', '🎈', '🎊'],
+  valentine: ['💝', '💘', '💖', '💘', '💝'],
+  kite: ['🪁', '🎐', '☁️', '🎐', '🪁'],
+  halloween: ['🎃', '👻', '🕸️', '🦇', '🎃'],
+  peacock: ['🦚', '🪶', '💙', '🪶', '🦚'],
+}
+
+/** Festivals whose floors get a rangoli in the page corners. */
+const RANGOLI_PALETTES: readonly FestivalPalette[] = [
+  'diwali', 'ganesh', 'harvest', 'holi', 'peacock', 'tricolor',
+]
 
 export function FestivalParticles() {
   const festival = useFestival()
@@ -95,6 +117,53 @@ export function FestivalBunting() {
       {Array.from({ length: 40 }).map((_, i) => (
         <span key={i} className="festival-flag" style={{ background: colors[i % 3] }} />
       ))}
+    </div>
+  )
+}
+
+/**
+ * The festive band under the header: gradient in the festival colours,
+ * swinging ornaments on strings, the greeting writ large, and a CTA into
+ * deep cleaning. Scrolls away with the page — the sticky header stays lean.
+ */
+export function FestivalBanner() {
+  const festival = useFestival()
+  if (!festival) return null
+
+  const hangs = HANGINGS[festival.theme.palette] ?? []
+  const strings = [16, 30, 10, 26, 18]
+  return (
+    <div className="relative overflow-hidden bg-gradient-to-r from-primary via-primary to-primary/85 text-primary-foreground">
+      <div className="pointer-events-none absolute inset-x-0 top-0 hidden justify-between px-[6%] sm:flex" aria-hidden="true">
+        {hangs.map((h, i) => (
+          <span key={i} className="festival-hang" style={{ animationDelay: `${i * 0.4}s` }}>
+            <i style={{ height: strings[i % strings.length] }} />
+            <span className="text-lg drop-shadow-sm">{h}</span>
+          </span>
+        ))}
+      </div>
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-4 gap-y-2 px-4 py-4 text-center sm:py-5">
+        <span className="text-2xl" aria-hidden="true">{festival.festival.emoji}</span>
+        <p className="text-sm font-bold sm:text-base">{festival.theme.greeting}</p>
+        <Link
+          href="/deep-cleaning"
+          className="rounded-full bg-brand px-3.5 py-1.5 text-xs font-bold text-brand-foreground shadow-md transition-transform hover:scale-105"
+        >
+          Book a festive clean →
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+/** Faint rangoli quarter-circles in the bottom corners (Indian festivals). */
+export function FestivalRangoli() {
+  const festival = useFestival()
+  if (!festival || !RANGOLI_PALETTES.includes(festival.theme.palette)) return null
+  return (
+    <div className="pointer-events-none fixed inset-0 z-0 hidden md:block" aria-hidden="true">
+      <span className="festival-rangoli -bottom-24 -left-24" />
+      <span className="festival-rangoli -bottom-24 -right-24" />
     </div>
   )
 }

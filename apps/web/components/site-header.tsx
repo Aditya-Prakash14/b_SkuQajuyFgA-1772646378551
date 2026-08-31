@@ -11,7 +11,7 @@ import { useCart } from '@/lib/cart-context'
 import { useCity } from '@/lib/city-context'
 import { useAuth } from '@/lib/auth-context'
 import { LogoFestivalAccessory, FestivalGreeting } from '@/components/festival-decorations'
-import { FestivalBunting } from '@/components/festival-effects'
+import { FestivalBunting, FestivalBanner } from '@/components/festival-effects'
 import { useFestival } from '@/lib/festival-context'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -256,6 +256,8 @@ export function SiteHeader() {
           </div>
         )}
       </header>
+
+      <FestivalBanner />
     </>
   )
 }
