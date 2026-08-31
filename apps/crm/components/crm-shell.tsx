@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard, ClipboardList, Users, Truck, Sparkles, FileText, Settings,
-  LogOut, Menu, ChevronRight, ChevronsUpDown, type LucideIcon, Zap } from 'lucide-react'
+  LogOut, Menu, ChevronRight, ChevronsUpDown, type LucideIcon, Zap, CalendarDays } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { Badge, type BadgeProps } from '@/components/ui/badge'
@@ -36,7 +36,13 @@ const ALL: Role[] = ['staff', 'admin', 'super_admin']
 const MANAGER: Role[] = ['admin', 'super_admin']
 
 const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
-  { label: 'Overview', items: [{ href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ALL }] },
+  {
+    label: 'Overview',
+    items: [
+      { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ALL },
+      { href: '/dashboard/calendar', label: 'Festival Calendar', icon: CalendarDays, roles: ALL },
+    ],
+  },
   {
     label: 'Operations',
     items: [

@@ -10,6 +10,7 @@ import {
 import { useCart } from '@/lib/cart-context'
 import { useCity } from '@/lib/city-context'
 import { useAuth } from '@/lib/auth-context'
+import { LogoFestivalAccessory, FestivalGreeting } from '@/components/festival-decorations'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -52,14 +53,18 @@ export function SiteHeader() {
       <div className="bg-primary px-4 py-2 text-center text-xs text-primary-foreground sm:text-sm">
         <Phone className="mr-1 inline-block h-3.5 w-3.5" /> Call us anytime:{' '}
         <a href="tel:+917349603429" className="font-semibold hover:underline">+91 73496 03429</a>
-        &nbsp;|&nbsp; Professional cleaning services across India
+        &nbsp;|&nbsp;{' '}
+        <FestivalGreeting fallback="Professional cleaning services across India" />
       </div>
 
       <header className="sticky top-0 z-50 border-b bg-background shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
           <Link href="/" className="flex shrink-0 items-center gap-2.5" aria-label="My Prime Company home">
-            <span className="flex h-7 w-12 items-center justify-center overflow-hidden rounded-lg bg-white ring-1 ring-border">
-              <Image src="/logo.png" alt="PC monogram" width={40} height={18} priority className="h-4 w-auto" />
+            <span className="relative">
+              <span className="flex h-7 w-12 items-center justify-center overflow-hidden rounded-lg bg-white ring-1 ring-border">
+                <Image src="/logo.png" alt="PC monogram" width={40} height={18} priority className="h-4 w-auto" />
+              </span>
+              <LogoFestivalAccessory />
             </span>
             <span className="flex flex-col leading-none">
               <span className="text-base font-black tracking-tight text-foreground">My Prime Company</span>

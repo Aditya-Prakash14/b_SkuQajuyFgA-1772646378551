@@ -6,6 +6,7 @@ import { SITE_URL } from '@/lib/env'
 import { AuthProvider } from '@/lib/auth-context'
 import { CityProvider } from '@/lib/city-context'
 import { CartProvider } from '@/lib/cart-context'
+import { FestivalProvider } from '@/lib/festival-context'
 import CartDrawer from '@/components/cart-drawer'
 // @ts-ignore: CSS module side-effect import (no type declarations in this repo)
 import './globals.css'
@@ -46,14 +47,16 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" className={`${manrope.variable} ${jetbrainsMono.variable}`}>
       <body className="font-sans antialiased" suppressHydrationWarning>
-        <AuthProvider>
-          <CityProvider>
-            <CartProvider>
-              {children}
-              <CartDrawer />
-            </CartProvider>
-          </CityProvider>
-        </AuthProvider>
+        <FestivalProvider>
+          <AuthProvider>
+            <CityProvider>
+              <CartProvider>
+                {children}
+                <CartDrawer />
+              </CartProvider>
+            </CityProvider>
+          </AuthProvider>
+        </FestivalProvider>
         <Analytics />
         {/* Google tag (gtag.js) */}
         <Script

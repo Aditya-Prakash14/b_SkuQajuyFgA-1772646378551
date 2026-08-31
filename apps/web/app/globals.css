@@ -113,6 +113,82 @@
   --sidebar-ring: #4ea3ac;
 }
 
+/* ============================================================================
+ * Festival palettes — applied automatically by FestivalProvider, which stamps
+ * data-festival="<palette>" on <html> while a festival window is live (data in
+ * packages/shared/src/festivals.ts). Only the accent tokens move; the page
+ * ground, ink bands and neutrals stay put so the site remains itself, just
+ * dressed for the occasion. :root[data-festival] outranks .dark, so the same
+ * mid-tone accents serve both modes.
+ * ========================================================================= */
+
+:root[data-festival='christmas'] {
+  --primary: #a51d1d; --primary-foreground: #ffffff; --ring: #a51d1d;
+  --secondary: #fbeaea; --secondary-foreground: #7c1616;
+  --accent: #fbeaea; --accent-foreground: #7c1616;
+  --brand: #2e7d4f; --brand-foreground: #ffffff;
+}
+:root[data-festival='diwali'] {
+  --primary: #9a3412; --primary-foreground: #ffffff; --ring: #9a3412;
+  --secondary: #fdf0e7; --secondary-foreground: #7c2d12;
+  --accent: #fdf0e7; --accent-foreground: #7c2d12;
+  --brand: #eab308; --brand-foreground: #12212a;
+}
+:root[data-festival='holi'] {
+  --primary: #a21caf; --primary-foreground: #ffffff; --ring: #a21caf;
+  --secondary: #fbeafc; --secondary-foreground: #86198f;
+  --accent: #fbeafc; --accent-foreground: #86198f;
+  --brand: #06b6d4; --brand-foreground: #083344;
+}
+:root[data-festival='tricolor'] {
+  --primary: #17418a; --primary-foreground: #ffffff; --ring: #17418a;
+  --secondary: #e9f0fb; --secondary-foreground: #12336c;
+  --accent: #e9f0fb; --accent-foreground: #12336c;
+  --brand: #f97316; --brand-foreground: #431407;
+}
+:root[data-festival='eid'] {
+  --primary: #047857; --primary-foreground: #ffffff; --ring: #047857;
+  --secondary: #e7f5f0; --secondary-foreground: #065f46;
+  --accent: #e7f5f0; --accent-foreground: #065f46;
+  --brand: #ca8a04; --brand-foreground: #1c1503;
+}
+:root[data-festival='ganesh'] {
+  --primary: #c2410c; --primary-foreground: #ffffff; --ring: #c2410c;
+  --secondary: #fdeee5; --secondary-foreground: #9a3412;
+  --accent: #fdeee5; --accent-foreground: #9a3412;
+  --brand: #f59e0b; --brand-foreground: #12212a;
+}
+:root[data-festival='harvest'] {
+  --primary: #15803d; --primary-foreground: #ffffff; --ring: #15803d;
+  --secondary: #eaf6ee; --secondary-foreground: #14532d;
+  --accent: #eaf6ee; --accent-foreground: #14532d;
+  --brand: #eab308; --brand-foreground: #12212a;
+}
+:root[data-festival='celebration'] {
+  --primary: #5b21b6; --primary-foreground: #ffffff; --ring: #5b21b6;
+  --secondary: #f1eafc; --secondary-foreground: #4c1d95;
+  --accent: #f1eafc; --accent-foreground: #4c1d95;
+  --brand: #f59e0b; --brand-foreground: #12212a;
+}
+:root[data-festival='valentine'] {
+  --primary: #be185d; --primary-foreground: #ffffff; --ring: #be185d;
+  --secondary: #fceaf1; --secondary-foreground: #9d174d;
+  --accent: #fceaf1; --accent-foreground: #9d174d;
+  --brand: #f472b6; --brand-foreground: #4c0519;
+}
+:root[data-festival='kite'] {
+  --primary: #0369a1; --primary-foreground: #ffffff; --ring: #0369a1;
+  --secondary: #e7f3fa; --secondary-foreground: #075985;
+  --accent: #e7f3fa; --accent-foreground: #075985;
+  --brand: #f59e0b; --brand-foreground: #12212a;
+}
+:root[data-festival='halloween'] {
+  --primary: #7e22ce; --primary-foreground: #ffffff; --ring: #7e22ce;
+  --secondary: #f4ebfb; --secondary-foreground: #6b21a8;
+  --accent: #f4ebfb; --accent-foreground: #6b21a8;
+  --brand: #f97316; --brand-foreground: #431407;
+}
+
 @theme inline {
   --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;
