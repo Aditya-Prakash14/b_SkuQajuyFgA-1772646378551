@@ -182,6 +182,12 @@
   --accent: #e7f3fa; --accent-foreground: #075985;
   --brand: #f59e0b; --brand-foreground: #12212a;
 }
+:root[data-festival='peacock'] {
+  --primary: #4338ca; --primary-foreground: #ffffff; --ring: #4338ca;
+  --secondary: #eef0fb; --secondary-foreground: #3730a3;
+  --accent: #eef0fb; --accent-foreground: #3730a3;
+  --brand: #eab308; --brand-foreground: #12212a;
+}
 :root[data-festival='halloween'] {
   --primary: #7e22ce; --primary-foreground: #ffffff; --ring: #7e22ce;
   --secondary: #f4ebfb; --secondary-foreground: #6b21a8;

@@ -26,6 +26,7 @@ export type FestivalPalette =
   | 'valentine'
   | 'kite'
   | 'halloween'
+  | 'peacock'
 
 export type FestivalAccessory =
   | 'santa-cap'
@@ -39,6 +40,7 @@ export type FestivalAccessory =
   | 'heart'
   | 'kite'
   | 'pumpkin'
+  | 'peacock'
 
 export interface FestivalTheme {
   palette: FestivalPalette
@@ -147,7 +149,11 @@ const DATED_FESTIVALS: DatedFestival[] = [
     dates: { 2026: [8, 26], 2027: [9, 12] },
     theme: { palette: 'harvest', accessory: 'flowers', daysBefore: 3, daysAfter: 0, greeting: 'Happy Onam! Wishing you a golden harvest.' },
   },
-  { id: 'janmashtami', name: 'Krishna Janmashtami', emoji: '🦚', kind: 'indian', dates: { 2026: [9, 4], 2027: [8, 25] } },
+  {
+    id: 'janmashtami', name: 'Krishna Janmashtami', emoji: '🦚', kind: 'indian',
+    dates: { 2026: [9, 4], 2027: [8, 25] },
+    theme: { palette: 'peacock', accessory: 'peacock', daysBefore: 1, daysAfter: 0, greeting: 'Happy Janmashtami from My Prime Company!' },
+  },
   {
     id: 'ganesh-chaturthi', name: 'Ganesh Chaturthi', emoji: '🌺', kind: 'indian', durationDays: 10,
     dates: { 2026: [9, 14], 2027: [9, 4] },
@@ -240,5 +246,30 @@ export function activeFestivalTheme(on: Date): ActiveFestivalTheme | null {
   if (!candidates.length) return null
   return candidates.sort(
     (a, b) => Math.abs(a.date.getTime() - day.getTime()) - Math.abs(b.date.getTime() - day.getTime()),
+  )[0]
+}
+
+/**
+ * The theme of a specific festival by id, resolved to its occurrence nearest
+ * `ref` — used by the website's `?festival=<id>` preview mode.
+ */
+export function festivalThemeById(id: string, ref: Date = new Date()): ActiveFestivalTheme | null {
+  const matches: ActiveFestivalTheme[] = []
+  for (const y of [ref.getFullYear() - 1, ref.getFullYear(), ref.getFullYear() + 1]) {
+    for (const o of festivalsForYear(y)) {
+      if (o.festival.id !== id || !o.festival.theme) continue
+      const theme = o.festival.theme
+      matches.push({
+        festival: o.festival,
+        theme,
+        date: o.date,
+        start: addDays(o.date, -theme.daysBefore),
+        end: addDays(o.date, theme.daysAfter),
+      })
+    }
+  }
+  if (!matches.length) return null
+  return matches.sort(
+    (a, b) => Math.abs(a.date.getTime() - ref.getTime()) - Math.abs(b.date.getTime() - ref.getTime()),
   )[0]
 }

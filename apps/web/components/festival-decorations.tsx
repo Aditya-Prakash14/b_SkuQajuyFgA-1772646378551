@@ -22,6 +22,7 @@ const EMOJI: Partial<Record<FestivalAccessory, string>> = {
   heart: '💝',
   kite: '🪁',
   pumpkin: '🎃',
+  peacock: '🦚',
 }
 
 function SantaCap({ className }: { className?: string }) {

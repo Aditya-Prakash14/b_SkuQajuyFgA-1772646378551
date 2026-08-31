@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState } from 'react'
-import { activeFestivalTheme, type ActiveFestivalTheme } from '@prime/shared'
+import { activeFestivalTheme, festivalThemeById, type ActiveFestivalTheme } from '@prime/shared'
 
 /**
  * Automatic festive theming — the Google/Amazon "cap on the logo" treatment.
@@ -20,7 +20,7 @@ export function FestivalProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const apply = () => {
-      const next = activeFestivalTheme(new Date())
+      const next = previewTheme() ?? activeFestivalTheme(new Date())
       setActive(next)
       const root = document.documentElement
       if (next) root.setAttribute('data-festival', next.theme.palette)
@@ -36,3 +36,18 @@ export function FestivalProvider({ children }: { children: React.ReactNode }) {
 }
 
 export const useFestival = () => useContext(FestivalContext)
+
+/**
+ * Testing hook: `?festival=diwali` forces a festival's theme by id, and
+ * `?festival=2026-09-04` shows whatever theme would be live on that date.
+ * Remove the query param and the site snaps back to today's reality.
+ */
+function previewTheme(): ActiveFestivalTheme | null {
+  const raw = new URLSearchParams(window.location.search).get('festival')
+  if (!raw) return null
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+    const [y, m, d] = raw.split('-').map(Number)
+    return activeFestivalTheme(new Date(y, m - 1, d))
+  }
+  return festivalThemeById(raw)
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { activeFestivalTheme, festivalsForYear, festivalsInMonth, upcomingFestivals } from './festivals'
+import { activeFestivalTheme, festivalThemeById, festivalsForYear, festivalsInMonth, upcomingFestivals } from './festivals'
 
 describe('festivalsForYear', () => {
   it('includes fixed and dated festivals for 2026, sorted', () => {
@@ -50,6 +50,23 @@ describe('activeFestivalTheme', () => {
 
   it('is null on an ordinary day', () => {
     expect(activeFestivalTheme(new Date(2026, 6, 7))).toBeNull()
+  })
+
+  it('is Janmashtami on Sep 4 2026', () => {
+    expect(activeFestivalTheme(new Date(2026, 8, 4))?.festival.id).toBe('janmashtami')
+  })
+})
+
+describe('festivalThemeById', () => {
+  it('resolves a themed festival to its nearest occurrence', () => {
+    const t = festivalThemeById('janmashtami', new Date(2026, 8, 1))
+    expect(t?.theme.palette).toBe('peacock')
+    expect(t?.date).toEqual(new Date(2026, 8, 4))
+  })
+
+  it('returns null for unthemed or unknown ids', () => {
+    expect(festivalThemeById('teachers-day', new Date(2026, 8, 1))).toBeNull()
+    expect(festivalThemeById('nope', new Date(2026, 8, 1))).toBeNull()
   })
 })
 
