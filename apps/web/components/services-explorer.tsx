@@ -46,7 +46,7 @@ export function ServiceCard({ svc, city }: { svc: HomeService; city: string }) {
           <Button
             size="sm"
             onClick={() => addToCart({ id: svc.id, name: svc.name, img: svc.img, price: svc.price, priceStr: svc.priceStr })}
-            className={cn(inCart && 'bg-emerald-600 text-white hover:bg-emerald-600/90')}
+            className={cn(inCart && 'bg-primary text-primary-foreground hover:bg-primary/90')}
           >
             <ShoppingBag />
             {inCart ? 'Added' : 'Add'}

@@ -347,7 +347,7 @@ function ReviewBlock({
             </Button>
           </div>
           {existing.comment && <p className="mt-1.5 text-sm text-gray-600">“{existing.comment}”</p>}
-          <p className="mt-1 flex items-center gap-1 text-[11px] text-green-600"><CheckCircle className="w-3 h-3" /> Thanks for your review</p>
+          <p className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground"><CheckCircle className="w-3 h-3" /> Thanks for your review</p>
         </div>
       ) : (
         <div className="mt-2 space-y-2">

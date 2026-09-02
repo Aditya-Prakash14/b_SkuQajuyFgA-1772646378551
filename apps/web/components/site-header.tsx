@@ -106,7 +106,7 @@ export function SiteHeader() {
                   {detecting ? 'Detecting…' : 'Use my current location'}
                 </DropdownMenuItem>
 
-                {detectMessage && <p className="px-2 py-1.5 text-[11px] text-emerald-600">{detectMessage}</p>}
+                {detectMessage && <p className="px-2 py-1.5 text-[11px] text-muted-foreground">{detectMessage}</p>}
                 {detectError && <p className="px-2 py-1.5 text-[11px] text-destructive">{detectError}</p>}
 
                 <DropdownMenuSeparator />

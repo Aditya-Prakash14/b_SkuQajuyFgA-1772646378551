@@ -15,7 +15,7 @@ export function Stars({ value, className = 'w-4 h-4' }: { value: number; classNa
           key={n}
           className={cn(
             className,
-            n <= Math.round(value) ? 'fill-amber-400 text-amber-400' : 'fill-muted text-muted',
+            n <= Math.round(value) ? 'fill-foreground text-foreground' : 'fill-muted text-muted',
           )}
         />
       ))}
@@ -46,7 +46,7 @@ export function StarInput({ value, onChange }: { value: number; onChange: (v: nu
           <Star
             className={cn(
               'size-7',
-              n <= shown ? 'fill-amber-400 text-amber-400' : 'fill-muted text-muted-foreground/40',
+              n <= shown ? 'fill-foreground text-foreground' : 'fill-muted text-muted-foreground/40',
             )}
           />
         </Button>

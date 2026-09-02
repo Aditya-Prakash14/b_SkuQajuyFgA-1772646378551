@@ -48,13 +48,13 @@ export default function CareersPage() {
                 href="https://wa.me/917349603429"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 bg-brand text-white px-6 py-3 rounded-xl font-bold hover:bg-brand/90 transition-colors"
+                className="inline-flex items-center justify-center gap-2 bg-brand text-brand-foreground px-6 py-3 rounded-xl font-bold hover:bg-brand/90 transition-colors"
               >
                 <MessageCircle className="w-4 h-4" /> Apply on WhatsApp
               </a>
               <a
                 href="mailto:support@myprimecompany.in?subject=Job%20Application"
-                className="inline-flex items-center justify-center gap-2 border-2 border-primary text-primary px-6 py-3 rounded-xl font-bold hover:bg-primary hover:text-white transition-colors"
+                className="inline-flex items-center justify-center gap-2 border-2 border-primary text-primary px-6 py-3 rounded-xl font-bold hover:bg-primary hover:text-primary-foreground transition-colors"
               >
                 <Mail className="w-4 h-4" /> Email your CV
               </a>
