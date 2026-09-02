@@ -4,22 +4,25 @@ import { useMemo, useState } from 'react'
 import { Check, Loader2, Phone, Send } from 'lucide-react'
 import { formatINR } from '@prime/shared'
 import {
+  FALLBACK_SLOTS,
   GUARANTEES,
-  SLOTS,
   SUPPORT_PHONE,
   TASKS,
   TASK_LABEL,
   submitPrimeNowRequest,
   type PrimeNowInput,
+  type Slot,
   type SlotId,
 } from '@/lib/prime-now'
 
 /**
  * Three steps in one card, with a sticky summary that prices the request live.
  * No catalogue and no cart: this is a request, dispatched to a helper.
+ * `slots` is the CRM-controlled price list, fetched server-side by the page.
  */
-export function PrimeNowRequestFlow({ cities }: { cities: string[] }) {
-  const [slotId, setSlotId] = useState<SlotId>('1h')
+export function PrimeNowRequestFlow({ cities, slots = FALLBACK_SLOTS }: { cities: string[]; slots?: Slot[] }) {
+  const SLOTS = slots.length ? slots : FALLBACK_SLOTS
+  const [slotId, setSlotId] = useState<SlotId>(SLOTS.find((s) => s.id === '1h')?.id ?? SLOTS[0].id)
   const [tasks, setTasks] = useState<string[]>([])
   const [detail, setDetail] = useState('')
   const [timing, setTiming] = useState<'now' | 'scheduled'>('now')
@@ -32,7 +35,7 @@ export function PrimeNowRequestFlow({ cities }: { cities: string[] }) {
   const [error, setError] = useState<string | null>(null)
   const [done, setDone] = useState<{ number: string } | null>(null)
 
-  const slot = useMemo(() => SLOTS.find((s) => s.id === slotId)!, [slotId])
+  const slot = useMemo(() => SLOTS.find((s) => s.id === slotId) ?? SLOTS[0], [SLOTS, slotId])
   const toggleTask = (id: string) =>
     setTasks((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]))
 

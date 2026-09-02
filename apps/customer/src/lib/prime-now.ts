@@ -4,15 +4,14 @@ import { supabase } from './supabase'
  * Prime Now — instant house help by the hour.
  *
  * No catalogue by design: the customer picks how long they need someone for,
- * ticks what needs doing, and the request is dispatched. Prices here are for
- * display only — create_prime_now_request() re-derives the slot price
- * server-side, so a tampered client cannot buy a half day for ₹199.
- *
- * These four rates are still the brief's drafts; §12 of the product spec lists
- * them as needing business confirmation.
+ * ticks what needs doing, and the request is dispatched. The price list lives
+ * in prime_now_slots and is edited from the CRM (migration 0034); the copy
+ * shown here is display only — create_prime_now_request() re-derives the slot
+ * price server-side from the same table, so a tampered client cannot buy a
+ * half day for ₹199.
  */
 
-export type SlotId = '30m' | '1h' | '90m' | 'half_day'
+export type SlotId = string
 
 export interface Slot {
   id: SlotId
@@ -22,12 +21,50 @@ export interface Slot {
   minutes: number
 }
 
+/** Shown until the live list arrives, and offline (mirror of the seed rows). */
 export const SLOTS: Slot[] = [
   { id: '30m', label: '30 minutes', sublabel: 'A quick tidy-up', price: 199, minutes: 30 },
   { id: '1h', label: '1 hour', sublabel: 'Most popular', price: 349, minutes: 60 },
   { id: '90m', label: '90 minutes', sublabel: 'A thorough round', price: 499, minutes: 90 },
   { id: 'half_day', label: 'Half day', sublabel: '4 hours', price: 1199, minutes: 240 },
 ]
+
+// Module cache: screens read synchronously, refreshSlots() updates it.
+let liveSlots: Slot[] = SLOTS
+
+export function getSlots(): Slot[] {
+  return liveSlots
+}
+
+/** The slot a screen was navigated to; falls back so a stale id never crashes. */
+export function getSlot(id: SlotId): Slot {
+  return liveSlots.find((s) => s.id === id) ?? liveSlots[0]
+}
+
+/** Fetch the CRM-controlled price list; keeps the current list on any failure. */
+export async function refreshSlots(): Promise<Slot[]> {
+  try {
+    const { data, error } = await supabase
+      .from('prime_now_slots')
+      .select('id,label,sublabel,minutes,price,is_active,sort_order')
+      .eq('is_active', true)
+      .order('sort_order')
+    if (!error && data && data.length > 0) {
+      liveSlots = (data as { id: string; label: string; sublabel: string | null; minutes: number; price: number }[]).map(
+        (s) => ({
+          id: s.id,
+          label: s.label,
+          sublabel: s.sublabel ?? '',
+          minutes: Number(s.minutes),
+          price: Number(s.price),
+        }),
+      )
+    }
+  } catch {
+    // offline: keep whatever we have
+  }
+  return liveSlots
+}
 
 /** A convenience for the customer, not a taxonomy — the helper reads the list. */
 export const TASKS: { id: string; label: string }[] = [

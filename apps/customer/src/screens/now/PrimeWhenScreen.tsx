@@ -17,7 +17,7 @@ import {
 } from '../../components/ui'
 import { track } from '../../lib/analytics'
 import { dateParts, formatINR, hourLabel, upcomingDays } from '../../lib/format'
-import { SCHEDULE_HOURS, SLOTS, TASK_LABEL, createPrimeNowRequest, type SlotId } from '../../lib/prime-now'
+import { SCHEDULE_HOURS, TASK_LABEL, createPrimeNowRequest, getSlot, type SlotId } from '../../lib/prime-now'
 import { useSession } from '../../lib/session'
 import { errorMessage } from '../../lib/supabase'
 import type { HomeStackProps } from '../../navigation/types'
@@ -35,7 +35,7 @@ export function PrimeWhenScreen({ route, navigation }: HomeStackProps<'PrimeWhen
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const chosen = useMemo(() => SLOTS.find((s) => s.id === (slot as SlotId))!, [slot])
+  const chosen = useMemo(() => getSlot(slot as SlotId), [slot])
   const days = useMemo(() => upcomingDays(10), [])
 
   useEffect(() => {

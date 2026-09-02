@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
 import { getCities } from '@/lib/services-data'
+import { getSlots } from '@/lib/prime-now'
 import { Breadcrumbs, PageShell } from '@/components/page-shell'
 import { PrimeNowRequestFlow } from '@/components/prime-now/request-flow'
 
-export const revalidate = 3600
+// Short revalidate so a CRM price change reaches the page within minutes.
+export const revalidate = 300
 
 export const metadata: Metadata = {
   title: 'Prime Now',
@@ -16,7 +18,7 @@ export const metadata: Metadata = {
  * customer describes the work and it is dispatched to a helper.
  */
 export default async function PrimeNowPage() {
-  const cities = await getCities()
+  const [cities, slots] = await Promise.all([getCities(), getSlots()])
 
   return (
     <PageShell>
@@ -42,7 +44,7 @@ export default async function PrimeNowPage() {
 
       <section className="px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
         <div className="mx-auto max-w-7xl">
-          <PrimeNowRequestFlow cities={cities} />
+          <PrimeNowRequestFlow cities={cities} slots={slots} />
         </div>
       </section>
     </PageShell>

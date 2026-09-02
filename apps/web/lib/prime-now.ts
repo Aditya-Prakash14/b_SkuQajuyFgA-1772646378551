@@ -4,12 +4,14 @@ import { createPublicClient } from '@/lib/supabase/public'
  * Prime Now — instant house help by the hour.
  *
  * There is deliberately no catalogue: the customer picks how long they need
- * someone for, ticks what needs doing, and the request is dispatched. Prices
- * here are for display only — create_prime_now_request() prices the slot again
- * server-side, so a tampered browser cannot buy a half day for ₹199.
+ * someone for, ticks what needs doing, and the request is dispatched. The
+ * price list lives in prime_now_slots, edited from the CRM (0034); what is
+ * shown here is display only — create_prime_now_request() prices the slot
+ * again server-side from the same table, so a tampered browser cannot buy a
+ * half day for ₹199.
  */
 
-export type SlotId = '30m' | '1h' | '90m' | 'half_day'
+export type SlotId = string
 
 export interface Slot {
   id: SlotId
@@ -19,12 +21,35 @@ export interface Slot {
   minutes: number
 }
 
-export const SLOTS: Slot[] = [
+/** Shown only if the price list cannot be fetched (e.g. Supabase down). */
+export const FALLBACK_SLOTS: Slot[] = [
   { id: '30m', label: '30 minutes', sublabel: 'A quick tidy-up', price: 199, minutes: 30 },
   { id: '1h', label: '1 hour', sublabel: 'Most popular', price: 349, minutes: 60 },
   { id: '90m', label: '90 minutes', sublabel: 'A thorough round', price: 499, minutes: 90 },
   { id: 'half_day', label: 'Half day', sublabel: '4 hours', price: 1199, minutes: 240 },
 ]
+
+/** The live price list, CRM-controlled. Server-side (page) fetch. */
+export async function getSlots(): Promise<Slot[]> {
+  try {
+    const supabase = createPublicClient()
+    const { data, error } = await supabase
+      .from('prime_now_slots')
+      .select('id,label,sublabel,minutes,price,is_active,sort_order')
+      .eq('is_active', true)
+      .order('sort_order')
+    if (error || !data?.length) return FALLBACK_SLOTS
+    return data.map((s) => ({
+      id: s.id as string,
+      label: s.label as string,
+      sublabel: (s.sublabel as string) ?? '',
+      minutes: Number(s.minutes),
+      price: Number(s.price),
+    }))
+  } catch {
+    return FALLBACK_SLOTS
+  }
+}
 
 /** Chips are a convenience for the customer, not a taxonomy — the helper reads the list. */
 export const TASKS: { id: string; label: string }[] = [

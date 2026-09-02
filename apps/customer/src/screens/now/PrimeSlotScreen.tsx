@@ -1,15 +1,28 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Pressable, View } from 'react-native'
 
 import { Body, Button, Card, Eyebrow, H1, Muted, Screen, Text } from '../../components/ui'
 import { track } from '../../lib/analytics'
 import { formatINR } from '../../lib/format'
-import { GUARANTEES, SLOTS, type SlotId } from '../../lib/prime-now'
+import { GUARANTEES, getSlots, refreshSlots, type SlotId } from '../../lib/prime-now'
 import type { HomeStackProps } from '../../navigation/types'
 
 /** Screen 14. How long do you need someone for. */
 export function PrimeSlotScreen({ navigation }: HomeStackProps<'PrimeSlot'>) {
+  // CRM-controlled price list: render the cache at once, refresh in place.
+  const [slots, setSlots] = useState(getSlots())
   const [slot, setSlot] = useState<SlotId>('1h')
+  useEffect(() => {
+    let mounted = true
+    refreshSlots().then((next) => {
+      if (!mounted) return
+      setSlots(next)
+      setSlot((cur) => (next.some((s) => s.id === cur) ? cur : next[0].id))
+    })
+    return () => {
+      mounted = false
+    }
+  }, [])
 
   return (
     <Screen edges={[]}>
@@ -21,7 +34,7 @@ export function PrimeSlotScreen({ navigation }: HomeStackProps<'PrimeSlot'>) {
         </View>
 
         <View className="gap-3">
-          {SLOTS.map((s) => {
+          {slots.map((s) => {
             const active = s.id === slot
             return (
               <Pressable
