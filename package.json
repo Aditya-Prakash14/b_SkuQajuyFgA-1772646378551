@@ -20,7 +20,9 @@
     "test:e2e": "bash scripts/e2e.sh",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
     "seed": "pnpm --filter @prime/supabase-seed seed",
-    "bootstrap": "pnpm --filter @prime/supabase-seed bootstrap"
+    "bootstrap": "pnpm --filter @prime/supabase-seed bootstrap",
+    "//graph": "Rebuilds .graphify/graph.json (code-only knowledge graph; excludes live in .graphifyignore). Use `extract`, not `update` — `update` dies with git ENOBUFS on this repo.",
+    "graph": "pnpm dlx @sentropic/graphify extract . --no-description --no-label"
   },
   "devDependencies": {
     "vitest": "^2"

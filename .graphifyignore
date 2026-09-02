@@ -1,0 +1,16 @@
+# Non-code corpus excluded from Graphify extraction: these need an LLM
+# semantic backend (images/OCR, SQL, markdown) — the code graph stays
+# deterministic and key-free without them.
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.svg
+*.md
+*.sql
+*.css
+*.json
+*.yaml
+*.example
+*.sh
+*.gitignore
