@@ -126,7 +126,42 @@ export function PrimeNowRequestFlow({ cities, slots = FALLBACK_SLOTS }: { cities
     <div className="grid gap-8 lg:grid-cols-[1fr_360px] lg:items-start">
       {/* ── The three steps ─────────────────────────────────────────────── */}
       <div className="rounded-3xl border border-border bg-card p-6 sm:p-8">
-        <Step n={1} title="How long do you need help for?" />
+        <Step n={1} title="What should they do?" hint="Pick as many as you like — it does not change the price." />
+        <div className="mt-4 grid grid-cols-3 gap-2.5 sm:grid-cols-4">
+          {TASKS.map((t) => {
+            const active = tasks.includes(t.id)
+            return (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => toggleTask(t.id)}
+                aria-pressed={active}
+                className={`flex flex-col items-center gap-2 rounded-2xl border p-3.5 text-center transition-colors ${
+                  active ? 'border-primary bg-secondary' : 'border-border hover:border-primary/40'
+                }`}
+              >
+                <t.icon className={`h-6 w-6 ${active ? 'text-primary' : 'text-muted-foreground'}`} />
+                <span className={`text-xs leading-tight ${active ? 'font-bold' : 'font-medium'}`}>
+                  {t.label}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+        <label className="mt-4 block">
+          <span className="sr-only">Anything else we should know</span>
+          <textarea
+            value={detail}
+            onChange={(e) => setDetail(e.target.value)}
+            rows={3}
+            placeholder="Anything else? e.g. two bedrooms and a balcony, pets at home, please bring a mop."
+            className="w-full rounded-2xl border border-border bg-background p-4 text-sm outline-none focus:border-primary"
+          />
+        </label>
+
+        <hr className="my-8 border-border" />
+
+        <Step n={2} title="How long do you need help for?" />
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {SLOTS.map((s) => {
             const active = s.id === slotId
@@ -149,40 +184,6 @@ export function PrimeNowRequestFlow({ cities, slots = FALLBACK_SLOTS }: { cities
             )
           })}
         </div>
-
-        <hr className="my-8 border-border" />
-
-        <Step n={2} title="What should they do?" hint="Pick as many as you like." />
-        <div className="mt-4 flex flex-wrap gap-2">
-          {TASKS.map((t) => {
-            const active = tasks.includes(t.id)
-            return (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => toggleTask(t.id)}
-                aria-pressed={active}
-                className={`rounded-full border px-4 py-2 text-sm transition-colors ${
-                  active
-                    ? 'border-primary bg-primary text-primary-foreground'
-                    : 'border-border hover:border-primary/40'
-                }`}
-              >
-                {t.label}
-              </button>
-            )
-          })}
-        </div>
-        <label className="mt-4 block">
-          <span className="sr-only">Anything else we should know</span>
-          <textarea
-            value={detail}
-            onChange={(e) => setDetail(e.target.value)}
-            rows={3}
-            placeholder="Anything else? e.g. two bedrooms and a balcony, pets at home, please bring a mop."
-            className="w-full rounded-2xl border border-border bg-background p-4 text-sm outline-none focus:border-primary"
-          />
-        </label>
 
         <hr className="my-8 border-border" />
 
@@ -272,11 +273,11 @@ export function PrimeNowRequestFlow({ cities, slots = FALLBACK_SLOTS }: { cities
         <div className="rounded-3xl bg-ink p-6 text-ink-foreground shadow-panel">
           <p className="label-mono text-brand">Your request</p>
           <dl className="mt-5 space-y-3 text-sm">
-            <Row label="Slot" value={slot.label} />
             <Row
               label="Tasks"
               value={tasks.length ? `${tasks.length} selected` : 'Not chosen yet'}
             />
+            <Row label="Slot" value={slot.label} />
             <Row label="Arrival" value={arrival} />
           </dl>
 

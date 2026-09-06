@@ -1,3 +1,8 @@
+import {
+  Boxes, BrushCleaning, CookingPot, DoorClosed, Ellipsis, Fence, PartyPopper,
+  Refrigerator, Shirt, ShowerHead, SprayCan, UtensilsCrossed, WashingMachine,
+  type LucideIcon,
+} from 'lucide-react'
 import { createPublicClient } from '@/lib/supabase/public'
 
 /**
@@ -51,21 +56,24 @@ export async function getSlots(): Promise<Slot[]> {
   }
 }
 
-/** Chips are a convenience for the customer, not a taxonomy — the helper reads the list. */
-export const TASKS: { id: string; label: string }[] = [
-  { id: 'sweeping_mopping', label: 'Sweeping & mopping' },
-  { id: 'utensils', label: 'Utensils & dishes' },
-  { id: 'dusting', label: 'Dusting & wiping' },
-  { id: 'laundry', label: 'Laundry' },
-  { id: 'ironing', label: 'Ironing & folding' },
-  { id: 'kitchen_prep', label: 'Kitchen prep' },
-  { id: 'bathroom', label: 'Bathroom' },
-  { id: 'fridge', label: 'Fridge' },
-  { id: 'balcony', label: 'Balcony' },
-  { id: 'wardrobe', label: 'Wardrobe' },
-  { id: 'party', label: 'Before or after a party' },
-  { id: 'moving', label: 'Packing & moving help' },
-  { id: 'other', label: 'Something else' },
+/**
+ * Task cards are a convenience for the customer, not a taxonomy — the helper
+ * reads the list. Icons mirror the customer app's Prime Now cards.
+ */
+export const TASKS: { id: string; label: string; icon: LucideIcon }[] = [
+  { id: 'sweeping_mopping', label: 'Sweeping & mopping', icon: BrushCleaning },
+  { id: 'utensils', label: 'Utensils & dishes', icon: UtensilsCrossed },
+  { id: 'dusting', label: 'Dusting & wiping', icon: SprayCan },
+  { id: 'laundry', label: 'Laundry', icon: WashingMachine },
+  { id: 'ironing', label: 'Ironing & folding', icon: Shirt },
+  { id: 'kitchen_prep', label: 'Kitchen prep', icon: CookingPot },
+  { id: 'bathroom', label: 'Bathroom', icon: ShowerHead },
+  { id: 'fridge', label: 'Fridge', icon: Refrigerator },
+  { id: 'balcony', label: 'Balcony', icon: Fence },
+  { id: 'wardrobe', label: 'Wardrobe', icon: DoorClosed },
+  { id: 'party', label: 'Before or after a party', icon: PartyPopper },
+  { id: 'moving', label: 'Packing & moving help', icon: Boxes },
+  { id: 'other', label: 'Something else', icon: Ellipsis },
 ]
 
 export const TASK_LABEL: Record<string, string> = Object.fromEntries(
