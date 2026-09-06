@@ -6,11 +6,11 @@ import { supabase } from './supabase'
 /**
  * Online payment through Razorpay Checkout.
  *
- * Off until the business has a Razorpay account: the three function secrets
- * (RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, RAZORPAY_WEBHOOK_SECRET) are set,
- * the webhook URL is registered with Razorpay, and the website's /pay page is
- * deployed. Then this flag is the switch; "pay after the work" stays as the
- * other option either way.
+ * ON since 6 Sep 2026 with the owner's TEST-mode keys: credentials live in
+ * Vault (razorpay_secret(), migration 0035), the webhook is registered with
+ * Razorpay (id TYqWVNTJbw0GOU). Test mode means Razorpay's test cards/UPI
+ * succeed and no real money moves — swap the Vault values for live keys to
+ * go real. "Pay after the work" stays as the other option either way.
  *
  * Flow: razorpay-create-order (our edge function, as this user) → the
  * website's /pay page runs Checkout → it sends the browser back to
@@ -18,7 +18,7 @@ import { supabase } from './supabase'
  * the webhook is what marks the booking paid, and the tracking screen picks
  * that up live.
  */
-export const ONLINE_PAYMENTS_ENABLED = false
+export const ONLINE_PAYMENTS_ENABLED = true
 
 const PAY_PAGE = 'https://www.myprimecompany.com/pay'
 

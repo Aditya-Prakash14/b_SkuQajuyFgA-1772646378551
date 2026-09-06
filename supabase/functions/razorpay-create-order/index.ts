@@ -17,8 +17,23 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 const url = Deno.env.get('SUPABASE_URL')!
 const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!
 const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const keyId = Deno.env.get('RAZORPAY_KEY_ID')
-const keySecret = Deno.env.get('RAZORPAY_KEY_SECRET')
+
+const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } })
+
+// Credentials: function secrets when set; otherwise Vault via the
+// service-role-only razorpay_secret() (0035), cached for the isolate.
+let keyId = Deno.env.get('RAZORPAY_KEY_ID') ?? ''
+let keySecret = Deno.env.get('RAZORPAY_KEY_SECRET') ?? ''
+async function ensureKeys(): Promise<boolean> {
+  if (keyId && keySecret) return true
+  const [a, b] = await Promise.all([
+    admin.rpc('razorpay_secret', { p_name: 'razorpay_key_id' }),
+    admin.rpc('razorpay_secret', { p_name: 'razorpay_key_secret' }),
+  ])
+  keyId = keyId || ((a.data as string | null) ?? '')
+  keySecret = keySecret || ((b.data as string | null) ?? '')
+  return Boolean(keyId && keySecret)
+}
 
 // The website calls this from the browser, so CORS is needed — but only for
 // our own origins. The apps use native fetch (no Origin header) and are
@@ -48,7 +63,7 @@ Deno.serve(async (req) => {
 
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors })
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405)
-  if (!keyId || !keySecret) return json({ error: 'Online payment is not set up yet' }, 503)
+  if (!(await ensureKeys())) return json({ error: 'Online payment is not set up yet' }, 503)
 
   const jwt = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '')
   if (!jwt) return json({ error: 'Sign in first' }, 401)
@@ -116,7 +131,6 @@ Deno.serve(async (req) => {
     return json({ error: order.error?.description ?? 'Could not start the payment. Please try again.' }, 502)
   }
 
-  const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } })
   const { error: ledgerErr } = await admin.from('payments').insert({
     kind: kind === 'deep' ? 'deep_clean' : 'prime_now',
     job_id: body.id,

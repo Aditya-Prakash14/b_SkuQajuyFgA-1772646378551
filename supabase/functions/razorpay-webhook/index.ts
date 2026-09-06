@@ -18,7 +18,18 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 
 const url = Deno.env.get('SUPABASE_URL')!
 const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const webhookSecret = Deno.env.get('RAZORPAY_WEBHOOK_SECRET')
+
+const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } })
+
+// Secret: function secret when set; otherwise Vault via razorpay_secret()
+// (0035, service-role only), cached for the isolate.
+let webhookSecret = Deno.env.get('RAZORPAY_WEBHOOK_SECRET') ?? ''
+async function ensureSecret(): Promise<boolean> {
+  if (webhookSecret) return true
+  const { data } = await admin.rpc('razorpay_secret', { p_name: 'razorpay_webhook_secret' })
+  webhookSecret = (data as string | null) ?? ''
+  return Boolean(webhookSecret)
+}
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
@@ -45,7 +56,7 @@ type RefundEntity = { id: string; payment_id: string; amount?: number; status?: 
 
 Deno.serve(async (req) => {
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405)
-  if (!webhookSecret) return json({ error: 'Webhook secret not configured' }, 503)
+  if (!(await ensureSecret())) return json({ error: 'Webhook secret not configured' }, 503)
 
   const raw = await req.text()
   const presented = req.headers.get('x-razorpay-signature') ?? ''
@@ -58,8 +69,6 @@ Deno.serve(async (req) => {
   } catch {
     return json({ error: 'Bad JSON' }, 400)
   }
-
-  const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } })
 
   if (event.event === 'payment.captured' || event.event === 'payment.failed') {
     const p = event.payload?.payment?.entity
