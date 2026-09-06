@@ -66,21 +66,24 @@ export async function refreshSlots(): Promise<Slot[]> {
   return liveSlots
 }
 
-/** A convenience for the customer, not a taxonomy — the helper reads the list. */
-export const TASKS: { id: string; label: string }[] = [
-  { id: 'sweeping_mopping', label: 'Sweeping & mopping' },
-  { id: 'utensils', label: 'Utensils & dishes' },
-  { id: 'dusting', label: 'Dusting & wiping' },
-  { id: 'laundry', label: 'Laundry' },
-  { id: 'ironing', label: 'Ironing & folding' },
-  { id: 'kitchen_prep', label: 'Kitchen prep' },
-  { id: 'bathroom', label: 'Bathroom' },
-  { id: 'fridge', label: 'Fridge' },
-  { id: 'balcony', label: 'Balcony' },
-  { id: 'wardrobe', label: 'Wardrobe' },
-  { id: 'party', label: 'Before or after a party' },
-  { id: 'moving', label: 'Packing & moving help' },
-  { id: 'other', label: 'Something else' },
+/**
+ * A convenience for the customer, not a taxonomy — the helper reads the list.
+ * `icon` is a MaterialCommunityIcons glyph name rendered on the chip.
+ */
+export const TASKS: { id: string; label: string; icon: string }[] = [
+  { id: 'sweeping_mopping', label: 'Sweeping & mopping', icon: 'broom' },
+  { id: 'utensils', label: 'Utensils & dishes', icon: 'silverware-fork-knife' },
+  { id: 'dusting', label: 'Dusting & wiping', icon: 'spray-bottle' },
+  { id: 'laundry', label: 'Laundry', icon: 'washing-machine' },
+  { id: 'ironing', label: 'Ironing & folding', icon: 'iron' },
+  { id: 'kitchen_prep', label: 'Kitchen prep', icon: 'chef-hat' },
+  { id: 'bathroom', label: 'Bathroom', icon: 'shower' },
+  { id: 'fridge', label: 'Fridge', icon: 'fridge-outline' },
+  { id: 'balcony', label: 'Balcony', icon: 'balcony' },
+  { id: 'wardrobe', label: 'Wardrobe', icon: 'wardrobe-outline' },
+  { id: 'party', label: 'Before or after a party', icon: 'party-popper' },
+  { id: 'moving', label: 'Packing & moving help', icon: 'package-variant-closed' },
+  { id: 'other', label: 'Something else', icon: 'dots-horizontal' },
 ]
 
 export const TASK_LABEL: Record<string, string> = Object.fromEntries(TASKS.map((t) => [t.id, t.label]))

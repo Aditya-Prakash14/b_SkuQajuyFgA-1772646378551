@@ -238,11 +238,14 @@ export function Chip({
   selected,
   onPress,
   className,
+  icon,
 }: {
   label: string
   selected: boolean
   onPress: () => void
   className?: string
+  /** Optional leading glyph; the caller colours it for the selected state. */
+  icon?: React.ReactNode
 }) {
   return (
     <Pressable
@@ -250,13 +253,14 @@ export function Chip({
       accessibilityRole="button"
       accessibilityState={{ selected }}
       className={[
-        'min-h-[44px] justify-center rounded-pill border px-4 active:opacity-80',
+        'min-h-[44px] flex-row items-center gap-1.5 rounded-pill border px-4 active:opacity-80',
         selected ? 'border-ink bg-ink' : 'border-border bg-card',
         className,
       ]
         .filter(Boolean)
         .join(' ')}
     >
+      {icon}
       <Text className={selected ? 'font-bold text-[13px] text-ink-foreground' : 'font-medium text-[13px] text-foreground'}>
         {label}
       </Text>

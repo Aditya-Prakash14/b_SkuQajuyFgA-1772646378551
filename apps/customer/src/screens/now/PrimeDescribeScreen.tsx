@@ -1,9 +1,13 @@
-import { useState } from 'react'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
+import { type ComponentProps, useState } from 'react'
 import { View } from 'react-native'
 
 import { Body, Button, Chip, Eyebrow, Field, H1, Muted, Screen } from '../../components/ui'
 import { TASKS } from '../../lib/prime-now'
+import { useColors } from '../../lib/theme'
 import type { HomeStackProps } from '../../navigation/types'
+
+type MCIName = ComponentProps<typeof MaterialCommunityIcons>['name']
 
 /**
  * Screen 15. What should they do.
@@ -14,6 +18,7 @@ import type { HomeStackProps } from '../../navigation/types'
  */
 export function PrimeDescribeScreen({ route, navigation }: HomeStackProps<'PrimeDescribe'>) {
   const { slot } = route.params
+  const colors = useColors()
   const [tasks, setTasks] = useState<string[]>([])
   const [notes, setNotes] = useState('')
 
@@ -30,9 +35,24 @@ export function PrimeDescribeScreen({ route, navigation }: HomeStackProps<'Prime
         </View>
 
         <View className="flex-row flex-wrap gap-2">
-          {TASKS.map((t) => (
-            <Chip key={t.id} label={t.label} selected={tasks.includes(t.id)} onPress={() => toggle(t.id)} />
-          ))}
+          {TASKS.map((t) => {
+            const selected = tasks.includes(t.id)
+            return (
+              <Chip
+                key={t.id}
+                label={t.label}
+                selected={selected}
+                onPress={() => toggle(t.id)}
+                icon={
+                  <MaterialCommunityIcons
+                    name={t.icon as MCIName}
+                    size={15}
+                    color={selected ? colors.inkForeground : colors.muted}
+                  />
+                }
+              />
+            )
+          })}
         </View>
 
         <Field
