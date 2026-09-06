@@ -3,6 +3,7 @@
 import Script from 'next/script'
 import { useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import '@/lib/payments'
 
 type CheckoutResponse = { razorpay_payment_id?: string; razorpay_order_id?: string; razorpay_signature?: string }
 type CheckoutOptions = {
@@ -18,11 +19,8 @@ type CheckoutOptions = {
   modal: { ondismiss: () => void }
 }
 
-declare global {
-  interface Window {
-    Razorpay?: new (o: CheckoutOptions) => { open: () => void }
-  }
-}
+// window.Razorpay is declared (loosely) in @/lib/payments, imported above;
+// CheckoutOptions here just keeps this file's construction honest.
 
 /** Only the app's own schemes may receive the result. */
 function safeReturn(raw: string | null) {
@@ -71,7 +69,7 @@ export function PayClient() {
     opened.current = true
     setState('open')
     setMessage('Complete the payment in the window that opened.')
-    const checkout = new window.Razorpay({
+    const options: CheckoutOptions = {
       key,
       amount,
       currency: 'INR',
@@ -83,10 +81,11 @@ export function PayClient() {
         email: params.get('email') ?? undefined,
         contact: params.get('contact') ?? undefined,
       },
-      theme: { color: '#0E5A63' },
+      theme: { color: '#111111' },
       handler: (r) => finish('success', r.razorpay_payment_id),
       modal: { ondismiss: () => finish('cancelled') },
-    })
+    }
+    const checkout = new window.Razorpay(options as unknown as Record<string, unknown>)
     checkout.open()
   }, [amount, finish, key, orderId, params, reference])
 

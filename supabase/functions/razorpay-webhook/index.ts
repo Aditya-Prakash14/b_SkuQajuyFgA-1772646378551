@@ -67,13 +67,29 @@ Deno.serve(async (req) => {
 
     const { data: row } = await admin
       .from('payments')
-      .select('id, kind, job_id, status')
+      .select('id, kind, job_id, status, amount')
       .eq('provider_order_id', p.order_id)
       .maybeSingle()
     if (!row) return json({ ok: true, ignored: 'unknown order' })
     if (row.status === 'captured' && event.event === 'payment.captured') return json({ ok: true, ignored: 'already captured' })
 
     const captured = event.event === 'payment.captured'
+
+    // Defence in depth: the order was created for the booking's exact amount,
+    // so a captured amount that differs means something is wrong — record the
+    // event on the ledger row but do NOT mark anything paid.
+    const expectedPaise = Math.round(Number(row.amount) * 100)
+    if (captured && typeof p.amount === 'number' && p.amount !== expectedPaise) {
+      await admin
+        .from('payments')
+        .update({
+          provider_payment_id: p.id,
+          raw: { amount_mismatch: { expected_paise: expectedPaise, captured_paise: p.amount }, event },
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', row.id)
+      return json({ ok: true, ignored: 'amount mismatch' })
+    }
     await admin
       .from('payments')
       .update({

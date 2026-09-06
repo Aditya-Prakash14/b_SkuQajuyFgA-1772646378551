@@ -20,11 +20,33 @@ const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const keyId = Deno.env.get('RAZORPAY_KEY_ID')
 const keySecret = Deno.env.get('RAZORPAY_KEY_SECRET')
 
-function json(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
+// The website calls this from the browser, so CORS is needed — but only for
+// our own origins. The apps use native fetch (no Origin header) and are
+// unaffected. Extend via the ALLOWED_ORIGINS secret (comma-separated).
+const ALLOWED_ORIGINS = (
+  Deno.env.get('ALLOWED_ORIGINS') ??
+  'https://myprimecompany.com,https://www.myprimecompany.com,http://localhost:3000'
+)
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean)
+
+function corsHeaders(origin: string | null): Record<string, string> {
+  if (!origin || !ALLOWED_ORIGINS.includes(origin)) return { Vary: 'Origin' }
+  return {
+    'Access-Control-Allow-Origin': origin,
+    'Access-Control-Allow-Headers': 'authorization, content-type, apikey, x-client-info',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    Vary: 'Origin',
+  }
 }
 
 Deno.serve(async (req) => {
+  const cors = corsHeaders(req.headers.get('Origin'))
+  const json = (body: unknown, status = 200) =>
+    new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', ...cors } })
+
+  if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors })
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405)
   if (!keyId || !keySecret) return json({ error: 'Online payment is not set up yet' }, 503)
 
