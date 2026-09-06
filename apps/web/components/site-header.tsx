@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import {
@@ -49,6 +49,10 @@ export function SiteHeader() {
   const festival = useFestival()
 
   const [mobileOpen, setMobileOpen] = useState(false)
+  // Radix DropdownMenu uses useId(); rendering it only after mount avoids an
+  // SSR/client id hydration mismatch on the trigger (same fix as CrmShell).
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
 
   return (
     <>
@@ -85,6 +89,13 @@ export function SiteHeader() {
 
           <div className="flex shrink-0 items-center gap-2">
             {/* City selector with geolocation */}
+            {!mounted ? (
+              <Button variant="outline" className="hidden gap-1 font-normal text-muted-foreground sm:flex">
+                <MapPin className="size-4" />
+                <span className="max-w-24 truncate">{city ?? 'Select City'}</span>
+                <ChevronDown className="size-3" />
+              </Button>
+            ) : (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="hidden gap-1 font-normal text-muted-foreground sm:flex">
@@ -123,9 +134,18 @@ export function SiteHeader() {
                 </ScrollArea>
               </DropdownMenuContent>
             </DropdownMenu>
+            )}
 
             {/* Auth */}
-            {user ? (
+            {user && !mounted ? (
+              <Button variant="outline" className="hidden gap-1.5 px-2 font-normal sm:flex">
+                <span className="grid size-6 place-items-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                  {displayName.charAt(0).toUpperCase() || <UserIcon className="size-3" />}
+                </span>
+                <span className="max-w-20 truncate">{displayName}</span>
+                <ChevronDown className="size-3 text-muted-foreground" />
+              </Button>
+            ) : user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="hidden gap-1.5 px-2 font-normal sm:flex">
