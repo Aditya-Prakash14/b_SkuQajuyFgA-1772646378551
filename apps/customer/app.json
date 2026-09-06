@@ -52,7 +52,9 @@
           "color": "#0E5A63",
           "defaultChannel": "bookings"
         }
-      ]
+      ],
+      "expo-splash-screen",
+      "expo-status-bar"
     ],
     "scheme": "myprimecompany",
     "backgroundColor": "#FBFAF7",
