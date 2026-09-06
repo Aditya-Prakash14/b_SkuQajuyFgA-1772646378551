@@ -11,7 +11,9 @@ import type { HomeStackProps } from '../../navigation/types'
 
 /** Screen 14 — now step 2: how long, after the tasks are picked. */
 export function PrimeSlotScreen({ route, navigation }: HomeStackProps<'PrimeSlot'>) {
-  const { tasks, notes } = route.params
+  // params can be missing on a hot refresh of an already-mounted screen or a
+  // stale navigation stack; an empty task list is a valid request.
+  const { tasks = [], notes = '' } = route.params ?? {}
   const colors = useColors()
   // CRM-controlled price list: render the cache at once, refresh in place.
   const [slots, setSlots] = useState(getSlots())

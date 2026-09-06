@@ -24,7 +24,8 @@ import type { HomeStackProps } from '../../navigation/types'
 
 /** Screen 16. When and where, with the price shown live. */
 export function PrimeWhenScreen({ route, navigation }: HomeStackProps<'PrimeWhen'>) {
-  const { slot, tasks, notes } = route.params
+  // params survive normal navigation; a hot refresh can drop them.
+  const { slot = '1h', tasks = [], notes = '' } = route.params ?? {}
   const { addresses, defaultAddress, profile, draft } = useSession()
 
   const [timing, setTiming] = useState<'now' | 'scheduled'>('now')
