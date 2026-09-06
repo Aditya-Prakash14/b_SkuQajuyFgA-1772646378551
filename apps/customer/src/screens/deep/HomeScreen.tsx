@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons'
 import { useFocusEffect } from '@react-navigation/native'
 import { setStatusBarStyle } from 'expo-status-bar'
 import { useColorScheme } from 'nativewind'
@@ -293,9 +294,12 @@ export function HomeScreen({ navigation }: HomeStackProps<'Home'>) {
               <View className="gap-3 p-4">
                 <View>
                   <Eyebrow className="text-brand">Domain 02 · by the hour</Eyebrow>
-                  <Text className="mt-1.5 font-black text-[22px] text-ink-foreground" style={{ letterSpacing: -0.6 }}>
-                    Prime Now
-                  </Text>
+                  <View className="mt-1.5 flex-row items-center gap-2">
+                    <Ionicons name="flash" size={20} color={colors.brand} />
+                    <Text className="font-black text-[22px] text-ink-foreground" style={{ letterSpacing: -0.6 }}>
+                      Prime Now
+                    </Text>
+                  </View>
                   <Text className="mt-1 font-sans text-[14px] leading-[21px] text-ink-foreground/70">
                     Instant house help. Tell us what needs doing — a verified helper is on the way.
                   </Text>

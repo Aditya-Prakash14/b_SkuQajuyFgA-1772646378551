@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons'
 import { useEffect, useState } from 'react'
 import { Pressable, View } from 'react-native'
 
@@ -5,10 +6,12 @@ import { Body, Button, Card, Eyebrow, H1, Muted, Screen, Text } from '../../comp
 import { track } from '../../lib/analytics'
 import { formatINR } from '../../lib/format'
 import { GUARANTEES, getSlots, refreshSlots, type SlotId } from '../../lib/prime-now'
+import { useColors } from '../../lib/theme'
 import type { HomeStackProps } from '../../navigation/types'
 
 /** Screen 14. How long do you need someone for. */
 export function PrimeSlotScreen({ navigation }: HomeStackProps<'PrimeSlot'>) {
+  const colors = useColors()
   // CRM-controlled price list: render the cache at once, refresh in place.
   const [slots, setSlots] = useState(getSlots())
   const [slot, setSlot] = useState<SlotId>('1h')
@@ -28,7 +31,10 @@ export function PrimeSlotScreen({ navigation }: HomeStackProps<'PrimeSlot'>) {
     <Screen edges={[]}>
       <Body>
         <View className="gap-2">
-          <Eyebrow className="text-primary">Domain 02 · step 1 of 3</Eyebrow>
+          <View className="flex-row items-center gap-1.5">
+            <Ionicons name="flash" size={13} color={colors.primary} />
+            <Eyebrow className="text-primary">Prime Now · step 1 of 3</Eyebrow>
+          </View>
           <H1>How long do you need help for?</H1>
           <Muted>A flat price for the slot. No travel fee and no surge.</Muted>
         </View>
