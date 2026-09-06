@@ -91,7 +91,7 @@ export function PrimeWhenScreen({ route, navigation }: HomeStackProps<'PrimeWhen
     <Screen edges={[]}>
       <ScrollView contentContainerStyle={{ padding: 22, paddingBottom: 32, gap: 16 }} keyboardShouldPersistTaps="handled">
         <View className="gap-2">
-          <Eyebrow className="text-primary">Domain 02 · step 3 of 3</Eyebrow>
+          <Eyebrow className="text-primary">Prime Now · step 3 of 3</Eyebrow>
           <H1>When and where?</H1>
         </View>
 

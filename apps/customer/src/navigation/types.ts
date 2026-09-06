@@ -21,8 +21,8 @@ export type HomeStackParams = AddressRoutes & {
   Services: { categoryId: string; categoryName: string }
   ServiceDetail: { serviceId: string }
   // Prime Now
-  PrimeSlot: undefined
-  PrimeDescribe: { slot: string }
+  PrimeDescribe: undefined
+  PrimeSlot: { tasks: string[]; notes: string }
   PrimeWhen: { slot: string; tasks: string[]; notes: string; addressId?: string }
   PrimeMatching: { requestId: string; reference: string }
 }

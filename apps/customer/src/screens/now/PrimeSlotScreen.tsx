@@ -9,8 +9,9 @@ import { GUARANTEES, getSlots, refreshSlots, type SlotId } from '../../lib/prime
 import { useColors } from '../../lib/theme'
 import type { HomeStackProps } from '../../navigation/types'
 
-/** Screen 14. How long do you need someone for. */
-export function PrimeSlotScreen({ navigation }: HomeStackProps<'PrimeSlot'>) {
+/** Screen 14 — now step 2: how long, after the tasks are picked. */
+export function PrimeSlotScreen({ route, navigation }: HomeStackProps<'PrimeSlot'>) {
+  const { tasks, notes } = route.params
   const colors = useColors()
   // CRM-controlled price list: render the cache at once, refresh in place.
   const [slots, setSlots] = useState(getSlots())
@@ -33,7 +34,7 @@ export function PrimeSlotScreen({ navigation }: HomeStackProps<'PrimeSlot'>) {
         <View className="gap-2">
           <View className="flex-row items-center gap-1.5">
             <Ionicons name="flash" size={13} color={colors.primary} />
-            <Eyebrow className="text-primary">Prime Now · step 1 of 3</Eyebrow>
+            <Eyebrow className="text-primary">Prime Now · step 2 of 3</Eyebrow>
           </View>
           <H1>How long do you need help for?</H1>
           <Muted>A flat price for the slot. No travel fee and no surge.</Muted>
@@ -77,7 +78,7 @@ export function PrimeSlotScreen({ navigation }: HomeStackProps<'PrimeSlot'>) {
           label="Continue"
           onPress={() => {
             track('prime_now_slot_selected', { slot })
-            navigation.navigate('PrimeDescribe', { slot })
+            navigation.navigate('PrimeWhen', { slot, tasks, notes })
           }}
         />
       </Body>

@@ -280,7 +280,7 @@ export function HomeScreen({ navigation }: HomeStackProps<'Home'>) {
             accessibilityRole="button"
             onPress={() => {
               track('view_domain', { domain: 'now' })
-              navigation.navigate('PrimeSlot')
+              navigation.navigate('PrimeDescribe')
             }}
           >
             <View className="overflow-hidden rounded-lg bg-ink">
