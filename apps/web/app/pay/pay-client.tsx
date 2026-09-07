@@ -36,10 +36,17 @@ export function PayClient() {
   const opened = useRef(false)
 
   const orderId = params.get('order') ?? ''
-  const key = params.get('key') ?? ''
   const amount = Number(params.get('amount') ?? 0)
   const reference = params.get('ref') ?? ''
   const returnTo = safeReturn(params.get('return'))
+
+  // Security (branch review, Sep 2026): the merchant key is PINNED to ours.
+  // Accepting a key from the URL would let anyone host a genuine-looking
+  // Checkout for a foreign Razorpay account on this trusted domain. A key
+  // param is tolerated only when it matches (older app builds send it).
+  const key = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ?? ''
+  const urlKey = params.get('key')
+  const keyMismatch = Boolean(urlKey && urlKey !== key)
 
   const finish = useCallback(
     (status: 'success' | 'cancelled' | 'failed', paymentId?: string) => {
@@ -61,6 +68,11 @@ export function PayClient() {
 
   const open = useCallback(() => {
     if (opened.current || !window.Razorpay) return
+    if (keyMismatch) {
+      setState('error')
+      setMessage('This payment link is not valid. Go back to the app and start the payment again.')
+      return
+    }
     if (!orderId || !key || !(amount > 0)) {
       setState('error')
       setMessage('This payment link is incomplete. Go back to the app and try again.')
@@ -87,7 +99,7 @@ export function PayClient() {
     }
     const checkout = new window.Razorpay(options as unknown as Record<string, unknown>)
     checkout.open()
-  }, [amount, finish, key, orderId, params, reference])
+  }, [amount, finish, key, keyMismatch, orderId, params, reference])
 
   useEffect(() => {
     if (window.Razorpay) open()
