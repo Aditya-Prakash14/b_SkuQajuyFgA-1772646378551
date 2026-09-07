@@ -58,8 +58,8 @@ export function HeroSection() {
           </p>
         </div>
 
-        {/* Image collage with the 1M+ stat tile — desktop only: stacked under
-            the hero on small screens it pushed the real content below the fold. */}
+        {/* Image collage — desktop only: stacked under the hero on small
+            screens it pushed the real content below the fold. */}
         <div className="relative hidden lg:block">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-3">
@@ -70,10 +70,6 @@ export function HeroSection() {
               <Photo src="/marble polishing PC.jpg" alt="Marble polishing" className="h-32 sm:h-40" />
               <Photo src="/glass cleaning PC.jpg" alt="Glass cleaning" className="h-44 sm:h-56" />
             </div>
-          </div>
-          <div className="absolute -bottom-4 left-4 rounded-2xl bg-ink px-5 py-4 text-ink-foreground shadow-panel">
-            <p className="tabular text-3xl font-extrabold">1M+</p>
-            <p className="label-mono mt-0.5 text-brand">Customers served</p>
           </div>
         </div>
       </div>
@@ -86,30 +82,6 @@ function Photo({ src, alt, className }: { src: string; alt: string; className: s
     <div className={`relative overflow-hidden rounded-2xl border border-border ${className}`}>
       <Image src={src} alt={alt} fill sizes="(max-width: 1024px) 45vw, 22vw" className="object-cover" />
     </div>
-  )
-}
-
-/* ── 4. Trust strip ───────────────────────────────────────────────────────── */
-
-const STATS = [
-  { value: '1M+', label: 'Customers served' },
-  { value: '4.8', label: 'Average rating' },
-  { value: '14', label: 'Cities covered' },
-  { value: '100%', label: 'Verified professionals' },
-]
-
-export function TrustStrip() {
-  return (
-    <section className="hidden border-b border-border bg-secondary/50 px-4 py-8 sm:px-6 md:block lg:px-8">
-      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-6 lg:grid-cols-4">
-        {STATS.map((s) => (
-          <div key={s.label} className="text-center">
-            <p className="tabular text-3xl font-extrabold text-primary">{s.value}</p>
-            <p className="label-mono mt-1 text-muted-foreground">{s.label}</p>
-          </div>
-        ))}
-      </div>
-    </section>
   )
 }
 

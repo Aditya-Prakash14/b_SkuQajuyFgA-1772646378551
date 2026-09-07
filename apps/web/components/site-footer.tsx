@@ -27,7 +27,6 @@ export function SiteFooter() {
             <p className="text-lg font-extrabold">My Prime Company</p>
             <p className="mt-3 max-w-xs text-sm leading-relaxed text-ink-foreground/60">
               Professional cleaning and facility services for homes and offices across India.
-              1M+ customers served.
             </p>
           </div>
 

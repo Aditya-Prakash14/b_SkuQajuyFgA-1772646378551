@@ -8,13 +8,6 @@ export const metadata: Metadata = {
   description: 'MyPrimeCompany is a professional cleaning and facility services company serving homes and offices across India.',
 }
 
-const STATS = [
-  { value: '1M+', label: 'Happy customers' },
-  { value: '12', label: 'Cities served' },
-  { value: '20+', label: 'Services offered' },
-  { value: '4.8★', label: 'Average rating' },
-]
-
 const VALUES = [
   { Icon: Shield, title: 'Trust first', desc: 'Every professional on our team is background-verified and trained before they enter your home.' },
   { Icon: Sparkles, title: 'Craft, not shortcuts', desc: 'We use professional equipment and the right chemistry for each surface — never a one-size-fits-all spray.' },
@@ -54,17 +47,6 @@ export default function AboutPage() {
           <div className="rounded-3xl overflow-hidden shadow-2xl border border-gray-100">
             <img src="/Office%20cleaning%20PC.jpg" alt="Our cleaning team at work" className="w-full h-80 object-cover" />
           </div>
-        </div>
-      </section>
-
-      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 border-y border-gray-100">
-        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          {STATS.map((s) => (
-            <div key={s.label}>
-              <p className="text-3xl md:text-4xl font-black text-primary">{s.value}</p>
-              <p className="text-sm text-gray-500 mt-1">{s.label}</p>
-            </div>
-          ))}
         </div>
       </section>
 
