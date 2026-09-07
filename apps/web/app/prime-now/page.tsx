@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
+import { Check, X } from 'lucide-react'
 import { getCities } from '@/lib/services-data'
-import { getSlots } from '@/lib/prime-now'
+import { getSlots, HELPERS_DO, HELPERS_DONT } from '@/lib/prime-now'
 import { Breadcrumbs, PageShell } from '@/components/page-shell'
 import { PrimeNowRequestFlow } from '@/components/prime-now/request-flow'
 
@@ -45,6 +46,41 @@ export default async function PrimeNowPage() {
       <section className="px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
         <div className="mx-auto max-w-7xl">
           <PrimeNowRequestFlow cities={cities} slots={slots} />
+        </div>
+      </section>
+
+      {/* Scope: what an hourly helper does and does not do */}
+      <section className="border-t border-border px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+        <div className="mx-auto max-w-7xl">
+          <h2 className="text-2xl font-extrabold sm:text-3xl">What helpers do — and don&apos;t</h2>
+          <p className="mt-2 max-w-xl text-muted-foreground">
+            An hourly helper handles everyday house work. Specialised jobs belong with our
+            scheduled services.
+          </p>
+          <div className="mt-8 grid gap-6 lg:grid-cols-2">
+            <div className="rounded-3xl border border-border bg-card p-6 sm:p-8">
+              <p className="label-mono text-primary">Helpers do</p>
+              <ul className="mt-4 space-y-3">
+                {HELPERS_DO.map((item) => (
+                  <li key={item} className="flex gap-3 text-sm">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="rounded-3xl border border-border bg-secondary/50 p-6 sm:p-8">
+              <p className="label-mono text-muted-foreground">Helpers don&apos;t</p>
+              <ul className="mt-4 space-y-3">
+                {HELPERS_DONT.map((item) => (
+                  <li key={item} className="flex gap-3 text-sm text-muted-foreground">
+                    <X className="mt-0.5 h-4 w-4 shrink-0" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
       </section>
     </PageShell>

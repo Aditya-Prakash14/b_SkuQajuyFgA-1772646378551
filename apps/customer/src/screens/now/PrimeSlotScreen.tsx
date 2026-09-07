@@ -5,7 +5,7 @@ import { Pressable, View } from 'react-native'
 import { Body, Button, Card, Eyebrow, H1, Muted, Screen, Text } from '../../components/ui'
 import { track } from '../../lib/analytics'
 import { formatINR } from '../../lib/format'
-import { GUARANTEES, getSlots, refreshSlots, type SlotId } from '../../lib/prime-now'
+import { GUARANTEES, HELPERS_DO, HELPERS_DONT, getSlots, refreshSlots, type SlotId } from '../../lib/prime-now'
 import { useColors } from '../../lib/theme'
 import type { HomeStackProps } from '../../navigation/types'
 
@@ -72,6 +72,24 @@ export function PrimeSlotScreen({ route, navigation }: HomeStackProps<'PrimeSlot
             <View key={g} className="flex-row gap-2.5">
               <Text className="font-bold text-[13px] text-primary">✓</Text>
               <Text className="flex-1 font-medium text-[13px] leading-5 text-foreground">{g}</Text>
+            </View>
+          ))}
+        </Card>
+
+        {/* Scope: everyday house work in, specialised jobs out. */}
+        <Card className="gap-3">
+          <Text className="font-bold text-[14px] text-foreground">What helpers do</Text>
+          {HELPERS_DO.map((item) => (
+            <View key={item} className="flex-row gap-2.5">
+              <Text className="font-bold text-[13px] text-primary">✓</Text>
+              <Text className="flex-1 text-[13px] leading-5 text-foreground">{item}</Text>
+            </View>
+          ))}
+          <Text className="mt-1 font-bold text-[14px] text-foreground">What helpers don&apos;t</Text>
+          {HELPERS_DONT.map((item) => (
+            <View key={item} className="flex-row gap-2.5">
+              <Text className="font-bold text-[13px] text-muted-foreground">✕</Text>
+              <Text className="flex-1 text-[13px] leading-5 text-muted-foreground">{item}</Text>
             </View>
           ))}
         </Card>

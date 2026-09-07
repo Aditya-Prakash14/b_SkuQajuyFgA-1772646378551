@@ -80,6 +80,23 @@ export const TASK_LABEL: Record<string, string> = Object.fromEntries(
   TASKS.map((t) => [t.id, t.label]),
 )
 
+/** Scope of an hourly helper — shown as do / don't on the request page. */
+export const HELPERS_DO = [
+  'Everyday cleaning: sweeping, mopping, dusting and dishes',
+  'Laundry, ironing and folding',
+  'Kitchen prep and cleanup, before or after a party',
+  'Bathroom, balcony, fridge and wardrobe tidy-ups',
+  'Packing and moving help inside your home',
+]
+
+export const HELPERS_DONT = [
+  'Outside window or ledge cleaning at height',
+  'Moving very heavy furniture or appliances alone',
+  'Childcare, elder care or pet care',
+  'Electrical, plumbing, repairs or pest control — book those as scheduled services',
+  'Driving or errands outside your home',
+]
+
 export const GUARANTEES = [
   { title: 'Background-verified helper', body: 'Every helper is ID-checked before their first job.' },
   { title: 'Flat hourly price', body: 'You pay the slot price. No travel fee, no surge.' },
