@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, Check, MessageCircle, Minus, Plus, Search, Star } from 'lucide-react'
+import { ArrowRight, Check, MessageCircle, Minus, Plus, Search, Sparkles, Star, Zap } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { useCity } from '@/lib/city-context'
 
@@ -100,10 +100,25 @@ export function DomainCards() {
           {/* Deep Cleaning — light */}
           <Link
             href="/deep-cleaning"
-            className="group flex flex-col justify-between rounded-3xl border border-border bg-card p-8 transition-colors hover:border-primary"
+            className="group flex flex-col overflow-hidden rounded-3xl border border-border bg-card transition-colors hover:border-primary"
           >
+            <div className="relative h-44 w-full sm:h-52">
+              <Image
+                src="/Carpet cleaning PC.jpg"
+                alt="Professional deep cleaning a carpet"
+                fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+            </div>
+            <div className="flex flex-1 flex-col justify-between p-8">
             <div>
-              <p className="label-mono text-primary">Scheduled · flat price</p>
+              <div className="flex items-center gap-2.5">
+                <span className="grid h-10 w-10 place-items-center rounded-xl bg-secondary text-primary">
+                  <Sparkles className="h-5 w-5" />
+                </span>
+                <p className="label-mono text-primary">Scheduled · flat price</p>
+              </div>
               <h3 className="mt-4 text-3xl font-extrabold">Deep Cleaning</h3>
               <p className="mt-3 max-w-sm text-muted-foreground">
                 Homes, offices, marble floors and painting. Booked in advance, priced up front,
@@ -120,15 +135,31 @@ export function DomainCards() {
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </span>
             </div>
+            </div>
           </Link>
 
           {/* Prime Now — dark */}
           <Link
             href="/prime-now"
-            className="group flex flex-col justify-between rounded-3xl bg-ink p-8 text-ink-foreground transition-opacity hover:opacity-95"
+            className="group flex flex-col overflow-hidden rounded-3xl bg-ink text-ink-foreground transition-opacity hover:opacity-95"
           >
+            <div className="relative h-44 w-full sm:h-52">
+              <Image
+                src="/Kitchen Sink cleaning PC.jpg"
+                alt="Helper cleaning a kitchen"
+                fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+            </div>
+            <div className="flex flex-1 flex-col justify-between p-8">
             <div>
-              <p className="label-mono text-brand">On demand · by the hour</p>
+              <div className="flex items-center gap-2.5">
+                <span className="grid h-10 w-10 place-items-center rounded-xl bg-ink-foreground/10 text-brand">
+                  <Zap className="h-5 w-5" />
+                </span>
+                <p className="label-mono text-brand">On demand · by the hour</p>
+              </div>
               <h3 className="mt-4 text-3xl font-extrabold">Prime Now</h3>
               <p className="mt-3 max-w-sm text-ink-foreground/70">
                 Instant house help. Tell us what needs doing and a verified helper arrives — today,
@@ -145,6 +176,7 @@ export function DomainCards() {
                 Request a helper
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </span>
+            </div>
             </div>
           </Link>
         </div>
