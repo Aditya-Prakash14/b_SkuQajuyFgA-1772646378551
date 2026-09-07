@@ -139,7 +139,7 @@ export default function FestivalCalendar() {
             <span className="flex items-center gap-1.5">
               <span className="h-2.5 w-2.5 rounded-sm bg-sky-300" /> Universal
             </span>
-            <span>🎨 changes the website theme</span>
+            <span>🎨 decorates the website (colours stay black &amp; white)</span>
             <span>~ date depends on moon sighting</span>
           </div>
         </CardContent>
@@ -149,9 +149,9 @@ export default function FestivalCalendar() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <Palette className="h-4 w-4 text-primary" /> Website theme
+              <Palette className="h-4 w-4 text-primary" /> Website dress-up
             </CardTitle>
-            <CardDescription>Applied automatically on myprimecompany.com</CardDescription>
+            <CardDescription>Decorations only — the black &amp; white theme never changes</CardDescription>
           </CardHeader>
           <CardContent>
             {live ? (
@@ -161,12 +161,12 @@ export default function FestivalCalendar() {
                   Live {fmtDay(live.start)} – {fmtDay(live.end)}
                 </p>
                 <p className="rounded-lg bg-muted px-3 py-2 text-sm italic">“{live.theme.greeting}”</p>
-                <Badge variant="brand">Theme active now</Badge>
+                <Badge variant="brand">Decorations live now</Badge>
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">
-                No festival theme is live today — the site is wearing its regular teal. The next
-                themed festival switches it on automatically.
+                No festival decorations are live today. The next decorated festival switches
+                them on automatically — the black &amp; white theme stays either way.
               </p>
             )}
           </CardContent>
