@@ -8,7 +8,6 @@ import {
   HeroSection,
   HowItWorks,
   Testimonials,
-  TrustStrip,
   WhyUs,
 } from '@/components/home-sections'
 
@@ -20,7 +19,6 @@ export default function Page() {
   return (
     <PageShell>
       <HeroSection />
-      <TrustStrip />
       <DomainCards />
       <HowItWorks />
       <WhyUs />
