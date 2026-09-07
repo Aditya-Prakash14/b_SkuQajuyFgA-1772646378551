@@ -91,6 +91,23 @@ export const TASK_LABEL: Record<string, string> = Object.fromEntries(TASKS.map((
 /** Hours a scheduled visit can start at, on the hour, 8 AM to 8 PM. */
 export const SCHEDULE_HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
 
+/** Scope of an hourly helper — shown as do / don't beside the guarantees. */
+export const HELPERS_DO = [
+  'Everyday cleaning: sweeping, mopping, dusting and dishes',
+  'Laundry, ironing and folding',
+  'Kitchen prep and cleanup, before or after a party',
+  'Bathroom, balcony, fridge and wardrobe tidy-ups',
+  'Packing and moving help inside your home',
+]
+
+export const HELPERS_DONT = [
+  'Outside window or ledge cleaning at height',
+  'Moving very heavy furniture or appliances alone',
+  'Childcare, elder care or pet care',
+  'Electrical, plumbing, repairs or pest control — book those as scheduled services',
+  'Driving or errands outside your home',
+]
+
 export const GUARANTEES = [
   'Background-verified helper',
   'Flat hourly price, no surge',
