@@ -4,16 +4,18 @@ import { createClient } from '@/lib/supabase/server'
 import { formatINRShort } from '@prime/shared'
 import { Button } from '@/components/ui/button'
 import { ServicesTable, type ServiceRow } from '@/components/services/services-table'
+import { PrimeNowSlotPricing, type PrimeNowSlotRow } from '@/components/prime-now/slot-pricing'
 
 export default async function ServicesPage() {
   const supabase = await createClient()
 
-  const [{ data: services }, { data: categories }] = await Promise.all([
+  const [{ data: services }, { data: categories }, { data: slots }] = await Promise.all([
     supabase
       .from('services')
       .select('id,name,slug,price,display_price_label,is_active,rating,bookings_count,category:service_categories(name)')
       .order('name'),
     supabase.from('service_categories').select('id,name').order('sort_order'),
+    supabase.from('prime_now_slots').select('id,label,sublabel,minutes,price,is_active').order('sort_order'),
   ])
 
   const rows: ServiceRow[] = (services ?? []).map((s) => ({
@@ -42,6 +44,10 @@ export default async function ServicesPage() {
       </div>
 
       <ServicesTable services={rows} categories={categories ?? []} />
+
+      <PrimeNowSlotPricing
+        slots={((slots ?? []) as PrimeNowSlotRow[]).map((s) => ({ ...s, price: Number(s.price) }))}
+      />
     </div>
   )
 }

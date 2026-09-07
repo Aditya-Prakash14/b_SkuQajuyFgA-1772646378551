@@ -313,9 +313,9 @@ export default function CartDrawer() {
               ) : (
                 /* ── Booking form ── */
                 <form id="checkout-form" onSubmit={handleSubmit} className="space-y-4 p-4" noValidate>
-                  <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 dark:border-emerald-900 dark:bg-emerald-950">
-                    <CheckCircle className="size-4 shrink-0 text-emerald-600" />
-                    <p className="text-xs text-emerald-700 dark:text-emerald-400">
+                  <div className="flex items-center gap-2 rounded-xl border bg-secondary px-3 py-2">
+                    <CheckCircle className="size-4 shrink-0 text-foreground" />
+                    <p className="text-xs text-muted-foreground">
                       Signed in as <strong>{user.email}</strong>
                     </p>
                   </div>
@@ -445,8 +445,8 @@ export default function CartDrawer() {
           {/* STEP 3 — Success */}
           {step === 'success' && (
             <div className="flex h-full flex-col items-center justify-center gap-5 px-6 py-10 text-center">
-              <div className="flex size-24 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-950">
-                <CheckCircle className="size-12 text-emerald-500" />
+              <div className="flex size-24 items-center justify-center rounded-full bg-secondary">
+                <CheckCircle className="size-12 text-foreground" />
               </div>
               <div>
                 <p className="text-2xl font-black text-foreground">Booking Confirmed!</p>

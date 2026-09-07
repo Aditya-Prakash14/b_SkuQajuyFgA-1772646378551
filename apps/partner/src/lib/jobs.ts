@@ -34,6 +34,8 @@ export async function fetchMyStats(): Promise<VendorStats | null> {
     all_time_payout: Number(row.all_time_payout ?? 0),
     rating_avg: row.rating_avg === null || row.rating_avg === undefined ? null : Number(row.rating_avg),
     rating_count: Number(row.rating_count ?? 0),
+    month_tips: Number(row.month_tips ?? 0),
+    all_time_tips: Number(row.all_time_tips ?? 0),
   }
 }
 
@@ -44,6 +46,15 @@ export async function updateJobStatus(orderId: string, status: JobStatus, cashCo
     p_status: status,
     p_cash_collected: cashCollected,
   })
+  if (error) throw error
+}
+
+/**
+ * Tell the customer you have set out. Allowed once, while the job is still
+ * assigned and not started; the customer's timeline and phone get it.
+ */
+export async function markEnRoute(jobId: string) {
+  const { error } = await supabase.rpc('mark_en_route', { p_job_id: jobId })
   if (error) throw error
 }
 

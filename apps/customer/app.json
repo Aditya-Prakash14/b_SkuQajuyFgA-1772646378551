@@ -1,0 +1,67 @@
+{
+  "expo": {
+    "name": "MyPrimeCompany",
+    "slug": "myprimecompany",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "in.myprimecompany.app",
+      "associatedDomains": [
+        "applinks:www.myprimecompany.com"
+      ]
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundColor": "#FFFFFF",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "in.myprimecompany.app",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "www.myprimecompany.com",
+              "pathPrefix": "/account/bookings"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-web-browser",
+      "expo-font",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/android-icon-monochrome.png",
+          "color": "#0E5A63",
+          "defaultChannel": "bookings"
+        }
+      ],
+      "expo-splash-screen",
+      "expo-status-bar"
+    ],
+    "scheme": "myprimecompany",
+    "backgroundColor": "#FBFAF7",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0E5A63"
+    }
+  }
+}

@@ -86,7 +86,7 @@ export default function AboutPage() {
           </div>
 
           <div className="text-center mt-12">
-            <Link href="/services" className="inline-block bg-brand text-white px-8 py-3.5 rounded-xl font-bold hover:bg-brand/90 transition-all shadow-lg shadow-brand/30">
+            <Link href="/services" className="inline-block bg-brand text-brand-foreground px-8 py-3.5 rounded-xl font-bold hover:bg-brand/90 transition-all shadow-lg shadow-brand/30">
               Explore our services
             </Link>
           </div>

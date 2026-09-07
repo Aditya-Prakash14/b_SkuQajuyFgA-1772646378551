@@ -4,22 +4,25 @@ import { useMemo, useState } from 'react'
 import { Check, Loader2, Phone, Send } from 'lucide-react'
 import { formatINR } from '@prime/shared'
 import {
+  FALLBACK_SLOTS,
   GUARANTEES,
-  SLOTS,
   SUPPORT_PHONE,
   TASKS,
   TASK_LABEL,
   submitPrimeNowRequest,
   type PrimeNowInput,
+  type Slot,
   type SlotId,
 } from '@/lib/prime-now'
 
 /**
  * Three steps in one card, with a sticky summary that prices the request live.
  * No catalogue and no cart: this is a request, dispatched to a helper.
+ * `slots` is the CRM-controlled price list, fetched server-side by the page.
  */
-export function PrimeNowRequestFlow({ cities }: { cities: string[] }) {
-  const [slotId, setSlotId] = useState<SlotId>('1h')
+export function PrimeNowRequestFlow({ cities, slots = FALLBACK_SLOTS }: { cities: string[]; slots?: Slot[] }) {
+  const SLOTS = slots.length ? slots : FALLBACK_SLOTS
+  const [slotId, setSlotId] = useState<SlotId>(SLOTS.find((s) => s.id === '1h')?.id ?? SLOTS[0].id)
   const [tasks, setTasks] = useState<string[]>([])
   const [detail, setDetail] = useState('')
   const [timing, setTiming] = useState<'now' | 'scheduled'>('now')
@@ -32,7 +35,7 @@ export function PrimeNowRequestFlow({ cities }: { cities: string[] }) {
   const [error, setError] = useState<string | null>(null)
   const [done, setDone] = useState<{ number: string } | null>(null)
 
-  const slot = useMemo(() => SLOTS.find((s) => s.id === slotId)!, [slotId])
+  const slot = useMemo(() => SLOTS.find((s) => s.id === slotId) ?? SLOTS[0], [SLOTS, slotId])
   const toggleTask = (id: string) =>
     setTasks((prev) => (prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]))
 
@@ -123,7 +126,42 @@ export function PrimeNowRequestFlow({ cities }: { cities: string[] }) {
     <div className="grid gap-8 lg:grid-cols-[1fr_360px] lg:items-start">
       {/* ── The three steps ─────────────────────────────────────────────── */}
       <div className="rounded-3xl border border-border bg-card p-6 sm:p-8">
-        <Step n={1} title="How long do you need help for?" />
+        <Step n={1} title="What should they do?" hint="Pick as many as you like — it does not change the price." />
+        <div className="mt-4 grid grid-cols-3 gap-2.5 sm:grid-cols-4">
+          {TASKS.map((t) => {
+            const active = tasks.includes(t.id)
+            return (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => toggleTask(t.id)}
+                aria-pressed={active}
+                className={`flex flex-col items-center gap-2 rounded-2xl border p-3.5 text-center transition-colors ${
+                  active ? 'border-primary bg-secondary' : 'border-border hover:border-primary/40'
+                }`}
+              >
+                <t.icon className={`h-6 w-6 ${active ? 'text-primary' : 'text-muted-foreground'}`} />
+                <span className={`text-xs leading-tight ${active ? 'font-bold' : 'font-medium'}`}>
+                  {t.label}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+        <label className="mt-4 block">
+          <span className="sr-only">Anything else we should know</span>
+          <textarea
+            value={detail}
+            onChange={(e) => setDetail(e.target.value)}
+            rows={3}
+            placeholder="Anything else? e.g. two bedrooms and a balcony, pets at home, please bring a mop."
+            className="w-full rounded-2xl border border-border bg-background p-4 text-sm outline-none focus:border-primary"
+          />
+        </label>
+
+        <hr className="my-8 border-border" />
+
+        <Step n={2} title="How long do you need help for?" />
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {SLOTS.map((s) => {
             const active = s.id === slotId
@@ -146,40 +184,6 @@ export function PrimeNowRequestFlow({ cities }: { cities: string[] }) {
             )
           })}
         </div>
-
-        <hr className="my-8 border-border" />
-
-        <Step n={2} title="What should they do?" hint="Pick as many as you like." />
-        <div className="mt-4 flex flex-wrap gap-2">
-          {TASKS.map((t) => {
-            const active = tasks.includes(t.id)
-            return (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => toggleTask(t.id)}
-                aria-pressed={active}
-                className={`rounded-full border px-4 py-2 text-sm transition-colors ${
-                  active
-                    ? 'border-primary bg-primary text-primary-foreground'
-                    : 'border-border hover:border-primary/40'
-                }`}
-              >
-                {t.label}
-              </button>
-            )
-          })}
-        </div>
-        <label className="mt-4 block">
-          <span className="sr-only">Anything else we should know</span>
-          <textarea
-            value={detail}
-            onChange={(e) => setDetail(e.target.value)}
-            rows={3}
-            placeholder="Anything else? e.g. two bedrooms and a balcony, pets at home, please bring a mop."
-            className="w-full rounded-2xl border border-border bg-background p-4 text-sm outline-none focus:border-primary"
-          />
-        </label>
 
         <hr className="my-8 border-border" />
 
@@ -269,11 +273,11 @@ export function PrimeNowRequestFlow({ cities }: { cities: string[] }) {
         <div className="rounded-3xl bg-ink p-6 text-ink-foreground shadow-panel">
           <p className="label-mono text-brand">Your request</p>
           <dl className="mt-5 space-y-3 text-sm">
-            <Row label="Slot" value={slot.label} />
             <Row
               label="Tasks"
               value={tasks.length ? `${tasks.length} selected` : 'Not chosen yet'}
             />
+            <Row label="Slot" value={slot.label} />
             <Row label="Arrival" value={arrival} />
           </dl>
 

@@ -1,0 +1,60 @@
+# CI for the MyPrimeCompany monorepo.
+#
+# Two worlds, two jobs:
+#   - platform: the pnpm workspace (website, CRM, @prime/shared) — lint,
+#     typecheck, unit tests, production builds. The builds run against
+#     placeholder Supabase env vars; anything needing live data falls back
+#     (catalog fetches, Prime Now slots) exactly as it does offline.
+#   - The two Expo apps are npm projects OUTSIDE the workspace (Metro vs pnpm
+#     symlinks) and cannot import @prime/shared, so they get their own
+#     matrix job: npm ci + tsc.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  platform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+
+  expo-app:
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [customer, partner]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/${{ matrix.app }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/${{ matrix.app }}/package-lock.json
+      - run: npm ci
+      - run: npx tsc --noEmit

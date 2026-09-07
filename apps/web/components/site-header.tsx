@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import {
@@ -10,6 +10,9 @@ import {
 import { useCart } from '@/lib/cart-context'
 import { useCity } from '@/lib/city-context'
 import { useAuth } from '@/lib/auth-context'
+import { LogoFestivalAccessory, FestivalGreeting } from '@/components/festival-decorations'
+import { FestivalBunting, FestivalBanner } from '@/components/festival-effects'
+import { useFestival } from '@/lib/festival-context'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -43,8 +46,13 @@ export function SiteHeader() {
   const { totalItems, setCartOpen } = useCart()
   const { city, setCity, cities, detectCity, detecting, detectMessage, detectError } = useCity()
   const { user, displayName, signInWithGoogle, signOut } = useAuth()
+  const festival = useFestival()
 
   const [mobileOpen, setMobileOpen] = useState(false)
+  // Radix DropdownMenu uses useId(); rendering it only after mount avoids an
+  // SSR/client id hydration mismatch on the trigger (same fix as CrmShell).
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
 
   return (
     <>
@@ -52,14 +60,18 @@ export function SiteHeader() {
       <div className="bg-primary px-4 py-2 text-center text-xs text-primary-foreground sm:text-sm">
         <Phone className="mr-1 inline-block h-3.5 w-3.5" /> Call us anytime:{' '}
         <a href="tel:+917349603429" className="font-semibold hover:underline">+91 73496 03429</a>
-        &nbsp;|&nbsp; Professional cleaning services across India
+        &nbsp;|&nbsp;{' '}
+        <FestivalGreeting fallback="Professional cleaning services across India" />
       </div>
 
       <header className="sticky top-0 z-50 border-b bg-background shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
           <Link href="/" className="flex shrink-0 items-center gap-2.5" aria-label="My Prime Company home">
-            <span className="flex h-7 w-12 items-center justify-center overflow-hidden rounded-lg bg-white ring-1 ring-border">
-              <Image src="/logo.png" alt="PC monogram" width={40} height={18} priority className="h-4 w-auto" />
+            <span className="relative">
+              <span className="flex h-7 w-12 items-center justify-center overflow-hidden rounded-lg bg-white ring-1 ring-border">
+                <Image src="/logo.png" alt="PC monogram" width={40} height={18} priority className="h-4 w-auto" />
+              </span>
+              <LogoFestivalAccessory />
             </span>
             <span className="flex flex-col leading-none">
               <span className="text-base font-black tracking-tight text-foreground">My Prime Company</span>
@@ -77,6 +89,13 @@ export function SiteHeader() {
 
           <div className="flex shrink-0 items-center gap-2">
             {/* City selector with geolocation */}
+            {!mounted ? (
+              <Button variant="outline" className="hidden gap-1 font-normal text-muted-foreground sm:flex">
+                <MapPin className="size-4" />
+                <span className="max-w-24 truncate">{city ?? 'Select City'}</span>
+                <ChevronDown className="size-3" />
+              </Button>
+            ) : (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="hidden gap-1 font-normal text-muted-foreground sm:flex">
@@ -98,7 +117,7 @@ export function SiteHeader() {
                   {detecting ? 'Detecting…' : 'Use my current location'}
                 </DropdownMenuItem>
 
-                {detectMessage && <p className="px-2 py-1.5 text-[11px] text-emerald-600">{detectMessage}</p>}
+                {detectMessage && <p className="px-2 py-1.5 text-[11px] text-muted-foreground">{detectMessage}</p>}
                 {detectError && <p className="px-2 py-1.5 text-[11px] text-destructive">{detectError}</p>}
 
                 <DropdownMenuSeparator />
@@ -115,9 +134,18 @@ export function SiteHeader() {
                 </ScrollArea>
               </DropdownMenuContent>
             </DropdownMenu>
+            )}
 
             {/* Auth */}
-            {user ? (
+            {user && !mounted ? (
+              <Button variant="outline" className="hidden gap-1.5 px-2 font-normal sm:flex">
+                <span className="grid size-6 place-items-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                  {displayName.charAt(0).toUpperCase() || <UserIcon className="size-3" />}
+                </span>
+                <span className="max-w-20 truncate">{displayName}</span>
+                <ChevronDown className="size-3 text-muted-foreground" />
+              </Button>
+            ) : user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="hidden gap-1.5 px-2 font-normal sm:flex">
@@ -173,7 +201,9 @@ export function SiteHeader() {
               onClick={() => setCartOpen(true)}
               className="rounded-xl font-bold shadow-md shadow-brand/30"
             >
-              {totalItems > 0 ? (<><ShoppingBag /> Cart ({totalItems})</>) : 'Book Now'}
+              {totalItems > 0
+                ? (<><ShoppingBag /> Cart ({totalItems})</>)
+                : festival ? `${festival.festival.emoji} Book Now` : 'Book Now'}
             </Button>
 
             <Button
@@ -188,6 +218,8 @@ export function SiteHeader() {
             </Button>
           </div>
         </div>
+
+        <FestivalBunting />
 
         {/* Mobile menu */}
         {mobileOpen && (
@@ -244,6 +276,8 @@ export function SiteHeader() {
           </div>
         )}
       </header>
+
+      <FestivalBanner />
     </>
   )
 }

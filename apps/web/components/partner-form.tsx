@@ -65,7 +65,7 @@ export function PartnerForm() {
     return (
       <Card className="text-center">
         <CardHeader>
-          <div className="mx-auto grid size-14 place-items-center rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950">
+          <div className="mx-auto grid size-14 place-items-center rounded-full bg-secondary text-foreground">
             <CheckCircle2 className="size-7" />
           </div>
           <CardTitle className="text-xl">Application received</CardTitle>

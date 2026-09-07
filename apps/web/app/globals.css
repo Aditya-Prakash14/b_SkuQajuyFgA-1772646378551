@@ -6,111 +6,280 @@
 /* ============================================================================
  * MyPrimeCompany — public site.
  *
- * Deep teal on warm off-white, with amber reserved for dark bands only.
- * Neutrals carry a deliberate warm/teal bias (never pure grey) so borders and
- * secondary text sit in the same world as the ground rather than on top of it.
+ * Monochrome: black ink on white, greys carrying every secondary role.
+ * The one exception is --destructive, kept red because errors must not
+ * blend in. Festival palettes further down still recolour the accents
+ * during festival windows (that is their whole job).
  * The CRM keeps its own palette in apps/crm/app/globals.css — this file is
  * scoped to the website.
  * ========================================================================= */
 
 :root {
-  --background: #fbfaf7; /* warm off-white page ground */
-  --foreground: #12212a; /* dark bands and body text */
+  --background: #ffffff;
+  --foreground: #111111;
   --card: #ffffff;
-  --card-foreground: #12212a;
+  --card-foreground: #111111;
   --popover: #ffffff;
-  --popover-foreground: #12212a;
+  --popover-foreground: #111111;
 
-  --primary: #0e5a63; /* deep teal */
+  --primary: #111111;
   --primary-foreground: #ffffff;
 
   /* Dark bands: the near-black used for full-bleed sections and the footer. */
-  --ink: #12212a;
-  --ink-foreground: #fbfaf7;
+  --ink: #111111;
+  --ink-foreground: #fafafa;
 
-  --secondary: #edf3f2; /* teal tint */
-  --secondary-foreground: #0e5a63;
-  --muted: #edf3f2;
-  --muted-foreground: #5f6b70; /* warm-cool grey, biased toward the teal */
+  --secondary: #f4f4f4;
+  --secondary-foreground: #111111;
+  --muted: #f4f4f4;
+  --muted-foreground: #6b6b6b;
 
-  /* shadcn treats --accent as a neutral hover tint; the amber lives in --brand
-   * and is used on dark grounds only (see the spec's "accent on dark"). */
-  --accent: #edf3f2;
-  --accent-foreground: #0e5a63;
-  --brand: #e8a33d; /* amber */
-  --brand-foreground: #12212a;
+  /* shadcn treats --accent as a neutral hover tint. --brand is the CTA accent:
+   * black on light surfaces; .bg-ink bands flip it to white (see below). */
+  --accent: #f4f4f4;
+  --accent-foreground: #111111;
+  --brand: #111111;
+  --brand-foreground: #ffffff;
 
   --destructive: #b3261e;
   --destructive-foreground: #ffffff;
 
-  --border: #e7e3db;
-  --input: #e7e3db;
-  --ring: #0e5a63;
+  --border: #e4e4e4;
+  --input: #e4e4e4;
+  --ring: #111111;
 
-  --chart-1: #0e5a63;
-  --chart-2: #e8a33d;
-  --chart-3: #3e8e97;
-  --chart-4: #12212a;
-  --chart-5: #8fb3ae;
+  --chart-1: #111111;
+  --chart-2: #6b6b6b;
+  --chart-3: #a3a3a3;
+  --chart-4: #d4d4d4;
+  --chart-5: #404040;
 
   /* Spec: 18–24px radii. */
   --radius: 1.25rem;
 
   --sidebar: #ffffff;
-  --sidebar-foreground: #12212a;
-  --sidebar-primary: #0e5a63;
+  --sidebar-foreground: #111111;
+  --sidebar-primary: #111111;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #edf3f2;
-  --sidebar-accent-foreground: #0e5a63;
-  --sidebar-border: #e7e3db;
-  --sidebar-ring: #0e5a63;
+  --sidebar-accent: #f4f4f4;
+  --sidebar-accent-foreground: #111111;
+  --sidebar-border: #e4e4e4;
+  --sidebar-ring: #111111;
+}
+
+/* Inside dark ink bands the accents invert: a black CTA would vanish on a
+ * black band, so brand/primary become white there. */
+.bg-ink {
+  --brand: #ffffff;
+  --brand-foreground: #111111;
+  --primary: #ffffff;
+  --primary-foreground: #111111;
+  --ring: #ffffff;
 }
 
 .dark {
-  --background: #0d1a21;
-  --foreground: #f4f2ed;
-  --card: #12212a;
-  --card-foreground: #f4f2ed;
-  --popover: #12212a;
-  --popover-foreground: #f4f2ed;
+  --background: #0a0a0a;
+  --foreground: #f5f5f5;
+  --card: #141414;
+  --card-foreground: #f5f5f5;
+  --popover: #141414;
+  --popover-foreground: #f5f5f5;
 
-  --primary: #4ea3ac; /* teal lifted to hold contrast on dark */
-  --primary-foreground: #06171b;
+  --primary: #f5f5f5;
+  --primary-foreground: #0a0a0a;
 
-  --ink: #0a151b;
-  --ink-foreground: #f4f2ed;
+  --ink: #050505;
+  --ink-foreground: #f5f5f5;
 
-  --secondary: #1b2f38;
-  --secondary-foreground: #cfe4e2;
-  --muted: #1b2f38;
-  --muted-foreground: #9aabb0;
+  --secondary: #1f1f1f;
+  --secondary-foreground: #e5e5e5;
+  --muted: #1f1f1f;
+  --muted-foreground: #9e9e9e;
 
-  --accent: #1b2f38;
-  --accent-foreground: #cfe4e2;
-  --brand: #e8a33d;
-  --brand-foreground: #12212a;
+  --accent: #1f1f1f;
+  --accent-foreground: #e5e5e5;
+  --brand: #f5f5f5;
+  --brand-foreground: #0a0a0a;
 
   --destructive: #e5645b;
   --destructive-foreground: #1a0b0a;
 
   --border: rgb(255 255 255 / 12%);
   --input: rgb(255 255 255 / 14%);
-  --ring: #4ea3ac;
+  --ring: #f5f5f5;
 
-  --chart-1: #4ea3ac;
-  --chart-2: #e8a33d;
-  --chart-3: #8fb3ae;
-  --chart-4: #f4f2ed;
-  --chart-5: #2c5a63;
+  --chart-1: #f5f5f5;
+  --chart-2: #a3a3a3;
+  --chart-3: #737373;
+  --chart-4: #404040;
+  --chart-5: #d4d4d4;
 
-  --sidebar: #12212a;
-  --sidebar-foreground: #f4f2ed;
-  --sidebar-primary: #4ea3ac;
-  --sidebar-primary-foreground: #06171b;
-  --sidebar-accent: #1b2f38;
-  --sidebar-accent-foreground: #cfe4e2;
+  --sidebar: #141414;
+  --sidebar-foreground: #f5f5f5;
+  --sidebar-primary: #f5f5f5;
+  --sidebar-primary-foreground: #0a0a0a;
+  --sidebar-accent: #1f1f1f;
+  --sidebar-accent-foreground: #e5e5e5;
   --sidebar-border: rgb(255 255 255 / 12%);
-  --sidebar-ring: #4ea3ac;
+  --sidebar-ring: #f5f5f5;
+}
+
+/* ============================================================================
+ * Festival palettes — applied automatically by FestivalProvider, which stamps
+ * data-festival="<palette>" on <html> while a festival window is live (data in
+ * packages/shared/src/festivals.ts). Only the accent tokens move; the page
+ * ground, ink bands and neutrals stay put so the site remains itself, just
+ * dressed for the occasion. :root[data-festival] outranks .dark, so the same
+ * mid-tone accents serve both modes.
+ * ========================================================================= */
+
+:root[data-festival='christmas'] {
+  --primary: #a51d1d; --primary-foreground: #ffffff; --ring: #a51d1d;
+  --secondary: #fbeaea; --secondary-foreground: #7c1616;
+  --accent: #fbeaea; --accent-foreground: #7c1616;
+  --brand: #2e7d4f; --brand-foreground: #ffffff;
+}
+:root[data-festival='diwali'] {
+  --primary: #9a3412; --primary-foreground: #ffffff; --ring: #9a3412;
+  --secondary: #fdf0e7; --secondary-foreground: #7c2d12;
+  --accent: #fdf0e7; --accent-foreground: #7c2d12;
+  --brand: #eab308; --brand-foreground: #12212a;
+}
+:root[data-festival='holi'] {
+  --primary: #a21caf; --primary-foreground: #ffffff; --ring: #a21caf;
+  --secondary: #fbeafc; --secondary-foreground: #86198f;
+  --accent: #fbeafc; --accent-foreground: #86198f;
+  --brand: #06b6d4; --brand-foreground: #083344;
+}
+:root[data-festival='tricolor'] {
+  --primary: #17418a; --primary-foreground: #ffffff; --ring: #17418a;
+  --secondary: #e9f0fb; --secondary-foreground: #12336c;
+  --accent: #e9f0fb; --accent-foreground: #12336c;
+  --brand: #f97316; --brand-foreground: #431407;
+}
+:root[data-festival='eid'] {
+  --primary: #047857; --primary-foreground: #ffffff; --ring: #047857;
+  --secondary: #e7f5f0; --secondary-foreground: #065f46;
+  --accent: #e7f5f0; --accent-foreground: #065f46;
+  --brand: #ca8a04; --brand-foreground: #1c1503;
+}
+:root[data-festival='ganesh'] {
+  --primary: #c2410c; --primary-foreground: #ffffff; --ring: #c2410c;
+  --secondary: #fdeee5; --secondary-foreground: #9a3412;
+  --accent: #fdeee5; --accent-foreground: #9a3412;
+  --brand: #f59e0b; --brand-foreground: #12212a;
+}
+:root[data-festival='harvest'] {
+  --primary: #15803d; --primary-foreground: #ffffff; --ring: #15803d;
+  --secondary: #eaf6ee; --secondary-foreground: #14532d;
+  --accent: #eaf6ee; --accent-foreground: #14532d;
+  --brand: #eab308; --brand-foreground: #12212a;
+}
+:root[data-festival='celebration'] {
+  --primary: #5b21b6; --primary-foreground: #ffffff; --ring: #5b21b6;
+  --secondary: #f1eafc; --secondary-foreground: #4c1d95;
+  --accent: #f1eafc; --accent-foreground: #4c1d95;
+  --brand: #f59e0b; --brand-foreground: #12212a;
+}
+:root[data-festival='valentine'] {
+  --primary: #be185d; --primary-foreground: #ffffff; --ring: #be185d;
+  --secondary: #fceaf1; --secondary-foreground: #9d174d;
+  --accent: #fceaf1; --accent-foreground: #9d174d;
+  --brand: #f472b6; --brand-foreground: #4c0519;
+}
+:root[data-festival='kite'] {
+  --primary: #0369a1; --primary-foreground: #ffffff; --ring: #0369a1;
+  --secondary: #e7f3fa; --secondary-foreground: #075985;
+  --accent: #e7f3fa; --accent-foreground: #075985;
+  --brand: #f59e0b; --brand-foreground: #12212a;
+}
+:root[data-festival='peacock'] {
+  --primary: #4338ca; --primary-foreground: #ffffff; --ring: #4338ca;
+  --secondary: #eef0fb; --secondary-foreground: #3730a3;
+  --accent: #eef0fb; --accent-foreground: #3730a3;
+  --brand: #eab308; --brand-foreground: #12212a;
+}
+:root[data-festival='halloween'] {
+  --primary: #7e22ce; --primary-foreground: #ffffff; --ring: #7e22ce;
+  --secondary: #f4ebfb; --secondary-foreground: #6b21a8;
+  --accent: #f4ebfb; --accent-foreground: #6b21a8;
+  --brand: #f97316; --brand-foreground: #431407;
+}
+
+/* Festive atmosphere: a soft wash of the festival colour bleeding down from
+ * the top of the page, plus the moving parts used by festival-effects.tsx. */
+:root[data-festival] body {
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--primary) 8%, transparent),
+    transparent 360px
+  );
+}
+
+@keyframes festival-fall {
+  0%   { transform: translateY(-8vh) translateX(0) rotate(0deg); }
+  25%  { transform: translateY(22vh) translateX(2.5vw) rotate(40deg); }
+  50%  { transform: translateY(50vh) translateX(-2vw) rotate(-30deg); }
+  75%  { transform: translateY(78vh) translateX(2vw) rotate(25deg); }
+  100% { transform: translateY(108vh) translateX(-1vw) rotate(0deg); }
+}
+@keyframes festival-twinkle {
+  from { opacity: 0.35; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1.15); }
+}
+
+/* String-light bulb under the header (festivals of lights). */
+.festival-bulb {
+  width: 7px;
+  height: 7px;
+  margin-bottom: 3px;
+  border-radius: 9999px;
+  filter: drop-shadow(0 0 4px currentColor) saturate(1.4);
+  animation: festival-twinkle 1.8s ease-in-out infinite alternate;
+}
+/* Triangle bunting flag (everything else). */
+.festival-flag {
+  height: 11px;
+  flex: 1 1 0;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  opacity: 0.9;
+}
+
+/* Ornament swinging from the festival banner: a thin string with the emoji
+ * at its end, the whole thing rocking around its anchor point. */
+@keyframes festival-sway {
+  from { transform: rotate(-7deg); }
+  to   { transform: rotate(7deg); }
+}
+.festival-hang {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform-origin: top center;
+  animation: festival-sway 2.6s ease-in-out infinite alternate;
+}
+.festival-hang > i {
+  width: 1.5px;
+  background: currentColor;
+  opacity: 0.45;
+}
+
+/* Faint rangoli quarter-circle pinned in a bottom corner. */
+.festival-rangoli {
+  position: absolute;
+  width: 15rem;
+  height: 15rem;
+  border-radius: 9999px;
+  background:
+    radial-gradient(circle, transparent 34%, var(--background) 35% 39%, transparent 40%),
+    repeating-conic-gradient(var(--primary) 0deg 12deg, var(--brand) 12deg 24deg, var(--secondary-foreground) 24deg 36deg);
+  opacity: 0.09;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .festival-particles { display: none; }
+  .festival-bulb,
+  .festival-hang { animation: none; }
 }
 
 @theme inline {

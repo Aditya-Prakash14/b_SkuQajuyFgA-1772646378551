@@ -494,6 +494,39 @@ export type Database = {
           },
         ]
       }
+      prime_now_slots: {
+        Row: {
+          id: string
+          is_active: boolean
+          label: string
+          minutes: number
+          price: number
+          sort_order: number
+          sublabel: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          is_active?: boolean
+          label: string
+          minutes: number
+          price: number
+          sort_order?: number
+          sublabel?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          is_active?: boolean
+          label?: string
+          minutes?: number
+          price?: number
+          sort_order?: number
+          sublabel?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           comment: string | null

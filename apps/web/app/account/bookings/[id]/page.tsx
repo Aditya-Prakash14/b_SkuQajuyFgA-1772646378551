@@ -13,6 +13,7 @@ import { statusMeta, CUSTOMER_EDITABLE } from '@/lib/order-status'
 import type { OrderStatus } from '@prime/shared'
 import { TIME_SLOTS } from '@/lib/slots'
 import { StarInput, Stars } from '@/components/account/star-rating'
+import { PayOnlineButton } from '@/components/account/pay-online-button'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -48,6 +49,7 @@ interface Order {
   subtotal: number
   tax: number | null
   total: number
+  payment_status: string | null
   notes: string | null
   created_at: string | null
   items: Item[]
@@ -71,7 +73,7 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
     const [{ data: o }, { data: r }] = await Promise.all([
       supabase
         .from('orders')
-        .select('id, order_number, status, scheduled_date, scheduled_slot, city, address, subtotal, tax, total, notes, created_at, items:order_items(id, service_id, service_name, unit_price, qty, line_total, service:services(slug, hero_img, price, display_price_label, is_active))')
+        .select('id, order_number, status, scheduled_date, scheduled_slot, city, address, subtotal, tax, total, payment_status, notes, created_at, items:order_items(id, service_id, service_name, unit_price, qty, line_total, service:services(slug, hero_img, price, display_price_label, is_active))')
         .eq('id', id)
         .maybeSingle(),
       supabase.from('reviews').select('service_id, rating, comment').eq('order_id', id),
@@ -109,6 +111,13 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
       <div className="flex items-center gap-3 flex-wrap">
         <h2 className="text-xl font-black text-gray-900">{order.order_number}</h2>
         <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${meta.className}`}>{meta.label}</span>
+        <span
+          className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+            order.payment_status === 'paid' ? 'bg-secondary text-foreground' : 'bg-muted text-muted-foreground'
+          }`}
+        >
+          {order.payment_status === 'paid' ? 'Paid' : order.payment_status === 'refunded' ? 'Refunded' : 'Payment pending'}
+        </span>
       </div>
 
       <div className="grid gap-5 lg:grid-cols-3">
@@ -159,9 +168,13 @@ export default function BookingDetailPage({ params }: { params: Promise<{ id: st
                 </>
               )}
               <div className="flex justify-between font-black text-primary pt-1">
-                <span>Total paid</span><span>{formatINR(Number(order.total))}</span>
+                <span>{order.payment_status === 'paid' ? 'Total paid' : 'Total'}</span>
+                <span>{formatINR(Number(order.total))}</span>
               </div>
             </div>
+            {order.payment_status !== 'paid' && order.payment_status !== 'refunded' && order.status !== 'cancelled' && (
+              <PayOnlineButton kind="deep" id={order.id} onPaid={load} />
+            )}
             <RebookButton items={order.items} />
           </Card>
 
@@ -347,7 +360,7 @@ function ReviewBlock({
             </Button>
           </div>
           {existing.comment && <p className="mt-1.5 text-sm text-gray-600">“{existing.comment}”</p>}
-          <p className="mt-1 flex items-center gap-1 text-[11px] text-green-600"><CheckCircle className="w-3 h-3" /> Thanks for your review</p>
+          <p className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground"><CheckCircle className="w-3 h-3" /> Thanks for your review</p>
         </div>
       ) : (
         <div className="mt-2 space-y-2">

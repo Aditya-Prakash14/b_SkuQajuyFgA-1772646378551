@@ -58,8 +58,9 @@ export function HeroSection() {
           </p>
         </div>
 
-        {/* Image collage with the 1M+ stat tile */}
-        <div className="relative">
+        {/* Image collage with the 1M+ stat tile — desktop only: stacked under
+            the hero on small screens it pushed the real content below the fold. */}
+        <div className="relative hidden lg:block">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-3">
               <Photo src="/Office cleaning PC.jpg" alt="Team cleaning an office" className="h-44 sm:h-56" />
@@ -99,7 +100,7 @@ const STATS = [
 
 export function TrustStrip() {
   return (
-    <section className="border-b border-border bg-secondary/50 px-4 py-8 sm:px-6 lg:px-8">
+    <section className="hidden border-b border-border bg-secondary/50 px-4 py-8 sm:px-6 md:block lg:px-8">
       <div className="mx-auto grid max-w-7xl grid-cols-2 gap-6 lg:grid-cols-4">
         {STATS.map((s) => (
           <div key={s.label} className="text-center">

@@ -117,6 +117,8 @@ export interface Job {
   items: JobItem[]
   created_at: string
   updated_at: string
+  /** Set once you tap "On my way" (0030); the customer sees the step. */
+  en_route_at: string | null
 }
 
 export const JOB_STATUS_LABELS: Record<JobStatus, string> = {
@@ -140,6 +142,9 @@ export interface VendorStats {
   all_time_payout: number
   rating_avg: number | null
   rating_count: number
+  /** Customer tips, already included in the payouts above (0029). */
+  month_tips: number
+  all_time_tips: number
 }
 
 // ── Offers (auto-dispatch) — mirrors my_offers() in 0019 ────────────────────

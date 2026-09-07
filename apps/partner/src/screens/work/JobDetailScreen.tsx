@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Alert, Linking, Pressable, ScrollView, View } from 'react-native'
 
 import { Badge, Banner, Button, Card, Text } from '../../components/ui'
-import { formatDay, formatINR, updateJobStatus } from '../../lib/jobs'
+import { formatDay, formatINR, markEnRoute, updateJobStatus } from '../../lib/jobs'
 import { errorMessage } from '../../lib/supabase'
 import { JOB_STATUS_LABELS, type Job } from '../../lib/types'
 
@@ -35,6 +35,19 @@ export function JobDetailScreen({
     setError(null)
     try {
       await updateJobStatus(job.id, status, status === 'completed' && cashCollected)
+      await onChanged()
+    } catch (err) {
+      setError(errorMessage(err, 'Could not update the job. Check your connection and try again.'))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function enRoute() {
+    setBusy(true)
+    setError(null)
+    try {
+      await markEnRoute(job.id)
       await onChanged()
     } catch (err) {
       setError(errorMessage(err, 'Could not update the job. Check your connection and try again.'))
@@ -147,7 +160,16 @@ export function JobDetailScreen({
       </Card>
 
       {job.status === 'vendor_assigned' ? (
-        <Button label="Start job" variant="brand" onPress={() => move('in_progress')} loading={busy} />
+        <View className="gap-3">
+          {job.en_route_at ? (
+            <Text className="text-center text-xs text-muted-foreground">
+              You told the customer you are on the way.
+            </Text>
+          ) : (
+            <Button label="On my way" variant="ghost" onPress={enRoute} loading={busy} />
+          )}
+          <Button label="Start job" variant="brand" onPress={() => move('in_progress')} loading={busy} />
+        </View>
       ) : null}
 
       {job.status === 'in_progress' ? (

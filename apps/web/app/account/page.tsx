@@ -56,7 +56,7 @@ export default function MyBookingsPage() {
         </div>
         <p className="font-bold text-gray-800 text-lg">No bookings yet</p>
         <p className="text-gray-500 text-sm mt-1">Your booked services will appear here.</p>
-        <Link href="/services" className="mt-5 inline-flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-primary/90 transition-colors">
+        <Link href="/services" className="mt-5 inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-primary/90 transition-colors">
           <ShoppingBag className="w-4 h-4" /> Browse services
         </Link>
       </div>
